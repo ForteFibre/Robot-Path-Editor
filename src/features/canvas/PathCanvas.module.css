@@ -1,0 +1,52 @@
+.shell {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.stageCanvas {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background-color: #fafafa;
+}
+
+.editingMode {
+  cursor: crosshair;
+}
+
+.editingMode:active {
+  cursor: crosshair;
+}
+
+.accessibilityOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.libraryDropOverlay {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  font-size: 0.82rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+  pointer-events: none;
+}
+
+.libraryDropOverlay strong {
+  font-weight: 700;
+}

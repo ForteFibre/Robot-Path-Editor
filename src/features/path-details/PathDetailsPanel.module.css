@@ -1,0 +1,243 @@
+.sidebar {
+  overflow: auto;
+  padding: 1.25rem 1rem;
+  border-left: 1px solid var(--panel-border);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #dbeafe;
+  border-radius: 8px;
+  color: #1d4ed8;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.headerInfo h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.headerInfo p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.totalTimeBadge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #64748b;
+  gap: 0.75rem;
+}
+
+.emptyStateIcon {
+  color: #cbd5e1;
+}
+
+.emptyState p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Timeline/List items */
+.pathItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Item Card */
+.itemCard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  user-select: none;
+  position: relative;
+}
+
+.itemCard:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.itemButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+}
+
+.itemButton:focus-visible,
+.dragHandle:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.itemCardActive {
+  background: #eff6ff !important;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1);
+}
+
+/* Drag Handle */
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #cbd5e1;
+  padding: 0.2rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: grab;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+
+.dragHandle:hover {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandleDisabled {
+  visibility: hidden;
+}
+
+/* Item Info */
+.itemIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.waypointIcon {
+  color: #334155;
+  background: #e2e8f0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.itemCardActive .waypointIcon {
+  color: #1d4ed8;
+  background: #bfdbfe;
+}
+
+.headingIcon {
+  color: #6d28d9;
+  background: #ede9fe;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.itemCardActive .headingIcon {
+  color: #5b21b6;
+  background: #ddd6fe;
+}
+
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemTitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.itemCardActive .itemTitle {
+  color: #1e40af;
+}
+
+.itemSubtitle {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.itemCardActive .itemSubtitle {
+  color: #3b82f6;
+}
+
+.itemMeta {
+  font-size: 0.7rem;
+  color: #0f766e;
+  font-weight: 600;
+}
