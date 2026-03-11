@@ -89,6 +89,13 @@
   margin: 0.25rem 0;
 }
 
+.linkedFileName {
+  padding: 0.35rem 0.75rem 0.5rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 /* Modal Styles for CSV Export */
 .csvModalContent {
   display: flex;

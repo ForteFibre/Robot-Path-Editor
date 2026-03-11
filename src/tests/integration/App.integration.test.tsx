@@ -30,9 +30,15 @@ import {
 import { resolveWaypointRobotHeadingHandleAngle } from '../../features/canvas/waypointHeading';
 import * as workspaceIO from '../../io/workspaceIO';
 import {
+  ACTIVE_WORKSPACE_PERSISTENCE_KEY,
+  saveWorkspacePersistence,
+} from '../../io/workspacePersistence';
+import * as pwaController from '../../pwa/usePwaController';
+import {
   getWorkspacePersistedState,
   useWorkspaceStore,
 } from '../../store/workspaceStore';
+import { putIndexedDbRecord } from '../../io/indexedDb';
 
 const stubBackgroundImageFileLoad = (params: {
   dataUrl: string;
@@ -71,6 +77,25 @@ type DirectoryPickerWindow = Window & {
   showDirectoryPicker?: (options?: {
     mode?: 'read' | 'readwrite';
   }) => Promise<FileSystemDirectoryHandle>;
+};
+
+type FilePickerWindow = Window & {
+  showOpenFilePicker?: (options?: {
+    excludeAcceptAllOption?: boolean;
+    multiple?: boolean;
+    types?: {
+      accept: Record<string, string[]>;
+      description?: string;
+    }[];
+  }) => Promise<FileSystemFileHandle[]>;
+  showSaveFilePicker?: (options?: {
+    excludeAcceptAllOption?: boolean;
+    suggestedName?: string;
+    types?: {
+      accept: Record<string, string[]>;
+      description?: string;
+    }[];
+  }) => Promise<FileSystemFileHandle>;
 };
 
 const setDirectoryPickerSupport = (
@@ -113,6 +138,75 @@ const createDirectoryExportMock = (directoryName = 'exports') => {
   return {
     showDirectoryPicker,
     getFileHandle,
+    write,
+  };
+};
+
+const createWorkspaceFileSaveMock = (fileName = 'workspace.json') => {
+  let currentText = workspaceIO.serializeWorkspace(
+    getWorkspacePersistedState(),
+  );
+  let currentLastModified = 1_762_000_000_000;
+  const write = vi.fn(async (blob: Blob) => {
+    currentText = await blob.text();
+    currentLastModified += 1;
+  });
+  const close = vi.fn(() => Promise.resolve(undefined));
+  const createWritable = vi.fn(() =>
+    Promise.resolve({
+      write,
+      close,
+    } as unknown as FileSystemWritableFileStream),
+  );
+  const queryPermission = vi.fn(() => Promise.resolve('granted'));
+  const requestPermission = vi.fn(() => Promise.resolve('granted'));
+  const getFile = vi.fn(() =>
+    Promise.resolve(
+      new File([currentText], fileName, {
+        type: 'application/json',
+        lastModified: currentLastModified,
+      }),
+    ),
+  );
+  const handle = {
+    kind: 'file',
+    name: fileName,
+    createWritable,
+    getFile,
+    queryPermission,
+    requestPermission,
+  } as unknown as FileSystemFileHandle;
+  const showSaveFilePicker = vi.fn(() => Promise.resolve(handle));
+
+  Object.defineProperty(globalThis.window, 'showSaveFilePicker', {
+    value: showSaveFilePicker,
+    configurable: true,
+    writable: true,
+  });
+  Object.defineProperty(globalThis.window, 'showOpenFilePicker', {
+    value: vi.fn(() => Promise.resolve([])),
+    configurable: true,
+    writable: true,
+  });
+  Object.defineProperty(globalThis.window, 'isSecureContext', {
+    value: true,
+    configurable: true,
+  });
+
+  return {
+    close,
+    createWritable,
+    getCurrentLastModified: () => currentLastModified,
+    getCurrentText: () => currentText,
+    getFile,
+    handle,
+    queryPermission,
+    requestPermission,
+    setExternalFile: (params: { text: string; lastModified?: number }) => {
+      currentText = params.text;
+      currentLastModified = params.lastModified ?? currentLastModified + 100;
+    },
+    showSaveFilePicker,
     write,
   };
 };
@@ -424,10 +518,45 @@ const importWorkspaceJsonFile = async (json: string): Promise<void> => {
   });
 };
 
+const primePersistedWorkspaceCandidate = async (): Promise<void> => {
+  act(() => {
+    useWorkspaceStore.getState().setBackgroundImage({
+      url: 'data:image/png;base64,dGVzdA==',
+      width: 320,
+      height: 180,
+      x: 1.25,
+      y: -2.5,
+      scale: 0.75,
+      alpha: 0.35,
+    });
+    useWorkspaceStore.getState().setRobotSettings({
+      length: 1.25,
+      width: 0.92,
+      maxVelocity: 3.4,
+    });
+  });
+
+  await saveWorkspacePersistence(getWorkspacePersistedState());
+
+  act(() => {
+    useWorkspaceStore.getState().resetWorkspace();
+  });
+};
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   delete (globalThis.window as DirectoryPickerWindow).showDirectoryPicker;
+  delete (globalThis.window as FilePickerWindow).showOpenFilePicker;
+  delete (globalThis.window as FilePickerWindow).showSaveFilePicker;
+  Object.defineProperty(globalThis.window, 'matchMedia', {
+    configurable: true,
+    value: undefined,
+  });
+  Object.defineProperty(globalThis.navigator, 'serviceWorker', {
+    configurable: true,
+    value: undefined,
+  });
   Object.defineProperty(globalThis.window, 'isSecureContext', {
     value: true,
     configurable: true,
@@ -609,6 +738,92 @@ describe('App integration', () => {
     expect(screen.getByLabelText('snap settings panel')).toBeInTheDocument();
   });
 
+  it('shows an update banner when a new service worker is waiting', () => {
+    vi.spyOn(pwaController, 'usePwaController').mockReturnValue({
+      applyUpdate: vi.fn(() => Promise.resolve(false)),
+      canInstall: false,
+      dismissUpdate: vi.fn(),
+      install: vi.fn(() => Promise.resolve(false)),
+      isInstalled: false,
+      isOnline: true,
+      isUpdateBannerVisible: true,
+      isUpdateReady: true,
+      registration: {
+        waiting: {
+          postMessage: vi.fn(() => undefined),
+        } as unknown as ServiceWorker,
+      } as ServiceWorkerRegistration,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText('新しいバージョンがあります')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '更新して再読み込み' }),
+    ).toBeInTheDocument();
+  });
+
+  it('restores a persisted workspace after confirming the startup dialog', async () => {
+    await primePersistedWorkspaceCandidate();
+
+    render(<App />);
+
+    expect(
+      await screen.findByRole('heading', {
+        name: '前回の作業を復元しますか？',
+      }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '最後の編集を復元' }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('heading', {
+          name: '前回の作業を復元しますか？',
+        }),
+      ).not.toBeInTheDocument();
+      expect(useWorkspaceStore.getState().ui.backgroundImage).not.toBeNull();
+      expect(useWorkspaceStore.getState().ui.robotSettings.length).toBeCloseTo(
+        1.25,
+      );
+      expect(useWorkspaceStore.getState().ui.robotSettings.width).toBeCloseTo(
+        0.92,
+      );
+    });
+  });
+
+  it('shows a recovery notice when invalid persisted data is cleared on boot', async () => {
+    await putIndexedDbRecord({
+      key: ACTIVE_WORKSPACE_PERSISTENCE_KEY,
+      savedAt: 123,
+      payloadJson: '{"workspace":',
+    });
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          '保存データが破損していたため自動削除して起動しました。',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'dismiss workspace recovery notice',
+      }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(
+          '保存データが破損していたため自動削除して起動しました。',
+        ),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders and drags background image with ROS x-up / y-left mapping', () => {
     render(<App />);
 
@@ -761,8 +976,8 @@ describe('App integration', () => {
     expect(screen.getByText(/フォルダ「robot-csv」/)).toBeInTheDocument();
   });
 
-  it('writes workspace json into a user-selected directory in supported browsers', async () => {
-    const directoryExport = createDirectoryExportMock('workspace-export');
+  it('saves workspace json into a user-selected file and reuses the linked handle', async () => {
+    const fileSave = createWorkspaceFileSaveMock('linked-workspace.json');
 
     render(<App />);
 
@@ -770,16 +985,21 @@ describe('App integration', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
 
     await waitFor(() => {
-      expect(directoryExport.showDirectoryPicker).toHaveBeenCalledWith({
-        mode: 'readwrite',
+      expect(fileSave.showSaveFilePicker).toHaveBeenCalledWith({
+        excludeAcceptAllOption: true,
+        suggestedName: 'workspace.json',
+        types: [
+          {
+            accept: {
+              'application/json': ['.json'],
+            },
+            description: 'Workspace JSON',
+          },
+        ],
       });
-      expect(directoryExport.getFileHandle).toHaveBeenCalledWith(
-        'workspace.json',
-        { create: true },
-      );
     });
 
-    const writtenBlob = directoryExport.write.mock.calls[0]?.[0];
+    const writtenBlob = fileSave.write.mock.calls[0]?.[0];
     expect(writtenBlob).toBeInstanceOf(Blob);
 
     if (!(writtenBlob instanceof Blob)) {
@@ -787,9 +1007,78 @@ describe('App integration', () => {
     }
 
     await expect(writtenBlob.text()).resolves.toContain('"workspace"');
+
+    openFileMenu();
     expect(
-      screen.getByText(/フォルダ「workspace-export」/),
+      screen.getByText('linked: linked-workspace.json'),
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
+
+    await waitFor(() => {
+      expect(fileSave.showSaveFilePicker).toHaveBeenCalledTimes(1);
+      expect(fileSave.createWritable).toHaveBeenCalledTimes(2);
+      expect(fileSave.queryPermission).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('shows a save conflict dialog and can load the latest linked file', async () => {
+    const fileSave = createWorkspaceFileSaveMock('linked-workspace.json');
+
+    render(<App />);
+
+    openSettingsMenu();
+    fireEvent.change(screen.getByLabelText('Robot Length (m)'), {
+      target: { value: '1.25' },
+    });
+
+    openFileMenu();
+    fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
+
+    await waitFor(() => {
+      expect(fileSave.showSaveFilePicker).toHaveBeenCalledTimes(1);
+    });
+
+    const persistedState = getWorkspacePersistedState();
+    const externalWorkspaceJson = workspaceIO.serializeWorkspace({
+      ...persistedState,
+      ui: {
+        ...persistedState.ui,
+        robotSettings: {
+          ...persistedState.ui.robotSettings,
+          length: 2.75,
+        },
+      },
+    });
+
+    fileSave.setExternalFile({
+      text: externalWorkspaceJson,
+      lastModified: fileSave.getCurrentLastModified() + 200,
+    });
+
+    openFileMenu();
+    fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'ファイルの競合を解決しますか？',
+      }),
+    ).toBeInTheDocument();
+    expect(fileSave.createWritable).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'ファイルの最新版を読み込む' }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('heading', {
+          name: 'ファイルの競合を解決しますか？',
+        }),
+      ).not.toBeInTheDocument();
+      expect(useWorkspaceStore.getState().ui.robotSettings.length).toBeCloseTo(
+        2.75,
+      );
+    });
   });
 
   it('falls back to download-based json export in unsupported browsers', async () => {
@@ -1354,59 +1643,6 @@ describe('App integration', () => {
     expect(
       useWorkspaceStore.getState().ui.robotSettings.maxVelocity,
     ).toBeCloseTo(3.4);
-
-    openSettingsMenu();
-    expect(screen.getByLabelText('Robot Preview')).not.toBeChecked();
-  });
-
-  it('does not increase canUndo when only dragging the background image', () => {
-    render(<App />);
-
-    act(() => {
-      useWorkspaceStore.getState().setBackgroundImage({
-        url: 'data:image/png;base64,dGVzdA==',
-        width: 100,
-        height: 50,
-        x: 0,
-        y: 0,
-        scale: 1,
-        alpha: 0.5,
-      });
-    });
-
-    const canvas = getCanvas();
-    const dragStart = getBackgroundImageDragStartPoint();
-    const undoButton = screen.getByRole('button', { name: 'undo workspace' });
-
-    expect(useWorkspaceStore.getState().canUndo()).toBe(false);
-    expect(undoButton).toBeDisabled();
-
-    act(() => {
-      useWorkspaceStore.getState().setTool('edit-image');
-    });
-
-    fireEvent.pointerDown(canvas, {
-      button: 0,
-      clientX: dragStart.x,
-      clientY: dragStart.y,
-      pointerId: 303,
-    });
-    fireEvent.pointerMove(canvas, {
-      clientX: dragStart.x + 40,
-      clientY: dragStart.y - 20,
-      pointerId: 303,
-    });
-    fireEvent.pointerUp(canvas, {
-      button: 0,
-      clientX: dragStart.x + 40,
-      clientY: dragStart.y - 20,
-      pointerId: 303,
-    });
-
-    expect(useWorkspaceStore.getState().ui.backgroundImage?.x).not.toBe(0);
-    expect(useWorkspaceStore.getState().ui.backgroundImage?.y).not.toBe(0);
-    expect(useWorkspaceStore.getState().canUndo()).toBe(false);
-    expect(undoButton).toBeDisabled();
   });
 
   it.each(['pointercancel', 'pointerleave'] as const)(

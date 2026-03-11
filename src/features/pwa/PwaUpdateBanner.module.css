@@ -1,0 +1,67 @@
+.banner {
+  margin: 0.5rem 1rem 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.messageBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.title {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.description {
+  font-size: 0.8rem;
+  color: #1d4ed8;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.primaryAction {
+  border-color: #60a5fa;
+  background: #2563eb;
+  color: #eff6ff;
+}
+
+.primaryAction:hover {
+  border-color: #3b82f6;
+  background: #1d4ed8;
+}
+
+.secondaryAction {
+  border-color: #93c5fd;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.secondaryAction:hover {
+  border-color: #60a5fa;
+  background: #bfdbfe;
+}
+
+@media (max-width: 960px) {
+  .banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+}

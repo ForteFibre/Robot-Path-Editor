@@ -14,15 +14,21 @@ import { useWorkspaceActions } from '../../store/workspaceStore';
 import { useEditorMode, useEditorTool } from '../../store/workspaceSelectors';
 import { FileMenu } from './components/FileMenu';
 import { SettingsMenu } from './components/SettingsMenu';
+import { useWorkspaceSaveHotkeys } from './components/useWorkspaceSaveHotkeys';
 import { useUndoRedoHotkeys } from './hooks/useUndoRedoHotkeys';
 import styles from './Toolbar.module.css';
 
 type ToolbarProps = {
   csvTarget: CsvTarget;
   csvStep: number;
+  isFileSystemAccessSupported: boolean;
+  linkedFileName: string | null;
   onCsvTargetChange: (target: CsvTarget) => void;
   onCsvStepChange: (step: number) => void;
-  onExportJson: () => void;
+  onLoadWorkspace: () => Promise<void>;
+  onNewWorkspace: () => Promise<void>;
+  onSaveWorkspace: () => Promise<void>;
+  onSaveWorkspaceAs: () => Promise<void>;
   onImportJson: (file: File) => Promise<void>;
   onExportCsv: () => void;
 };
@@ -30,9 +36,14 @@ type ToolbarProps = {
 export const Toolbar = ({
   csvTarget,
   csvStep,
+  isFileSystemAccessSupported,
+  linkedFileName,
   onCsvTargetChange,
   onCsvStepChange,
-  onExportJson,
+  onLoadWorkspace,
+  onNewWorkspace,
+  onSaveWorkspace,
+  onSaveWorkspaceAs,
   onImportJson,
   onExportCsv,
 }: ToolbarProps): ReactElement => {
@@ -42,6 +53,15 @@ export const Toolbar = ({
   const tool = useEditorTool();
 
   useUndoRedoHotkeys();
+  useWorkspaceSaveHotkeys({
+    onSave: () => {
+      void onSaveWorkspace();
+    },
+    onSaveAs: () => {
+      void onSaveWorkspaceAs();
+    },
+  });
+
   return (
     <header
       className={styles.toolbar}
@@ -58,9 +78,14 @@ export const Toolbar = ({
           <FileMenu
             csvTarget={csvTarget}
             csvStep={csvStep}
+            isFileSystemAccessSupported={isFileSystemAccessSupported}
+            linkedFileName={linkedFileName}
             onCsvTargetChange={onCsvTargetChange}
             onCsvStepChange={onCsvStepChange}
-            onExportJson={onExportJson}
+            onLoadWorkspace={onLoadWorkspace}
+            onNewWorkspace={onNewWorkspace}
+            onSaveWorkspace={onSaveWorkspace}
+            onSaveWorkspaceAs={onSaveWorkspaceAs}
             onImportJson={onImportJson}
             onExportCsv={onExportCsv}
           />

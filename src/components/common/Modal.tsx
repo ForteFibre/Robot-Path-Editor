@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactNode, type ReactElement } from 'react';
 import { X } from 'lucide-react';
 import styles from './Modal.module.css';
 
@@ -7,6 +7,7 @@ type ModalProps = {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  closable?: boolean;
 };
 
 export const Modal = ({
@@ -14,20 +15,28 @@ export const Modal = ({
   onClose,
   title,
   children,
+  closable = true,
 }: ModalProps): ReactElement | null => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (closable && e.key === 'Escape') {
         onClose();
       }
     };
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
+      // Move focus into the dialog for keyboard accessibility
+      const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      (firstFocusable ?? dialogRef.current)?.focus();
     }
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [closable, isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -37,30 +46,35 @@ export const Modal = ({
     <div
       className={styles.overlay}
       onPointerDown={(e) => {
-        if (e.target === e.currentTarget) {
+        if (closable && e.target === e.currentTarget) {
           onClose();
         }
       }}
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="modal-title"
     >
-      <div className={styles.modal}>
+      <dialog
+        ref={dialogRef}
+        className={styles.modal}
+        open
+        aria-labelledby="modal-title"
+        tabIndex={-1}
+      >
         <div className={styles.header}>
           <h2 id="modal-title" className={styles.title}>
             {title}
           </h2>
-          <button
-            type="button"
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="close"
-          >
-            <X size={20} />
-          </button>
+          {closable ? (
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label="close"
+            >
+              <X size={20} />
+            </button>
+          ) : null}
         </div>
         <div className={styles.content}>{children}</div>
-      </div>
+      </dialog>
     </div>
   );
 };

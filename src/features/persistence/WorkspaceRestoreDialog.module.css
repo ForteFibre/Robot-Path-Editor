@@ -1,0 +1,190 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.7;
+}
+
+/* --- Saved meta card (autosave-only) --- */
+
+.savedMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--panel-border, #dbe3ef);
+  border-left: 3px solid #94a3b8;
+  border-radius: 0.625rem;
+  background: #f8fafc;
+}
+
+.savedMetaLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.savedMetaValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.savedMetaSubtext {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+/* --- Restore choices (conflict) --- */
+
+.restoreChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.restoreChoiceButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--panel-border, #dbe3ef);
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.restoreChoiceButton:hover:not(:disabled) {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+}
+
+.restoreChoiceButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.restoreChoiceButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.restoreChoiceTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.restoreChoiceValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.restoreChoiceSubtext {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* --- Actions section --- */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.primaryActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.actionButton,
+.secondaryActionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+/* Primary restore (blue accent) */
+.actionButton {
+  border: 1.5px solid #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.actionButton:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: #dbeafe;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
+/* Secondary neutral */
+.secondaryActionButton {
+  border: 1.5px solid var(--panel-border, #dbe3ef);
+  background: #ffffff;
+  color: #475569;
+  width: 100%;
+}
+
+.secondaryActionButton:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.actionButton:focus-visible,
+.secondaryActionButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.actionButton:disabled,
+.secondaryActionButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+/* --- Error banner --- */
+
+.error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid #fca5a5;
+  border-left: 3px solid #ef4444;
+  border-radius: 0.625rem;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .restoreChoices,
+  .primaryActions {
+    grid-template-columns: 1fr;
+  }
+}

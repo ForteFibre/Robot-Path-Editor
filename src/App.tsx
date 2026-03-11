@@ -1,11 +1,18 @@
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import './App.css';
 import { DEFAULT_CSV_EXPORT_STEP } from './domain/metricScale';
 import { PathCanvas } from './features/canvas/PathCanvas';
 import { FloatingInspector } from './features/floating/FloatingInspector';
+import { PwaUpdateBanner } from './features/pwa/PwaUpdateBanner';
+import { WorkspaceFileConflictDialog } from './features/persistence/WorkspaceFileConflictDialog';
+import { WorkspaceRestoreDialog } from './features/persistence/WorkspaceRestoreDialog';
+import { bootstrapWorkspacePersistence } from './features/persistence/bootstrapWorkspacePersistence';
+import type { WorkspacePersistenceBootstrapResult } from './features/persistence/types';
+import { useWorkspaceFileLink } from './features/persistence/useWorkspaceFileLink';
+import { useWorkspacePersistenceController } from './features/persistence/useWorkspacePersistenceController';
+import { PathDetailsPanel } from './features/path-details/PathDetailsPanel';
 import { Sidebar } from './features/sidebar/Sidebar';
 import { Toolbar } from './features/toolbar/Toolbar';
-import { PathDetailsPanel } from './features/path-details/PathDetailsPanel';
 import { generateWorkspaceCsvFiles, type CsvTarget } from './io/csv';
 import {
   type FileToWrite,
@@ -14,32 +21,23 @@ import {
   writeFilesToDirectory,
 } from './io/fileSystemAccess';
 import {
-  deserializeWorkspace,
-  downloadText,
-  serializeWorkspace,
-} from './io/workspaceIO';
+  isFilePickerAbortError,
+  isFileSystemAccessSupported,
+} from './io/workspaceFileAccess';
+import { downloadText, serializeWorkspace } from './io/workspaceIO';
 import {
   getDomainSnapshot,
   getWorkspacePersistedState,
-  useWorkspaceActions,
 } from './store/workspaceStore';
+import { usePwaController } from './pwa/usePwaController';
 
-const IMPORT_ERROR_PREFIX =
-  'JSONの読み込みに失敗しました。現行形式の workspace.json を選択してください。';
 const JSON_EXPORT_ERROR_PREFIX = 'JSONの書き込みに失敗しました。';
+const JSON_IMPORT_ERROR_PREFIX = 'JSONの読み込みに失敗しました。';
 const CSV_EXPORT_ERROR_PREFIX = 'CSVの書き込みに失敗しました。';
 
 type AppStatus = {
   tone: 'error' | 'info' | 'success';
   message: string;
-};
-
-const toImportErrorMessage = (error: unknown): string => {
-  if (error instanceof Error && error.message.length > 0) {
-    return `${IMPORT_ERROR_PREFIX} (${error.message})`;
-  }
-
-  return IMPORT_ERROR_PREFIX;
 };
 
 const toJsonExportErrorMessage = (error: unknown): string => {
@@ -65,16 +63,60 @@ const toCsvExportSuccessMessage = (
   return `CSVを ${writtenCount} ファイル、フォルダ「${directoryName}」に出力しました。`;
 };
 
-const toJsonExportSuccessMessage = (directoryName: string): string => {
-  return `JSONを 1 ファイル、フォルダ「${directoryName}」に出力しました。`;
+const toJsonImportErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.length > 0) {
+    return `${JSON_IMPORT_ERROR_PREFIX} (${error.message})`;
+  }
+
+  return JSON_IMPORT_ERROR_PREFIX;
+};
+
+const toJsonImportSuccessMessage = (fileName: string): string => {
+  return `JSONを「${fileName}」から読み込みました。`;
+};
+
+const toJsonExportSuccessMessage = (fileName: string): string => {
+  return `JSONを「${fileName}」に保存しました。`;
 };
 
 const EditorApp = (): ReactElement => {
-  const { importWorkspace } = useWorkspaceActions();
   const [csvTarget, setCsvTarget] = useState<CsvTarget>('all');
   const [csvStep, setCsvStep] = useState(DEFAULT_CSV_EXPORT_STEP);
-  const [importError, setImportError] = useState<string | null>(null);
   const [appStatus, setAppStatus] = useState<AppStatus | null>(null);
+  const [bootstrapResult, setBootstrapResult] =
+    useState<WorkspacePersistenceBootstrapResult | null>(null);
+  const [isFileConflictDialogBusy, setIsFileConflictDialogBusy] =
+    useState(false);
+  const pwaController = usePwaController();
+  const persistenceController =
+    useWorkspacePersistenceController(bootstrapResult);
+  const workspaceFileLink = useWorkspaceFileLink({
+    importWorkspaceJsonSource: persistenceController.handleImportJsonSource,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void bootstrapWorkspacePersistence()
+      .then((result) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setBootstrapResult(result);
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setBootstrapResult({ kind: 'no-restore' });
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const exportFilesWithFallback = async (
     files: FileToWrite[],
@@ -90,27 +132,58 @@ const EditorApp = (): ReactElement => {
     return await writeFilesToDirectory(files);
   };
 
-  const handleExportJson = async (): Promise<void> => {
+  const handleSaveWorkspace = async (): Promise<void> => {
     setAppStatus(null);
 
-    try {
-      const json = serializeWorkspace(getWorkspacePersistedState());
-      const result = await exportFilesWithFallback([
-        {
-          filename: 'workspace.json',
-          content: json,
-          mimeType: 'application/json',
-        },
-      ]);
+    const json = serializeWorkspace(getWorkspacePersistedState());
 
-      if (result !== null) {
+    if (!isFileSystemAccessSupported() || !workspaceFileLink.isSupported) {
+      downloadText('workspace.json', json, 'application/json');
+      return;
+    }
+
+    try {
+      const handle = await workspaceFileLink.save();
+
+      if (handle !== null) {
         setAppStatus({
           tone: 'success',
-          message: toJsonExportSuccessMessage(result.directoryName),
+          message: toJsonExportSuccessMessage(handle.name),
         });
       }
     } catch (error: unknown) {
-      if (isDirectoryPickerAbortError(error)) {
+      if (isFilePickerAbortError(error)) {
+        return;
+      }
+
+      setAppStatus({
+        tone: 'error',
+        message: toJsonExportErrorMessage(error),
+      });
+    }
+  };
+
+  const handleSaveWorkspaceAs = async (): Promise<void> => {
+    setAppStatus(null);
+
+    const json = serializeWorkspace(getWorkspacePersistedState());
+
+    if (!isFileSystemAccessSupported() || !workspaceFileLink.isSupported) {
+      downloadText('workspace.json', json, 'application/json');
+      return;
+    }
+
+    try {
+      const handle = await workspaceFileLink.saveAs();
+
+      if (handle !== null) {
+        setAppStatus({
+          tone: 'success',
+          message: toJsonExportSuccessMessage(handle.name),
+        });
+      }
+    } catch (error: unknown) {
+      if (isFilePickerAbortError(error)) {
         return;
       }
 
@@ -158,14 +231,109 @@ const EditorApp = (): ReactElement => {
   };
 
   const handleImportJson = async (file: File): Promise<void> => {
-    setImportError(null);
+    const imported = await persistenceController.handleImportJson(file);
+
+    if (imported) {
+      await workspaceFileLink.clearLink();
+    }
+  };
+
+  const handleLoadWorkspace = async (): Promise<void> => {
+    setAppStatus(null);
 
     try {
-      const content = await file.text();
-      const imported = deserializeWorkspace(content);
-      importWorkspace(imported);
+      await workspaceFileLink.openWithFilePicker();
     } catch (error: unknown) {
-      setImportError(toImportErrorMessage(error));
+      if (isFilePickerAbortError(error)) {
+        return;
+      }
+
+      setAppStatus({
+        tone: 'error',
+        message: toJsonImportErrorMessage(error),
+      });
+    }
+  };
+
+  const handleStartFresh = (): void => {
+    void (async () => {
+      await persistenceController.handleStartFresh();
+      await workspaceFileLink.clearLink();
+    })();
+  };
+
+  const handleRestoreDialogLoadFromFile = async (file: File): Promise<void> => {
+    const imported =
+      await persistenceController.handleRestoreDialogFileLoad(file);
+
+    if (imported) {
+      await workspaceFileLink.clearLink();
+    }
+  };
+
+  const handleRestoreLinkedWorkspace = async (): Promise<void> => {
+    setAppStatus(null);
+
+    try {
+      const imported = await workspaceFileLink.loadLatestFromLinkedFile();
+
+      if (imported && bootstrapResult?.kind === 'conflict') {
+        setAppStatus({
+          tone: 'success',
+          message: toJsonImportSuccessMessage(bootstrapResult.linkedFileName),
+        });
+      }
+    } catch (error: unknown) {
+      setAppStatus({
+        tone: 'error',
+        message: toJsonImportErrorMessage(error),
+      });
+    }
+  };
+
+  const handleConfirmOverwriteConflict = async (): Promise<void> => {
+    setAppStatus(null);
+    setIsFileConflictDialogBusy(true);
+
+    try {
+      const handle = await workspaceFileLink.confirmOverwrite();
+
+      if (handle !== null) {
+        setAppStatus({
+          tone: 'success',
+          message: toJsonExportSuccessMessage(handle.name),
+        });
+      }
+    } catch (error: unknown) {
+      setAppStatus({
+        tone: 'error',
+        message: toJsonExportErrorMessage(error),
+      });
+    } finally {
+      setIsFileConflictDialogBusy(false);
+    }
+  };
+
+  const handleLoadLatestLinkedFileConflict = async (): Promise<void> => {
+    setAppStatus(null);
+    setIsFileConflictDialogBusy(true);
+
+    try {
+      const imported = await workspaceFileLink.loadLatestFromLinkedFile();
+
+      if (imported && workspaceFileLink.linkedFileName !== null) {
+        setAppStatus({
+          tone: 'success',
+          message: toJsonImportSuccessMessage(workspaceFileLink.linkedFileName),
+        });
+      }
+    } catch (error: unknown) {
+      setAppStatus({
+        tone: 'error',
+        message: toJsonImportErrorMessage(error),
+      });
+    } finally {
+      setIsFileConflictDialogBusy(false);
     }
   };
 
@@ -210,30 +378,59 @@ const EditorApp = (): ReactElement => {
       <Toolbar
         csvTarget={csvTarget}
         csvStep={csvStep}
+        isFileSystemAccessSupported={workspaceFileLink.isSupported}
+        linkedFileName={workspaceFileLink.linkedFileName}
         onCsvTargetChange={setCsvTarget}
         onCsvStepChange={setCsvStep}
-        onExportJson={() => {
-          void handleExportJson();
+        onLoadWorkspace={handleLoadWorkspace}
+        onNewWorkspace={async () => {
+          await persistenceController.handleNewWorkspace();
+          await workspaceFileLink.clearLink();
         }}
+        onSaveWorkspace={handleSaveWorkspace}
+        onSaveWorkspaceAs={handleSaveWorkspaceAs}
         onImportJson={handleImportJson}
         onExportCsv={() => {
           void handleExportCsv();
         }}
       />
 
+      <PwaUpdateBanner
+        isVisible={pwaController.isUpdateBannerVisible}
+        onDismiss={pwaController.dismissUpdate}
+        onUpdate={() => {
+          void pwaController.applyUpdate();
+        }}
+      />
+
       {appStatusBanner}
 
-      {importError === null ? null : (
+      {persistenceController.workspaceRecoveryNotice === null ? null : (
+        <div className="app-status app-status-info" aria-live="polite">
+          <span>{persistenceController.workspaceRecoveryNotice}</span>
+          <button
+            type="button"
+            onClick={() => {
+              persistenceController.clearWorkspaceRecoveryNotice();
+            }}
+            aria-label="dismiss workspace recovery notice"
+          >
+            閉じる
+          </button>
+        </div>
+      )}
+
+      {persistenceController.workspaceError === null ? null : (
         <div
           className="app-status app-status-error"
           role="alert"
           aria-live="assertive"
         >
-          <span>{importError}</span>
+          <span>{persistenceController.workspaceError}</span>
           <button
             type="button"
             onClick={() => {
-              setImportError(null);
+              persistenceController.clearWorkspaceError();
             }}
             aria-label="dismiss import error"
           >
@@ -248,6 +445,32 @@ const EditorApp = (): ReactElement => {
         <PathDetailsPanel />
         <FloatingInspector />
       </div>
+
+      <WorkspaceRestoreDialog
+        result={persistenceController.restoreCandidate}
+        isBusy={persistenceController.isRestoreDialogBusy}
+        errorMessage={persistenceController.workspaceError}
+        onStartFresh={handleStartFresh}
+        onRestoreLastEdit={() => {
+          void persistenceController.handleRestoreLastEdit();
+        }}
+        onRestoreLinkedFile={() => {
+          void handleRestoreLinkedWorkspace();
+        }}
+        onLoadFromFile={handleRestoreDialogLoadFromFile}
+      />
+
+      <WorkspaceFileConflictDialog
+        conflict={workspaceFileLink.pendingSaveConflict}
+        isBusy={isFileConflictDialogBusy}
+        onCancel={workspaceFileLink.cancelSaveConflict}
+        onConfirmOverwrite={() => {
+          void handleConfirmOverwriteConflict();
+        }}
+        onLoadLatestFromFile={() => {
+          void handleLoadLatestLinkedFileConflict();
+        }}
+      />
     </div>
   );
 };

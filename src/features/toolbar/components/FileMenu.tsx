@@ -20,15 +20,19 @@ import {
   formatMetricValue,
 } from '../../../domain/metricScale';
 import type { CsvTarget } from '../../../io/csv';
-import { useWorkspaceActions } from '../../../store/workspaceStore';
 import styles from './FileMenu.module.css';
 
 type FileMenuProps = {
   csvTarget: CsvTarget;
   csvStep: number;
+  isFileSystemAccessSupported: boolean;
+  linkedFileName: string | null;
   onCsvTargetChange: (target: CsvTarget) => void;
   onCsvStepChange: (step: number) => void;
-  onExportJson: () => void;
+  onLoadWorkspace: () => Promise<void>;
+  onNewWorkspace: () => Promise<void>;
+  onSaveWorkspace: () => Promise<void>;
+  onSaveWorkspaceAs: () => Promise<void>;
   onImportJson: (file: File) => Promise<void>;
   onExportCsv: () => void;
 };
@@ -36,13 +40,17 @@ type FileMenuProps = {
 export const FileMenu = ({
   csvTarget,
   csvStep,
+  isFileSystemAccessSupported,
+  linkedFileName,
   onCsvTargetChange,
   onCsvStepChange,
-  onExportJson,
+  onLoadWorkspace,
+  onNewWorkspace,
+  onSaveWorkspace,
+  onSaveWorkspaceAs,
   onImportJson,
   onExportCsv,
 }: FileMenuProps): ReactElement => {
-  const { resetWorkspace } = useWorkspaceActions();
   const [isOpen, setIsOpen] = useState(false);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,6 +92,10 @@ export const FileMenu = ({
     setIsOpen(false);
   };
 
+  const closeMenu = (): void => {
+    setIsOpen(false);
+  };
+
   return (
     <div className={styles.container} ref={containerRef}>
       <button
@@ -112,7 +124,7 @@ export const FileMenu = ({
                     )
                   : true;
               if (confirmed) {
-                resetWorkspace();
+                void onNewWorkspace();
                 setIsOpen(false);
               }
             }}
@@ -124,31 +136,65 @@ export const FileMenu = ({
 
           <div className={styles.divider} />
 
-          <label className={styles.menuItem} aria-label="load workspace json">
-            <FolderOpen size={16} />
-            <span>Load Workspace</span>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json"
-              onChange={handleImport}
-              className="visually-hidden"
-              aria-label="load workspace file"
-            />
-          </label>
+          {isFileSystemAccessSupported ? (
+            <button
+              type="button"
+              className={styles.menuItem}
+              onClick={() => {
+                void onLoadWorkspace();
+                closeMenu();
+              }}
+              aria-label="Load Workspace"
+            >
+              <FolderOpen size={16} />
+              <span>Load Workspace</span>
+            </button>
+          ) : (
+            <label className={styles.menuItem} aria-label="load workspace json">
+              <FolderOpen size={16} />
+              <span>Load Workspace</span>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json"
+                onChange={handleImport}
+                className="visually-hidden"
+                aria-label="load workspace file"
+              />
+            </label>
+          )}
 
           <button
             type="button"
             className={styles.menuItem}
             onClick={() => {
-              onExportJson();
-              setIsOpen(false);
+              void onSaveWorkspace();
+              closeMenu();
             }}
             aria-label="Save Workspace"
           >
             <Save size={16} />
             <span>Save Workspace</span>
           </button>
+
+          <button
+            type="button"
+            className={styles.menuItem}
+            onClick={() => {
+              void onSaveWorkspaceAs();
+              closeMenu();
+            }}
+            aria-label="Save Workspace As"
+          >
+            <Save size={16} />
+            <span>Save Workspace As...</span>
+          </button>
+
+          {linkedFileName === null ? null : (
+            <div className={styles.linkedFileName} aria-live="polite">
+              linked: {linkedFileName}
+            </div>
+          )}
 
           <button
             type="button"
