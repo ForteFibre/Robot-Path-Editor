@@ -14,6 +14,7 @@ import { CanvasRMinDrag } from './CanvasRMinDrag';
 import { CanvasWaypoint } from './CanvasWaypoint';
 import type { EditorMode } from '../../../domain/models';
 import type { CanvasSceneVisiblePath } from '../hooks/canvasScene/types';
+import { canvasTheme } from '../canvasTheme';
 
 const toCanvasPointNumbers = (polyline: Point[]): number[] => {
   return polyline.flatMap((point) => {
@@ -98,7 +99,7 @@ export const CanvasResolvedPathLayer = ({
           <Line
             key={`${path.id}-heading-keyframe-range-${index}`}
             points={toCanvasPointNumbers(rangePolyline)}
-            stroke="#16a34a"
+            stroke={canvasTheme.resolvedPath.headingRangeStroke}
             strokeWidth={1.5 / k}
             dash={[4 / k, 2 / k]}
             lineJoin="round"

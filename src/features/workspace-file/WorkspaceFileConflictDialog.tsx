@@ -1,6 +1,12 @@
 import { type ReactElement } from 'react';
 import { AlertTriangle, RefreshCw, Save, XCircle } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import {
+  DialogActions,
+  DialogSection,
+  TwoColumnChoiceGrid,
+} from '../../components/common/DialogBody';
 import type { ConflictState } from '../persistence/types';
 import {
   formatAbsoluteDateTime,
@@ -34,7 +40,7 @@ export const WorkspaceFileConflictDialog = ({
       title="ファイルの競合を解決しますか？"
       closable={false}
     >
-      <div className={styles.content}>
+      <DialogSection>
         <div className={styles.warning}>
           <AlertTriangle size={18} />
           <p>
@@ -44,57 +50,66 @@ export const WorkspaceFileConflictDialog = ({
           </p>
         </div>
 
-        <div className={styles.timeline}>
-          <div className={styles.timelineCard}>
-            <span className={styles.timelineLabel}>最後に認識していた更新</span>
-            <strong className={styles.timelineValue}>
-              {formatTimestampLabel(conflict.lastKnownModifiedAt)}
-            </strong>
-            <span className={styles.timelineSubtext}>
-              保存時刻: {formatAbsoluteDateTime(conflict.lastKnownModifiedAt)}
-            </span>
-          </div>
-          <div className={styles.timelineCard}>
-            <span className={styles.timelineLabel}>現在のファイル更新時刻</span>
-            <strong className={styles.timelineValue}>
-              {formatTimestampLabel(conflict.linkedFileModifiedAt)}
-            </strong>
-            <span className={styles.timelineSubtext}>
-              保存時刻: {formatAbsoluteDateTime(conflict.linkedFileModifiedAt)}
-            </span>
-          </div>
-        </div>
+        <TwoColumnChoiceGrid
+          left={
+            <div className={styles.timelineCard}>
+              <span className={styles.timelineLabel}>
+                最後に認識していた更新
+              </span>
+              <strong className={styles.timelineValue}>
+                {formatTimestampLabel(conflict.lastKnownModifiedAt)}
+              </strong>
+              <span className={styles.timelineSubtext}>
+                保存時刻: {formatAbsoluteDateTime(conflict.lastKnownModifiedAt)}
+              </span>
+            </div>
+          }
+          right={
+            <div className={styles.timelineCard}>
+              <span className={styles.timelineLabel}>
+                現在のファイル更新時刻
+              </span>
+              <strong className={styles.timelineValue}>
+                {formatTimestampLabel(conflict.linkedFileModifiedAt)}
+              </strong>
+              <span className={styles.timelineSubtext}>
+                保存時刻:{' '}
+                {formatAbsoluteDateTime(conflict.linkedFileModifiedAt)}
+              </span>
+            </div>
+          }
+        />
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.overwriteButton}
+        <DialogActions>
+          <Button
+            variant="danger"
+            style={{ width: '100%' }}
             onClick={onConfirmOverwrite}
             disabled={isBusy}
           >
             <Save size={16} />
             <span>上書きする</span>
-          </button>
-          <button
-            type="button"
-            className={styles.loadLatestButton}
+          </Button>
+          <Button
+            variant="secondary"
+            style={{ width: '100%' }}
             onClick={onLoadLatestFromFile}
             disabled={isBusy}
           >
             <RefreshCw size={16} />
             <span>ファイルの最新版を読み込む</span>
-          </button>
-          <button
-            type="button"
-            className={styles.cancelButton}
+          </Button>
+          <Button
+            variant="ghost"
+            style={{ width: '100%' }}
             onClick={onCancel}
             disabled={isBusy}
           >
             <XCircle size={16} />
             <span>キャンセル</span>
-          </button>
-        </div>
-      </div>
+          </Button>
+        </DialogActions>
+      </DialogSection>
     </Modal>
   );
 };

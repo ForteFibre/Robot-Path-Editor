@@ -6,20 +6,20 @@
   border: 1px solid transparent;
   border-radius: 0.375rem;
   background: transparent;
-  color: #475569;
+  color: var(--slate-600);
   cursor: pointer;
   transition: all 0.2s ease;
   height: var(--toolbar-item-h);
 }
 
 .trigger:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--slate-100);
+  color: var(--text);
 }
 
 .trigger.isOpen {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--accent-bg);
+  color: var(--accent-strong);
 }
 
 /* Modal Content Styles */
@@ -33,10 +33,10 @@
 .settingsSection {
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: var(--slate-50);
   padding: 1.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--slate-200);
 }
 
 .sectionTitle {
@@ -45,59 +45,27 @@
   gap: 0.5rem;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--slate-800);
   margin: 0 0 1rem 0;
 }
 
 .sectionTitle svg {
-  color: #64748b;
+  color: var(--muted);
 }
 
 .activeBadge {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: var(--accent);
   margin-left: auto;
-  box-shadow: 0 0 0 2px #eff6ff;
+  box-shadow: 0 0 0 2px var(--accent-bg);
 }
 
 .fieldGroup {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-/* Match FileMenu.module.css .modalLabel */
-.inlineLabel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #334155;
-}
-
-.numberInputWrapper {
-  width: 100%;
-}
-
-.numberInputWrapper input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.375rem;
-  font-size: 0.9rem;
-  color: #0f172a;
-  background-color: #fff;
-  outline: none;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.numberInputWrapper input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .checkboxLabel {
@@ -107,12 +75,12 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--slate-700);
   margin: 0;
 }
 
 .checkboxLabel input[type='checkbox'] {
-  accent-color: #3b82f6;
+  accent-color: var(--accent);
   width: 1rem;
   height: 1rem;
   margin: 0;
@@ -128,19 +96,19 @@
   padding: 0.6rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #334155;
-  border: 1px dashed #cbd5e1;
-  background: #ffffff;
-  border-radius: 0.375rem;
+  color: var(--slate-700);
+  border: 1px dashed var(--slate-300);
+  background: var(--panel);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
 }
 
 .loadButton:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: var(--slate-100);
+  border-color: var(--slate-400);
+  color: var(--text);
 }
 
 .bgActions {
@@ -149,5 +117,5 @@
   align-items: center;
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px dashed #e2e8f0;
+  border-top: 1px dashed var(--slate-200);
 }

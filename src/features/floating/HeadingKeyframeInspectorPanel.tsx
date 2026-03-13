@@ -1,6 +1,9 @@
 import { type CSSProperties, type ReactElement } from 'react';
 import { MapPin, Trash2 } from 'lucide-react';
 import { NumberInput } from '../../components/common/NumberInput';
+import { Button } from '../../components/common/Button';
+import { FormField } from '../../components/common/FormField';
+import { PanelHeader } from '../../components/common/PanelHeader';
 import type { ResolvedPathModel } from '../../domain/pointResolution';
 import type { HeadingKeyframeUpdatePatch } from '../../store/types';
 import type { HeadingKeyframeSelection } from './floatingInspectorModel';
@@ -33,52 +36,50 @@ export const HeadingKeyframeInspectorPanel = ({
       aria-label="heading point properties"
       style={style}
     >
-      <div className={styles.header}>
-        <div className={styles.headerIcon}>
-          <MapPin size={18} />
-        </div>
-        <div className={styles.headerInfo}>
-          <h2>Heading Point</h2>
-          <p>
-            {path.name} / {headingKeyframe.name}
-          </p>
-        </div>
-      </div>
+      <PanelHeader
+        icon={<MapPin size={18} />}
+        title="Heading Point"
+        subtitle={`${path.name} / ${headingKeyframe.name}`}
+        divider
+        iconTone="neutral"
+      />
 
       <div className={styles.section}>
         <div className={styles.grid}>
-          <div className={`${styles.field} ${styles.fieldFullWidth}`}>
-            <span className={styles.fieldLabel}>Name</span>
-            <div className={styles.inputWrapper}>
-              <input
-                type="text"
-                value={headingKeyframe.name}
-                onChange={(event) => {
+          <FormField
+            className={`${styles.field} ${styles.fieldFullWidth}`}
+            variant="floating"
+            label="Name"
+          >
+            <input
+              type="text"
+              value={headingKeyframe.name}
+              onChange={(event) => {
+                updateHeadingKeyframe(path.id, headingKeyframe.id, {
+                  name: event.target.value,
+                });
+              }}
+              aria-label="heading point name"
+              placeholder="Heading point name"
+            />
+          </FormField>
+          <FormField
+            className={styles.field ?? ''}
+            variant="floating"
+            label="Robot H."
+          >
+            <NumberInput
+              value={headingKeyframe.robotHeading}
+              onChange={(value) => {
+                if (value !== null) {
                   updateHeadingKeyframe(path.id, headingKeyframe.id, {
-                    name: event.target.value,
+                    robotHeading: value,
                   });
-                }}
-                aria-label="heading point name"
-                placeholder="Heading point name"
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Robot H.</span>
-            <div className={styles.inputWrapper}>
-              <NumberInput
-                value={headingKeyframe.robotHeading}
-                onChange={(value) => {
-                  if (value !== null) {
-                    updateHeadingKeyframe(path.id, headingKeyframe.id, {
-                      robotHeading: value,
-                    });
-                  }
-                }}
-                aria-label="heading point robot heading"
-              />
-            </div>
-          </div>
+                }
+              }}
+              aria-label="heading point robot heading"
+            />
+          </FormField>
           <div className={styles.field}>
             <span className={styles.fieldLabel}>On Path</span>
             <small>{positionLabel}</small>
@@ -91,16 +92,18 @@ export const HeadingKeyframeInspectorPanel = ({
       </div>
 
       <div className={styles.section}>
-        <button
-          type="button"
-          className={`${styles.actionBtn} ${styles.danger}`}
+        <Button
+          variant="ghost"
+          size="sm"
+          danger
+          style={{ width: '100%' }}
           onClick={() => {
             deleteHeadingKeyframe(path.id, headingKeyframe.id);
           }}
           aria-label="delete heading point"
         >
           <Trash2 size={16} /> Delete Heading Point
-        </button>
+        </Button>
       </div>
     </div>
   );

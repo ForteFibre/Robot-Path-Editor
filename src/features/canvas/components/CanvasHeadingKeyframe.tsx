@@ -7,6 +7,7 @@ import type {
   ResolvedHeadingKeyframe,
   ResolvedPathModel,
 } from '../../../domain/pointResolution';
+import { canvasTheme } from '../canvasTheme';
 
 type CanvasHeadingKeyframeProps = {
   path: ResolvedPathModel;
@@ -56,8 +57,12 @@ export const CanvasHeadingKeyframe = ({
       <Line
         points={points}
         closed
-        fill={isSelected ? '#14532d' : '#dcfce7'}
-        stroke="#16a34a"
+        fill={
+          isSelected
+            ? canvasTheme.headingKeyframe.selectedFill
+            : canvasTheme.headingKeyframe.defaultFill
+        }
+        stroke={canvasTheme.headingKeyframe.stroke}
         strokeWidth={2 / k}
       />
 
@@ -65,7 +70,7 @@ export const CanvasHeadingKeyframe = ({
         x={canvasPoint.x + 8 / k}
         y={canvasPoint.y - 8 / k}
         fontSize={12 / k}
-        fill="#14532d"
+        fill={canvasTheme.headingKeyframe.labelFill}
         text={headingKeyframe.name}
         listening={false}
       />
@@ -77,7 +82,7 @@ export const CanvasHeadingKeyframe = ({
           headingHandleCanvasPoint.x,
           headingHandleCanvasPoint.y,
         ]}
-        stroke="#16a34a"
+        stroke={canvasTheme.headingKeyframe.stroke}
         strokeWidth={2 / k}
         {...(isPreview ? { dash: [4 / k, 4 / k] } : {})}
         listening={false}
@@ -87,7 +92,7 @@ export const CanvasHeadingKeyframe = ({
         x={headingHandleCanvasPoint.x}
         y={headingHandleCanvasPoint.y}
         radius={5 / k}
-        fill="#16a34a"
+        fill={canvasTheme.headingKeyframe.handleFill}
         opacity={mode === 'heading' ? 1 : 0.35}
         listening={false}
       />

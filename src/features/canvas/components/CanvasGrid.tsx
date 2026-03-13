@@ -8,11 +8,9 @@ import {
   WORLD_GUIDE_EXTENT,
 } from '../../../domain/metricScale';
 import type { CanvasTransform } from '../../../domain/canvasTransform';
+import { canvasTheme } from '../canvasTheme';
 
 const LABEL_SCREEN_PADDING = 12;
-const GRID_LINE_COLOR = '#e5e7eb';
-const ORIGIN_AXIS_COLOR = '#cbd5e1';
-const GRID_LABEL_COLOR = '#94a3b8';
 
 type CanvasGridProps = {
   canvasTransform: CanvasTransform;
@@ -63,7 +61,7 @@ export const CanvasGrid = ({
         <Line
           key={`grid-line-x-${value}`}
           points={[-gridExtent, -value, gridExtent, -value]}
-          stroke={GRID_LINE_COLOR}
+          stroke={canvasTheme.grid.line}
           strokeWidth={1 / k}
           listening={false}
         />
@@ -73,7 +71,7 @@ export const CanvasGrid = ({
         <Line
           key={`grid-line-y-${value}`}
           points={[-value, -gridExtent, -value, gridExtent]}
-          stroke={GRID_LINE_COLOR}
+          stroke={canvasTheme.grid.line}
           strokeWidth={1 / k}
           listening={false}
         />
@@ -81,13 +79,13 @@ export const CanvasGrid = ({
 
       <Line
         points={[0, -gridExtent, 0, gridExtent]}
-        stroke={ORIGIN_AXIS_COLOR}
+        stroke={canvasTheme.grid.originAxis}
         strokeWidth={1.25 / k}
         listening={false}
       />
       <Line
         points={[-gridExtent, 0, gridExtent, 0]}
-        stroke={ORIGIN_AXIS_COLOR}
+        stroke={canvasTheme.grid.originAxis}
         strokeWidth={1.25 / k}
         listening={false}
       />
@@ -99,7 +97,7 @@ export const CanvasGrid = ({
           y={-value - 4 / k}
           text={formatMetricValue(value, labelDecimals)}
           fontSize={12 / k}
-          fill={GRID_LABEL_COLOR}
+          fill={canvasTheme.grid.label}
           listening={false}
         />
       ))}
@@ -111,7 +109,7 @@ export const CanvasGrid = ({
           y={labelCanvasY}
           text={formatMetricValue(value, labelDecimals)}
           fontSize={12 / k}
-          fill={GRID_LABEL_COLOR}
+          fill={canvasTheme.grid.label}
           listening={false}
         />
       ))}

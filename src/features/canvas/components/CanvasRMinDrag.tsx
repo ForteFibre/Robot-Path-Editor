@@ -2,6 +2,7 @@ import { type ReactElement } from 'react';
 import { Circle, Line, Text } from 'react-konva';
 import { worldToCanvasPoint } from '../../../domain/geometry';
 import { formatMetricValue } from '../../../domain/metricScale';
+import { canvasTheme } from '../canvasTheme';
 import type { RMinDragTarget } from '../types/rMinDragTarget';
 
 type CanvasRMinDragProps = {
@@ -23,7 +24,7 @@ export const CanvasRMinDrag = ({
         y={centerCanvasPoint.y}
         radius={rMinDragTarget.rMin}
         fill="transparent"
-        stroke="rgba(37, 99, 235, 0.3)"
+        stroke={canvasTheme.rMinDrag.ringStroke}
         strokeWidth={1.5 / k}
         dash={[6 / k, 4 / k]}
         listening={false}
@@ -36,7 +37,7 @@ export const CanvasRMinDrag = ({
           waypointCanvasPoint.x,
           waypointCanvasPoint.y,
         ]}
-        stroke="rgba(37, 99, 235, 0.5)"
+        stroke={canvasTheme.rMinDrag.lineStroke}
         strokeWidth={1 / k}
         listening={false}
       />
@@ -45,7 +46,7 @@ export const CanvasRMinDrag = ({
         x={(centerCanvasPoint.x + waypointCanvasPoint.x) / 2}
         y={(centerCanvasPoint.y + waypointCanvasPoint.y) / 2}
         offsetY={6 / k}
-        fill="rgba(37, 99, 235, 0.8)"
+        fill={canvasTheme.rMinDrag.labelFill}
         fontSize={12 / k}
         align="center"
         text={`r: ${
@@ -60,7 +61,7 @@ export const CanvasRMinDrag = ({
         x={centerCanvasPoint.x}
         y={centerCanvasPoint.y}
         radius={5 / k}
-        fill="rgba(37, 99, 235, 0.6)"
+        fill={canvasTheme.rMinDrag.centerFill}
         listening={false}
       />
     </>

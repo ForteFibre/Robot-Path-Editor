@@ -1,4 +1,10 @@
-import { type ReactElement, type ReactNode, type RefObject } from 'react';
+import {
+  useId,
+  type ReactElement,
+  type ReactNode,
+  type RefObject,
+} from 'react';
+import { FormField } from '../../components/common/FormField';
 import { NumberInput } from '../../components/common/NumberInput';
 import { DEFAULT_COORDINATE_INPUT_STEP } from '../../domain/metricScale';
 import styles from './PointLibraryPanel.module.css';
@@ -29,11 +35,13 @@ export const PointLibraryForm = ({
   yAriaLabel,
   headingAriaLabel,
 }: PointLibraryFormProps): ReactElement => {
+  const nameInputId = useId();
+
   return (
     <div className={styles.formStack}>
-      <label className={styles.formField}>
-        <span className={styles.fieldLabel}>Name</span>
+      <FormField label="Name" variant="compact" htmlFor={nameInputId}>
         <input
+          id={nameInputId}
           ref={nameInputRef}
           type="text"
           value={draft.name}
@@ -43,7 +51,7 @@ export const PointLibraryForm = ({
           className={styles.textInput}
           aria-label={nameAriaLabel}
         />
-      </label>
+      </FormField>
 
       <div className={styles.compactGrid}>
         <div className={styles.compactField}>

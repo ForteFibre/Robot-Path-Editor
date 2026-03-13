@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { Check, Lock, LockOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import styles from './PointLibraryPanel.module.css';
+import { Button } from '../../components/common/Button';
 import { PointLibraryForm } from './PointLibraryForm';
 import { type LibraryPointDraft } from './usePointLibrary';
 
@@ -9,6 +10,7 @@ const formatLibraryValue = (value: number): string => {
 };
 
 type PointLibraryItemProps = {
+  frameClassName?: string;
   item: {
     id: string;
     name: string;
@@ -36,6 +38,7 @@ type PointLibraryItemProps = {
 };
 
 export const PointLibraryItem = ({
+  frameClassName,
   item,
   isSelected,
   isHighlighted,
@@ -93,7 +96,7 @@ export const PointLibraryItem = ({
   return (
     <li
       className={[
-        styles.item,
+        frameClassName ?? styles.item,
         isSelected ? styles.itemSelected : '',
         isHighlighted ? styles.itemHighlighted : '',
         isEditing ? styles.itemEditing : '',
@@ -169,7 +172,7 @@ export const PointLibraryItem = ({
             )}
           </button>
 
-          <div className={styles.hoverActions}>
+          <div className={[styles.hoverActions].filter(Boolean).join(' ')}>
             <button
               type="button"
               className={styles.iconActionButton}
@@ -237,16 +240,17 @@ export const PointLibraryItem = ({
             headingAriaLabel="library point heading"
             actions={
               <>
-                <button
+                <Button
                   type="submit"
-                  className={styles.secondaryActionButton}
+                  variant="secondary"
+                  size="sm"
                   aria-label="save library point"
                 >
                   <Check size={14} /> Save
-                </button>
-                <button
-                  type="button"
-                  className={styles.ghostActionButton}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setIsEditing(false);
                     setDraft({
@@ -259,7 +263,7 @@ export const PointLibraryItem = ({
                   aria-label="cancel library point edit"
                 >
                   <X size={14} /> Cancel
-                </button>
+                </Button>
               </>
             }
           />

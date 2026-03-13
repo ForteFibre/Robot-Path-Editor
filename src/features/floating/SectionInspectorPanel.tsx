@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { Route, RotateCcw } from 'lucide-react';
 import { NumberInput } from '../../components/common/NumberInput';
+import { PanelHeader } from '../../components/common/PanelHeader';
 import { SECTION_R_MIN_INPUT_STEP } from '../../domain/metricScale';
 import type { ResolvedPathModel } from '../../domain/pointResolution';
 import type { SectionSelection } from './floatingInspectorModel';
@@ -100,17 +101,13 @@ export const SectionInspectorPanel = ({
       aria-label="floating inspector"
       style={style}
     >
-      <div className={styles.header}>
-        <div className={styles.headerIcon}>
-          <Route size={18} />
-        </div>
-        <div className={styles.headerInfo}>
-          <h2>Section Inspector</h2>
-          <p>
-            {path.name} / Sect {section.index + 1}
-          </p>
-        </div>
-      </div>
+      <PanelHeader
+        icon={<Route size={18} />}
+        title="Section Inspector"
+        subtitle={`${path.name} / Sect ${section.index + 1}`}
+        divider
+        iconTone="neutral"
+      />
 
       <div className={styles.section}>
         <div className={styles.field}>

@@ -1,6 +1,12 @@
 import { useRef, type ChangeEvent, type ReactElement } from 'react';
 import { FileJson2, RotateCcw, Sparkles } from 'lucide-react';
 import { Modal } from '../../components/common/Modal';
+import {
+  DialogActions,
+  DialogSection,
+  TwoColumnChoiceGrid,
+} from '../../components/common/DialogBody';
+import { Button } from '../../components/common/Button';
 import type { WorkspacePersistenceRestoreCandidate } from './types';
 import { formatAbsoluteDateTime, formatTimestampLabel } from './timeFormatting';
 import styles from './WorkspaceRestoreDialog.module.css';
@@ -45,50 +51,53 @@ export const WorkspaceRestoreDialog = ({
 
   const restoreChoices =
     result.kind === 'conflict' ? (
-      <div className={styles.restoreChoices}>
-        <button
-          type="button"
-          className={styles.restoreChoiceButton}
-          onClick={onRestoreLastEdit}
-          disabled={isBusy}
-          aria-label={`IndexedDBの自動保存を復元 (${formatAbsoluteDateTime(
-            result.autoSavedAt,
-          )})`}
-        >
-          <RotateCcw size={16} />
-          <span className={styles.restoreChoiceTitle}>
-            IndexedDBの自動保存を復元
-          </span>
-          <span className={styles.restoreChoiceValue}>
-            {formatTimestampLabel(result.autoSavedAt)}
-          </span>
-          <span className={styles.restoreChoiceSubtext}>
-            保存時刻: {formatAbsoluteDateTime(result.autoSavedAt)}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className={styles.restoreChoiceButton}
-          onClick={onRestoreLinkedFile}
-          disabled={isBusy}
-          aria-label={`リンクされたJSONファイルを読み込む (${formatAbsoluteDateTime(
-            result.linkedFileModifiedAt,
-          )})`}
-        >
-          <FileJson2 size={16} />
-          <span className={styles.restoreChoiceTitle}>
-            リンクされたJSONファイルを読み込む
-          </span>
-          <span className={styles.restoreChoiceValue}>
-            {formatTimestampLabel(result.linkedFileModifiedAt)}
-          </span>
-          <span className={styles.restoreChoiceSubtext}>
-            {result.linkedFileName} / 保存時刻:{' '}
-            {formatAbsoluteDateTime(result.linkedFileModifiedAt)}
-          </span>
-        </button>
-      </div>
+      <TwoColumnChoiceGrid
+        left={
+          <button
+            type="button"
+            className={styles.restoreChoiceButton}
+            onClick={onRestoreLastEdit}
+            disabled={isBusy}
+            aria-label={`IndexedDBの自動保存を復元 (${formatAbsoluteDateTime(
+              result.autoSavedAt,
+            )})`}
+          >
+            <RotateCcw size={16} />
+            <span className={styles.restoreChoiceTitle}>
+              IndexedDBの自動保存を復元
+            </span>
+            <span className={styles.restoreChoiceValue}>
+              {formatTimestampLabel(result.autoSavedAt)}
+            </span>
+            <span className={styles.restoreChoiceSubtext}>
+              保存時刻: {formatAbsoluteDateTime(result.autoSavedAt)}
+            </span>
+          </button>
+        }
+        right={
+          <button
+            type="button"
+            className={styles.restoreChoiceButton}
+            onClick={onRestoreLinkedFile}
+            disabled={isBusy}
+            aria-label={`リンクされたJSONファイルを読み込む (${formatAbsoluteDateTime(
+              result.linkedFileModifiedAt,
+            )})`}
+          >
+            <FileJson2 size={16} />
+            <span className={styles.restoreChoiceTitle}>
+              リンクされたJSONファイルを読み込む
+            </span>
+            <span className={styles.restoreChoiceValue}>
+              {formatTimestampLabel(result.linkedFileModifiedAt)}
+            </span>
+            <span className={styles.restoreChoiceSubtext}>
+              {result.linkedFileName} / 保存時刻:{' '}
+              {formatAbsoluteDateTime(result.linkedFileModifiedAt)}
+            </span>
+          </button>
+        }
+      />
     ) : null;
 
   const savedMeta =
@@ -108,36 +117,36 @@ export const WorkspaceRestoreDialog = ({
 
   const primaryActions =
     result.kind === 'autosave-only' ? (
-      <div className={styles.primaryActions}>
-        <button
-          type="button"
-          className={styles.actionButton}
+      <DialogActions direction="row">
+        <Button
+          variant="secondary"
+          style={{ flex: 1 }}
           onClick={onRestoreLastEdit}
           disabled={isBusy}
         >
           <RotateCcw size={16} />
           <span>最後の編集を復元</span>
-        </button>
-        <button
-          type="button"
-          className={styles.actionButton}
+        </Button>
+        <Button
+          variant="secondary"
+          style={{ flex: 1 }}
           onClick={onStartFresh}
           disabled={isBusy}
         >
           <Sparkles size={16} />
           <span>新規で開始</span>
-        </button>
-      </div>
+        </Button>
+      </DialogActions>
     ) : (
-      <button
-        type="button"
-        className={styles.secondaryActionButton}
+      <Button
+        variant="ghost"
+        style={{ width: '100%' }}
         onClick={onStartFresh}
         disabled={isBusy}
       >
         <Sparkles size={16} />
         <span>新規で開始</span>
-      </button>
+      </Button>
     );
 
   return (
@@ -147,17 +156,17 @@ export const WorkspaceRestoreDialog = ({
       title="前回の作業を復元しますか？"
       closable={false}
     >
-      <div className={styles.content}>
+      <DialogSection>
         <p className={styles.lead}>{leadText}</p>
 
         {savedMeta}
 
-        <div className={styles.actions}>
+        <DialogActions>
           {primaryActions}
 
-          <button
-            type="button"
-            className={styles.secondaryActionButton}
+          <Button
+            variant="ghost"
+            style={{ width: '100%' }}
             onClick={() => {
               fileInputRef.current?.click();
             }}
@@ -165,7 +174,7 @@ export const WorkspaceRestoreDialog = ({
           >
             <FileJson2 size={16} />
             <span>ファイルを読み込む</span>
-          </button>
+          </Button>
 
           <input
             ref={fileInputRef}
@@ -175,8 +184,8 @@ export const WorkspaceRestoreDialog = ({
             className="visually-hidden"
             aria-label="復元する workspace json を選択"
           />
-        </div>
-      </div>
+        </DialogActions>
+      </DialogSection>
     </Modal>
   );
 };

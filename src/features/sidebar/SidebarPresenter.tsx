@@ -9,7 +9,15 @@ import {
   Circle,
 } from 'lucide-react';
 import type { PathModel } from '../../domain/models';
+import {
+  SidePanel,
+  SidePanelSection,
+  SidePanelCard,
+} from '../../components/common/SidePanel';
 import styles from './Sidebar.module.css';
+import { Button } from '../../components/common/Button';
+import { InteractiveList } from '../../components/common/InteractiveList';
+import interactiveListStyles from '../../components/common/InteractiveList.module.css';
 
 export type SidebarPresenterProps = {
   hostRef?: Ref<HTMLElement> | undefined;
@@ -39,30 +47,35 @@ export const SidebarPresenter = ({
   libraryPanel,
 }: SidebarPresenterProps): ReactElement => {
   return (
-    <aside ref={hostRef} className={styles.sidebar} aria-label="editor sidebar">
-      <section
-        className={`${styles.section} ${styles.pathsSection}`}
-        aria-label="path management"
-      >
-        <div className={styles.sectionHeader}>
-          <h2>Paths</h2>
-          <button
-            type="button"
-            className="icon-button icon-button--small"
+    <SidePanel side="left" ref={hostRef} aria-label="editor sidebar">
+      <SidePanelSection
+        title="Paths"
+        headerActions={
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onAddPath}
             aria-label="create new path"
           >
             <Plus size={16} /> New
-          </button>
-        </div>
-
-        <ul className={`${styles.list} ${styles.pathsList}`}>
-          {paths.map((path) => {
+          </Button>
+        }
+        className={styles.pathsSection}
+        aria-label="path management"
+      >
+        <InteractiveList
+          items={paths}
+          getKey={(path) => path.id}
+          className={styles.pathsList}
+          emptyState="パスがありません。New ボタンから追加してください。"
+          renderItem={(path) => {
             const isActive = activePathId === path.id;
             return (
-              <li
-                key={path.id}
-                className={`${styles.item} ${isActive ? styles.isActive : ''}`}
+              <SidePanelCard
+                active={isActive}
+                className={[styles.pathCard, interactiveListStyles.item]
+                  .filter(Boolean)
+                  .join(' ')}
               >
                 <button
                   type="button"
@@ -73,9 +86,15 @@ export const SidebarPresenter = ({
                   aria-label={`set ${path.name} active`}
                 >
                   {isActive ? (
-                    <CheckCircle2 size={18} color="#3b82f6" />
+                    <CheckCircle2
+                      size={18}
+                      className={styles.itemActivationIconActive}
+                    />
                   ) : (
-                    <Circle size={18} color="#cbd5e1" />
+                    <Circle
+                      size={18}
+                      className={styles.itemActivationIconInactive}
+                    />
                   )}
                 </button>
 
@@ -107,7 +126,15 @@ export const SidebarPresenter = ({
                     />
                   </div>
 
-                  <div className={styles.itemActions}>
+                  <div
+                    className={[
+                      styles.itemActions,
+                      interactiveListStyles.hoverActions,
+                      interactiveListStyles.dimUntilHover,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
                     <button
                       type="button"
                       className={styles.actionBtn}
@@ -120,7 +147,7 @@ export const SidebarPresenter = ({
                       {path.visible ? (
                         <Eye size={16} />
                       ) : (
-                        <EyeOff size={16} color="#94a3b8" />
+                        <EyeOff size={16} className={styles.hiddenPathIcon} />
                       )}
                     </button>
 
@@ -138,7 +165,7 @@ export const SidebarPresenter = ({
 
                     <button
                       type="button"
-                      className={`${styles.actionBtn} btn-danger-text`}
+                      className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                       disabled={paths.length <= 1}
                       onClick={() => {
                         onDeletePath(path.id);
@@ -150,15 +177,15 @@ export const SidebarPresenter = ({
                     </button>
                   </div>
                 </div>
-              </li>
+              </SidePanelCard>
             );
-          })}
-        </ul>
-      </section>
+          }}
+        />
+      </SidePanelSection>
 
-      <section className={`${styles.section} ${styles.librarySection}`}>
+      <SidePanelSection className={styles.librarySection}>
         {libraryPanel}
-      </section>
-    </aside>
+      </SidePanelSection>
+    </SidePanel>
   );
 };

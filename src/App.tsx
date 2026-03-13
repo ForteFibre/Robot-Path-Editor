@@ -1,5 +1,6 @@
 import { type ReactElement, useMemo } from 'react';
 import './App.css';
+import appShellStyles from './features/app-shell/AppShell.module.css';
 import { PathCanvas } from './features/canvas/PathCanvas';
 import { AppConfirmationDialog } from './features/app-shell/AppConfirmationDialog';
 import { AppConfirmationProvider } from './features/app-shell/AppConfirmationContext';
@@ -51,7 +52,7 @@ const EditorApp = (): ReactElement => {
   );
 
   return (
-    <div className="app-shell">
+    <div className={appShellStyles.appShell}>
       <Toolbar workspaceCommands={toolbarCommands} />
 
       <PwaUpdateBanner
@@ -67,7 +68,7 @@ const EditorApp = (): ReactElement => {
         onDismiss={clearNotification}
       />
 
-      <div className="app-body" ref={appBodyRef}>
+      <div className={appShellStyles.appBody} ref={appBodyRef}>
         <WorkspaceEditorProvider>
           <Sidebar hostRef={sidebarRef} />
           <PathCanvas />

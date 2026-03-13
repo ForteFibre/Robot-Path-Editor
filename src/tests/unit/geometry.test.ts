@@ -191,5 +191,4 @@ describe('geometry', () => {
     expect(next.x).toBeLessThan(200);
     expect(next.y).toBeLessThan(100);
   });
-
 });

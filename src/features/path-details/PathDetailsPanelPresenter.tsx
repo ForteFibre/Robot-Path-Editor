@@ -1,3 +1,4 @@
+import { SidePanel, SidePanelCard } from '../../components/common/SidePanel';
 import {
   DndContext,
   closestCenter,
@@ -22,7 +23,9 @@ import {
   getItemSubtitle,
   type PathItem,
 } from './pathDetailsModel';
+import { PanelHeader } from '../../components/common/PanelHeader';
 import styles from './PathDetailsPanel.module.css';
+import { InteractiveList } from '../../components/common/InteractiveList';
 
 type PathItemCardProps = {
   item: PathItem;
@@ -109,10 +112,13 @@ const SortableWaypointRow = ({
   } satisfies CSSProperties;
 
   return (
-    <li
+    <SidePanelCard
       ref={setNodeRef}
       style={style}
-      className={`${styles.itemCard} ${isActive ? styles.itemCardActive : ''}`}
+      active={isActive}
+      className={[styles.itemCard, isActive ? styles.itemCardActive : '']
+        .filter(Boolean)
+        .join(' ')}
     >
       <PathItemCard
         item={item}
@@ -131,7 +137,7 @@ const SortableWaypointRow = ({
           </button>
         }
       />
-    </li>
+    </SidePanelCard>
   );
 };
 
@@ -147,8 +153,11 @@ const StaticPathItemRow = ({
   onSelect,
 }: StaticPathItemRowProps): ReactElement => {
   return (
-    <li
-      className={`${styles.itemCard} ${isActive ? styles.itemCardActive : ''}`}
+    <SidePanelCard
+      active={isActive}
+      className={[styles.itemCard, isActive ? styles.itemCardActive : '']
+        .filter(Boolean)
+        .join(' ')}
     >
       <PathItemCard
         item={item}
@@ -161,7 +170,7 @@ const StaticPathItemRow = ({
           />
         }
       />
-    </li>
+    </SidePanelCard>
   );
 };
 
@@ -208,30 +217,36 @@ export const PathDetailsPanelPresenter = ({
   };
 
   return (
-    <aside className={styles.sidebar} aria-label="path details sidebar">
-      <div className={styles.header}>
-        <div className={styles.headerIcon}>
-          <Route size={18} />
-        </div>
-        <div className={styles.headerInfo}>
-          <h2>Path Elements</h2>
-          <p>{pathName}</p>
-          <span className={styles.totalTimeBadge}>
-            Total {formatSeconds(totalTime)}
-          </span>
-        </div>
-      </div>
+    <SidePanel side="right" aria-label="path details sidebar">
+      <PanelHeader
+        icon={<Route size={18} />}
+        title="Path Elements"
+        subtitle={pathName}
+        iconTone="accent"
+        divider
+      >
+        <span className={styles.totalTimeBadge}>
+          Total {formatSeconds(totalTime)}
+        </span>
+      </PanelHeader>
 
       <div className={styles.content}>
         {sequentialItems.length === 0 ? (
-          <div className={styles.emptyState}>
-            <Info size={32} className={styles.emptyStateIcon} />
-            <p>
-              このパスにはポイントがありません。
-              <br />
-              キャンバスをクリックして追加してください。
-            </p>
-          </div>
+          <InteractiveList<PathItem>
+            items={[]}
+            getKey={() => 'empty-path-item-list'}
+            renderItem={() => null}
+            emptyState={
+              <>
+                <Info size={32} className={styles.emptyStateIcon} />
+                <p className={styles.emptyStateMessage}>
+                  このパスにはポイントがありません。
+                  <br />
+                  キャンバスをクリックして追加してください。
+                </p>
+              </>
+            }
+          />
         ) : (
           <DndContext
             sensors={sensors}
@@ -242,8 +257,13 @@ export const PathDetailsPanelPresenter = ({
               items={waypointIds}
               strategy={verticalListSortingStrategy}
             >
-              <ol className={styles.pathItemsList} aria-label="Path elements">
-                {sequentialItems.map((item) => {
+              <InteractiveList
+                as="ol"
+                items={sequentialItems}
+                getKey={(item) => item.id}
+                className={styles.pathItemsList}
+                aria-label="Path elements"
+                renderItem={(item) => {
                   const isActive =
                     (item.type === 'waypoint' &&
                       selectionWaypointId === item.id) ||
@@ -256,25 +276,23 @@ export const PathDetailsPanelPresenter = ({
 
                   return item.type === 'waypoint' ? (
                     <SortableWaypointRow
-                      key={item.id}
                       item={item}
                       isActive={isActive}
                       onSelect={handleSelect}
                     />
                   ) : (
                     <StaticPathItemRow
-                      key={item.id}
                       item={item}
                       isActive={isActive}
                       onSelect={handleSelect}
                     />
                   );
-                })}
-              </ol>
+                }}
+              />
             </SortableContext>
           </DndContext>
         )}
       </div>
-    </aside>
+    </SidePanel>
   );
 };

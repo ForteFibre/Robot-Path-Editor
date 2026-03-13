@@ -33,6 +33,52 @@ const renderFileMenu = (workspaceCommands: WorkspaceToolbarCommands): void => {
 };
 
 describe('FileMenu', () => {
+  it('dropdown row を定義に基づいて描画し、aria-label を維持する', () => {
+    const workspaceCommands = createWorkspaceCommands();
+    workspaceCommands.linkedFileName = 'demo.path';
+
+    renderFileMenu(workspaceCommands);
+
+    fireEvent.click(screen.getByRole('button', { name: 'file menu' }));
+
+    expect(
+      screen.getByRole('button', { name: 'new workspace' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Load Workspace' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Save Workspace' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Save Workspace As' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Export CSV' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('linked: demo.path')).toBeInTheDocument();
+  });
+
+  it('File System Access 非対応時は json import row と hidden input を描画する', () => {
+    const workspaceCommands = createWorkspaceCommands();
+    workspaceCommands.isFileSystemAccessSupported = false;
+    const inputClickSpy = vi
+      .spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+
+    renderFileMenu(workspaceCommands);
+
+    fireEvent.click(screen.getByRole('button', { name: 'file menu' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'load workspace json' }),
+    );
+
+    expect(screen.getByLabelText('load workspace file')).toBeInTheDocument();
+    expect(inputClickSpy).toHaveBeenCalledTimes(1);
+
+    inputClickSpy.mockRestore();
+  });
+
   it('uses the domain CSV minimum step for the export step input', () => {
     renderFileMenu(createWorkspaceCommands());
 

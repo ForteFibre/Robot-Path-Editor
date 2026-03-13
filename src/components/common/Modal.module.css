@@ -1,25 +1,22 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--overlay-bg);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--space-4);
   animation: fadeIn 0.15s ease-out;
 }
 
 .modal {
-  background: #ffffff;
-  border: 1px solid var(--panel-border, #dbe3ef);
-  border-radius: 1rem;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.2),
-    0 10px 20px -8px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(15, 23, 42, 0.04);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--modal-shadow);
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
@@ -35,17 +32,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
-  background: linear-gradient(to bottom, #ffffff, #fafbfd);
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--slate-100);
+  background: linear-gradient(to bottom, var(--panel), var(--slate-50));
 }
 
 .title {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
   letter-spacing: -0.015em;
   line-height: 1.3;
 }
@@ -58,47 +55,27 @@
   width: 2rem;
   height: 2rem;
   padding: 0;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-lg);
   border: 1px solid transparent;
   background: transparent;
-  color: #475569;
+  color: var(--slate-600);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .closeButton:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #e2e8f0;
+  background: var(--slate-100);
+  color: var(--text);
+  border-color: var(--slate-200);
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-color: transparent;
 }
 
 .content {
-  padding: 1.25rem 1.5rem 1.5rem;
+  padding: var(--space-5) var(--space-6) var(--space-6);
   overflow-y: auto;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }

@@ -1,25 +1,19 @@
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.125rem;
-}
-
 /* Warning banner */
 .warning {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
   padding: 0.875rem 1rem;
-  border: 1px solid #fcd34d;
-  border-left: 3px solid #f59e0b;
-  border-radius: 0.625rem;
-  background: #fffbeb;
-  color: #78350f;
+  border: 1px solid var(--yellow-200);
+  border-left: 3px solid var(--yellow-amber);
+  border-radius: var(--radius-lg);
+  background: var(--yellow-50);
+  color: var(--yellow-900);
 }
 
 .warning svg {
   flex-shrink: 0;
-  color: #d97706;
+  color: var(--amber-600);
   margin-top: 0.1rem;
 }
 
@@ -29,21 +23,14 @@
   line-height: 1.65;
 }
 
-/* Timeline comparison */
-.timeline {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.625rem;
-}
-
 .timelineCard {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
   padding: 0.875rem 1rem;
-  border: 1px solid var(--panel-border, #dbe3ef);
-  border-radius: 0.625rem;
-  background: #f8fafc;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
 }
 
 .timelineLabel {
@@ -51,99 +38,17 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #94a3b8;
+  color: var(--slate-400);
 }
 
 .timelineValue {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .timelineSubtext {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--slate-400);
   line-height: 1.4;
-}
-
-/* Actions — vertical stack with clear visual hierarchy */
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.overwriteButton,
-.loadLatestButton,
-.cancelButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: 100%;
-  min-height: 2.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-/* Danger — overwrite (destructive, visually warns) */
-.overwriteButton {
-  border: 1.5px solid #fca5a5;
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-.overwriteButton:hover:not(:disabled) {
-  border-color: #f87171;
-  background: #fee2e2;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.18);
-}
-
-/* Primary — load latest (recommended safe action) */
-.loadLatestButton {
-  border: 1.5px solid #93c5fd;
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.loadLatestButton:hover:not(:disabled) {
-  border-color: #60a5fa;
-  background: #dbeafe;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.18);
-}
-
-/* Ghost — cancel */
-.cancelButton {
-  border: 1.5px solid var(--panel-border, #dbe3ef);
-  background: #ffffff;
-  color: #475569;
-}
-
-.cancelButton:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #334155;
-}
-
-.overwriteButton:focus-visible,
-.loadLatestButton:focus-visible,
-.cancelButton:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-.overwriteButton:disabled,
-.loadLatestButton:disabled,
-.cancelButton:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-@media (max-width: 480px) {
-  .timeline {
-    grid-template-columns: 1fr;
-  }
 }

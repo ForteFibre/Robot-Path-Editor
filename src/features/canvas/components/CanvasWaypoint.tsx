@@ -7,6 +7,7 @@ import { type ReactElement } from 'react';
 import { Circle, Group, Line, Text } from 'react-konva';
 import { pointFromHeading, worldToCanvasPoint } from '../../../domain/geometry';
 import { getHeadingHandleDistance } from '../../../domain/canvas';
+import { canvasTheme } from '../canvasTheme';
 
 type CanvasWaypointProps = {
   path: ResolvedPathModel;
@@ -26,14 +27,14 @@ const resolveWaypointFill = (
   isLibraryLinked: boolean,
 ): string => {
   if (isSelected) {
-    return '#111827';
+    return canvasTheme.waypoint.selectedFill;
   }
 
   if (isLibraryLinked) {
-    return '#f5f3ff';
+    return canvasTheme.waypoint.libraryLinkedFill;
   }
 
-  return '#ffffff';
+  return canvasTheme.waypoint.defaultFill;
 };
 
 const renderLibraryLinkRing = (params: {
@@ -54,7 +55,7 @@ const renderLibraryLinkRing = (params: {
       x={x}
       y={y}
       radius={(isSelected ? 10 : 8) / k}
-      stroke="#7c3aed"
+      stroke={canvasTheme.waypoint.libraryLinkedStroke}
       strokeWidth={1.5 / k}
       listening={false}
     />
@@ -91,7 +92,7 @@ const renderRobotHeadingOverlay = (params: {
           robotHeadingHandleCanvasPoint.x,
           robotHeadingHandleCanvasPoint.y,
         ]}
-        stroke="#16a34a"
+        stroke={canvasTheme.waypoint.robotHeadingStroke}
         strokeWidth={2 / k}
         {...robotHeadingLineProps}
         listening={false}
@@ -101,7 +102,7 @@ const renderRobotHeadingOverlay = (params: {
         x={robotHeadingHandleCanvasPoint.x}
         y={robotHeadingHandleCanvasPoint.y}
         radius={5 / k}
-        fill="#16a34a"
+        fill={canvasTheme.waypoint.robotHeadingStroke}
         opacity={mode === 'heading' ? 1 : 0.35}
         listening={false}
       />
@@ -123,7 +124,9 @@ export const CanvasWaypoint = ({
 }: CanvasWaypointProps): ReactElement | null => {
   const isLibraryLinked = waypoint.libraryPoint !== null;
   const waypointFill = resolveWaypointFill(isSelected, isLibraryLinked);
-  const waypointStroke = isLibraryLinked ? '#7c3aed' : path.color;
+  const waypointStroke = isLibraryLinked
+    ? canvasTheme.waypoint.libraryLinkedStroke
+    : path.color;
 
   if (!isActive) {
     const inactiveCanvasPoint = worldToCanvasPoint(waypoint);
@@ -132,7 +135,11 @@ export const CanvasWaypoint = ({
         x={inactiveCanvasPoint.x}
         y={inactiveCanvasPoint.y}
         radius={4 / k}
-        fill={isLibraryLinked ? '#8b5cf6' : path.color}
+        fill={
+          isLibraryLinked
+            ? canvasTheme.waypoint.inactiveLibraryLinkedFill
+            : path.color
+        }
         opacity={0.8}
         listening={false}
       />
@@ -185,7 +192,7 @@ export const CanvasWaypoint = ({
         x={waypointCanvasPoint.x + 8 / k}
         y={waypointCanvasPoint.y - 8 / k}
         fontSize={12 / k}
-        fill="#111827"
+        fill={canvasTheme.waypoint.labelFill}
         text={waypoint.name}
         listening={false}
       />
@@ -197,7 +204,7 @@ export const CanvasWaypoint = ({
           pathHeadingHandleCanvasPoint.x,
           pathHeadingHandleCanvasPoint.y,
         ]}
-        stroke="#0ea5e9"
+        stroke={canvasTheme.waypoint.pathHeadingStroke}
         strokeWidth={2 / k}
         listening={false}
       />
@@ -206,7 +213,7 @@ export const CanvasWaypoint = ({
         x={pathHeadingHandleCanvasPoint.x}
         y={pathHeadingHandleCanvasPoint.y}
         radius={5 / k}
-        fill="#0ea5e9"
+        fill={canvasTheme.waypoint.pathHeadingStroke}
         opacity={mode === 'path' ? 1 : 0.35}
         listening={false}
       />
@@ -225,7 +232,7 @@ export const CanvasWaypoint = ({
           x={waypointCanvasPoint.x + 12 / k}
           y={waypointCanvasPoint.y + 12 / k}
           fontSize={12 / k}
-          fill="#b91c1c"
+          fill={canvasTheme.waypoint.breakLabelFill}
           text="⚠ break"
           listening={false}
         />

@@ -1,53 +1,25 @@
 .panel {
   position: absolute;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: var(--space-5);
+  bottom: var(--space-5);
   width: min(240px, calc(100% - 2rem));
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(14px);
-  box-shadow:
-    0 16px 40px -24px rgba(15, 23, 42, 0.45),
-    0 10px 20px -18px rgba(15, 23, 42, 0.35);
-  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--dropdown-shadow);
+  padding: var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
   z-index: 6;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.titleBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
-}
-
 .collapseButton {
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  background: #f8fafc;
-  color: #334155;
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--slate-50);
+  color: var(--slate-700);
+  border-radius: var(--radius-pill);
   padding: 0.35rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -55,13 +27,19 @@
 }
 
 .collapseButton:hover {
-  background: #f1f5f9;
+  background: var(--slate-100);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .sectionTitle {
@@ -70,7 +48,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #475569;
+  color: var(--slate-600);
 }
 
 .settingList {
@@ -82,36 +60,36 @@
 .settingRow {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
   padding: 0.4rem 0.5rem;
-  border-radius: 0.5rem;
-  background: #f8fafc;
+  border-radius: var(--radius-lg);
+  background: var(--slate-50);
   border: 1px solid transparent;
   cursor: help;
 }
 
 .settingRow:hover {
-  border-color: rgba(20, 184, 166, 0.2);
+  border-color: var(--border-accent-subtle);
 }
 
 .checkbox {
   margin: 0;
-  accent-color: #0f766e;
+  accent-color: var(--teal-700);
   cursor: pointer;
 }
 
 .settingLabel {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text);
   cursor: pointer;
 }
 
 @media (max-width: 720px) {
   .panel {
-    right: 0.75rem;
-    bottom: 0.75rem;
+    right: var(--space-3);
+    bottom: var(--space-3);
     width: min(100%, calc(100% - 1rem));
   }
 }

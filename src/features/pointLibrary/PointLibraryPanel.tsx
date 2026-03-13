@@ -1,12 +1,15 @@
 import { Check, Plus, X } from 'lucide-react';
 import { useEffect, useRef, type ReactElement } from 'react';
 import styles from './PointLibraryPanel.module.css';
+import { Button } from '../../components/common/Button';
+import { PanelHeader } from '../../components/common/PanelHeader';
 import { PointLibraryForm } from './PointLibraryForm';
 import { PointLibraryItem } from './PointLibraryItem';
 import { type LibraryPointDraft } from './usePointLibrary';
 import { usePointLibraryPanelController } from './usePointLibraryPanelController';
 
 type CreateLibraryPointRowProps = {
+  frameClassName: string;
   draft: LibraryPointDraft;
   onChange: (patch: Partial<LibraryPointDraft>) => void;
   onSave: () => void;
@@ -14,13 +17,14 @@ type CreateLibraryPointRowProps = {
 };
 
 const CreateLibraryPointRow = ({
+  frameClassName,
   draft,
   onChange,
   onSave,
   onCancel,
 }: CreateLibraryPointRowProps): ReactElement => {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
-  const itemRef = useRef<HTMLLIElement | null>(null);
+  const itemRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     nameInputRef.current?.focus();
@@ -32,9 +36,9 @@ const CreateLibraryPointRow = ({
   }, []);
 
   return (
-    <li
+    <div
       ref={itemRef}
-      className={[styles.item, styles.itemEditing].join(' ')}
+      className={[frameClassName, styles.itemEditing].join(' ')}
       aria-label="new library point draft"
     >
       <form
@@ -54,26 +58,27 @@ const CreateLibraryPointRow = ({
           headingAriaLabel="library point heading"
           actions={
             <>
-              <button
+              <Button
                 type="submit"
-                className={styles.primaryActionButton}
+                variant="primary"
+                size="sm"
                 aria-label="save library point"
               >
                 <Check size={14} /> Add Pattern
-              </button>
-              <button
-                type="button"
-                className={styles.ghostActionButton}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onCancel}
                 aria-label="cancel library point creation"
               >
                 <X size={14} /> Cancel
-              </button>
+              </Button>
             </>
           }
         />
       </form>
-    </li>
+    </div>
   );
 };
 
@@ -96,20 +101,34 @@ export const PointLibraryPanel = (): ReactElement => {
 
   return (
     <section className={styles.panel} aria-label="point library management">
-      <div className={styles.header}>
-        <h2>Library</h2>
-        <button
-          type="button"
-          className="icon-button icon-button--small"
-          onClick={startCreate}
-          aria-label="new library point"
-          title="New library point"
-        >
-          <Plus size={16} />
-        </button>
-      </div>
+      <PanelHeader
+        title="Library"
+        compact
+        divider
+        actions={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={startCreate}
+            aria-label="new library point"
+            title="New library point"
+          >
+            <Plus size={16} />
+          </Button>
+        }
+      />
 
-      {items.length === 0 && createDraft === null ? (
+      {createDraft !== null && (
+        <CreateLibraryPointRow
+          frameClassName={styles.item ?? ''}
+          draft={createDraft}
+          onChange={changeCreateDraft}
+          onSave={saveCreateDraft}
+          onCancel={cancelCreate}
+        />
+      )}
+
+      {items.length === 0 ? (
         <div className={styles.emptyState}>
           ライブラリポイントがまだありません。右上の＋ボタンから追加してください。
         </div>
@@ -118,6 +137,7 @@ export const PointLibraryPanel = (): ReactElement => {
           {items.map((item) => (
             <PointLibraryItem
               key={item.id}
+              frameClassName={styles.item ?? ''}
               item={item}
               isSelected={selectedLibraryPointId === item.id}
               isHighlighted={highlightedLibraryPointId === item.id}
@@ -128,15 +148,6 @@ export const PointLibraryPanel = (): ReactElement => {
               onToggleLock={togglePointLock}
             />
           ))}
-
-          {createDraft === null ? null : (
-            <CreateLibraryPointRow
-              draft={createDraft}
-              onChange={changeCreateDraft}
-              onSave={saveCreateDraft}
-              onCancel={cancelCreate}
-            />
-          )}
         </ul>
       )}
     </section>

@@ -1,6 +1,11 @@
 import { AlertTriangle, CircleAlert } from 'lucide-react';
 import { type ReactElement } from 'react';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import {
+  DialogActions,
+  DialogSection,
+} from '../../components/common/DialogBody';
 import { useAppConfirmation } from './AppConfirmationContext';
 import styles from './AppConfirmationDialog.module.css';
 
@@ -32,6 +37,7 @@ export const AppConfirmationDialog = (): ReactElement | null => {
   };
 
   const Icon = tone === 'danger' ? AlertTriangle : CircleAlert;
+  const sectionClassName: string = styles.section ?? '';
 
   return (
     <Modal
@@ -42,7 +48,7 @@ export const AppConfirmationDialog = (): ReactElement | null => {
       title={title}
       closable={false}
     >
-      <div className={styles.content}>
+      <DialogSection className={sectionClassName}>
         <div className={styles.messageRow}>
           <div
             className={[
@@ -55,32 +61,25 @@ export const AppConfirmationDialog = (): ReactElement | null => {
           <div className={styles.message}>{message}</div>
         </div>
 
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.cancelButton}
+        <DialogActions direction="row">
+          <Button
+            variant="ghost"
             onClick={() => {
               handleCancel().catch(() => undefined);
             }}
           >
             {cancelLabel}
-          </button>
-          <button
-            type="button"
-            className={[
-              styles.confirmButton,
-              tone === 'danger'
-                ? styles.confirmButtonDanger
-                : styles.confirmButtonDefault,
-            ].join(' ')}
+          </Button>
+          <Button
+            variant={tone === 'danger' ? 'danger' : 'primary'}
             onClick={() => {
               handleConfirm().catch(() => undefined);
             }}
           >
             {confirmLabel}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </DialogActions>
+      </DialogSection>
     </Modal>
   );
 };

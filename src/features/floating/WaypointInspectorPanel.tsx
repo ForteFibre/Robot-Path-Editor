@@ -1,6 +1,9 @@
 import { type CSSProperties, type ReactElement } from 'react';
 import { Library, Link2Off, MapPin, RotateCcw, Trash2 } from 'lucide-react';
 import { NumberInput } from '../../components/common/NumberInput';
+import { Button } from '../../components/common/Button';
+import { FormField } from '../../components/common/FormField';
+import { PanelHeader } from '../../components/common/PanelHeader';
 import type { ResolvedPathModel } from '../../domain/pointResolution';
 import type { WaypointUpdatePatch } from '../../store/types';
 import type { WaypointSelection } from './floatingInspectorModel';
@@ -41,17 +44,13 @@ export const WaypointInspectorPanel = ({
       aria-label="waypoint properties"
       style={style}
     >
-      <div className={styles.header}>
-        <div className={styles.headerIcon}>
-          <MapPin size={18} />
-        </div>
-        <div className={styles.headerInfo}>
-          <h2>Waypoint Inspector</h2>
-          <p>
-            {path.name} / {waypoint.name}
-          </p>
-        </div>
-      </div>
+      <PanelHeader
+        icon={<MapPin size={18} />}
+        title="Waypoint Inspector"
+        subtitle={`${path.name} / ${waypoint.name}`}
+        divider
+        iconTone="neutral"
+      />
 
       <div className={styles.section}>
         {isLibraryPoint ? (
@@ -74,72 +73,82 @@ export const WaypointInspectorPanel = ({
         ) : null}
 
         <div className={styles.grid}>
-          <div className={`${styles.field} ${styles.fieldFullWidth}`}>
-            <span className={styles.fieldLabel}>Name</span>
-            <div className={styles.inputWrapper}>
-              <input
-                type="text"
-                value={waypoint.name}
-                onChange={(event) => {
+          <FormField
+            className={`${styles.field} ${styles.fieldFullWidth}`}
+            variant="floating"
+            label="Name"
+          >
+            <input
+              type="text"
+              value={waypoint.name}
+              onChange={(event) => {
+                updateWaypoint(path.id, waypoint.id, {
+                  name: event.target.value,
+                });
+              }}
+              aria-label="waypoint name"
+              placeholder={waypoint.name}
+            />
+          </FormField>
+
+          <FormField
+            className={styles.field ?? ''}
+            variant="floating"
+            label="X"
+          >
+            <NumberInput
+              value={waypoint.x}
+              disabled={isLibraryPointLocked}
+              onChange={(value) => {
+                if (value !== null) {
+                  updateWaypoint(path.id, waypoint.id, { x: value });
+                }
+              }}
+              aria-label="waypoint x"
+            />
+          </FormField>
+
+          <FormField
+            className={styles.field ?? ''}
+            variant="floating"
+            label="Y"
+          >
+            <NumberInput
+              value={waypoint.y}
+              disabled={isLibraryPointLocked}
+              onChange={(value) => {
+                if (value !== null) {
+                  updateWaypoint(path.id, waypoint.id, { y: value });
+                }
+              }}
+              aria-label="waypoint y"
+            />
+          </FormField>
+
+          <FormField
+            className={styles.field ?? ''}
+            variant="floating"
+            label="Heading"
+          >
+            <NumberInput
+              value={waypoint.pathHeading}
+              onChange={(value) => {
+                if (value !== null) {
                   updateWaypoint(path.id, waypoint.id, {
-                    name: event.target.value,
+                    pathHeading: value,
                   });
-                }}
-                aria-label="waypoint name"
-                placeholder={waypoint.name}
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>X</span>
-            <div className={styles.inputWrapper}>
-              <NumberInput
-                value={waypoint.x}
-                disabled={isLibraryPointLocked}
-                onChange={(value) => {
-                  if (value !== null) {
-                    updateWaypoint(path.id, waypoint.id, { x: value });
-                  }
-                }}
-                aria-label="waypoint x"
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Y</span>
-            <div className={styles.inputWrapper}>
-              <NumberInput
-                value={waypoint.y}
-                disabled={isLibraryPointLocked}
-                onChange={(value) => {
-                  if (value !== null) {
-                    updateWaypoint(path.id, waypoint.id, { y: value });
-                  }
-                }}
-                aria-label="waypoint y"
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <span className={styles.fieldLabel}>Heading</span>
-            <div className={styles.inputWrapper}>
-              <NumberInput
-                value={waypoint.pathHeading}
-                onChange={(value) => {
-                  if (value !== null) {
-                    updateWaypoint(path.id, waypoint.id, {
-                      pathHeading: value,
-                    });
-                  }
-                }}
-                aria-label="waypoint path heading"
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <div className={styles.fieldHeader}>
-              <span className={styles.fieldLabel}>Robot H.</span>
-              {waypoint.point.robotHeading === null ? null : (
+                }
+              }}
+              aria-label="waypoint path heading"
+            />
+          </FormField>
+
+          <FormField
+            className={styles.field ?? ''}
+            variant="floating"
+            label="Robot H."
+            trailing={
+              waypoint.point.robotHeading === null ? null : (
                 <button
                   type="button"
                   className={styles.resetBtn}
@@ -153,58 +162,61 @@ export const WaypointInspectorPanel = ({
                 >
                   <RotateCcw size={12} /> Auto
                 </button>
-              )}
-            </div>
-            <div className={styles.inputWrapper}>
-              <NumberInput
-                value={waypoint.point.robotHeading}
-                placeholder={`Auto (${waypoint.interpolatedRobotHeading.toFixed(1)})`}
-                disabled={isLibraryPointLocked}
-                onChange={(value) => {
-                  updateWaypoint(path.id, waypoint.id, { robotHeading: value });
-                }}
-                aria-label="waypoint robot heading"
-              />
-            </div>
-          </div>
+              )
+            }
+          >
+            <NumberInput
+              value={waypoint.point.robotHeading}
+              placeholder={`Auto (${waypoint.interpolatedRobotHeading.toFixed(1)})`}
+              disabled={isLibraryPointLocked}
+              onChange={(value) => {
+                updateWaypoint(path.id, waypoint.id, { robotHeading: value });
+              }}
+              aria-label="waypoint robot heading"
+            />
+          </FormField>
         </div>
       </div>
 
       <div className={styles.section}>
         {isLibraryPoint ? (
-          <button
-            type="button"
-            className={styles.actionBtn}
+          <Button
+            variant="ghost"
+            size="sm"
+            style={{ width: '100%' }}
             onClick={() => {
               unlinkWaypointPoint(path.id, waypoint.id);
             }}
             aria-label="unlink waypoint from library point"
           >
             <Link2Off size={16} /> Unlink
-          </button>
+          </Button>
         ) : (
-          <button
-            type="button"
-            className={styles.actionBtn}
+          <Button
+            variant="ghost"
+            size="sm"
+            style={{ width: '100%' }}
             onClick={() => {
               addLibraryPointFromSelection();
             }}
             aria-label="save to library"
           >
             <Library size={16} /> Save to Library
-          </button>
+          </Button>
         )}
 
-        <button
-          type="button"
-          className={`${styles.actionBtn} ${styles.danger}`}
+        <Button
+          variant="ghost"
+          size="sm"
+          danger
+          style={{ width: '100%' }}
           onClick={() => {
             deleteWaypoint(path.id, waypoint.id);
           }}
           aria-label="delete waypoint"
         >
           <Trash2 size={16} /> Delete Waypoint
-        </button>
+        </Button>
       </div>
     </div>
   );

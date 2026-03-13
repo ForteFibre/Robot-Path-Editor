@@ -3,6 +3,7 @@ import { Circle, Group, Line, Rect } from 'react-konva';
 import { worldToCanvasPoint } from '../../../domain/geometry';
 import type { RobotMotionSettings } from '../../../domain/models';
 import type { TimedPathPose } from '../../../domain/pathTiming';
+import { canvasTheme } from '../canvasTheme';
 
 type CanvasRobotProps = {
   pose: TimedPathPose;
@@ -50,7 +51,7 @@ export const CanvasRobot = ({
         height={bodyWidth}
         rx={cornerRadius}
         ry={cornerRadius}
-        fill="rgba(255, 255, 255, 0.82)"
+        fill={canvasTheme.robot.bodyFill}
         stroke={color}
         strokeWidth={strokeWidth}
       />

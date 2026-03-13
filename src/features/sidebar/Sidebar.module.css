@@ -1,24 +1,3 @@
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 100%;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-  padding: 1rem 0.85rem;
-  border-right: 1px solid var(--panel-border);
-  background: var(--bg);
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-height: 0;
-  min-width: 0;
-}
-
 .pathsSection {
   flex: 0 1 auto;
 }
@@ -28,62 +7,18 @@
   min-height: 0;
 }
 
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.25rem;
-  gap: 0.75rem;
-}
-
-.section h2 {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #64748b;
-}
-
-/* Sidebar List & Items */
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.pathsList {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  min-width: 0;
-}
-
-.pathsList {
   max-height: min(18rem, 35vh);
   overflow: auto;
   padding-right: 0.15rem;
 }
 
-.item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  background: var(--panel);
-  border: 1px solid transparent;
-  border-radius: 0.75rem;
-  padding: 0.4rem 0.5rem;
-  transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-}
-
-.item:hover {
-  border-color: var(--panel-border);
-  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05);
-}
-
-.item.isActive {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1);
+/* Sidebar cards use more rounded corners than the SidePanel default */
+.pathCard {
+  border-radius: var(--radius-xl);
 }
 
 .itemActivation {
@@ -96,6 +31,19 @@
   transition: transform 0.1s;
 }
 
+.itemActivation:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.itemActivationIconActive {
+  color: var(--accent);
+}
+
+.itemActivationIconInactive {
+  color: var(--slate-300);
+}
+
 .itemActivation:hover {
   transform: scale(1.1);
 }
@@ -105,14 +53,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   min-width: 0;
 }
 
 .itemMain {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
 }
@@ -121,34 +69,42 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-}
-
-.item:hover .itemActions {
-  opacity: 1;
 }
 
 .actionBtn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--muted);
   padding: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.3rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
+.actionBtn:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
 .actionBtn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--slate-200);
+  color: var(--text);
 }
 
 .actionBtn:disabled {
-  opacity: 0.3;
+  opacity: var(--opacity-muted);
   cursor: not-allowed;
+}
+
+.actionBtnDanger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.hiddenPathIcon {
+  color: var(--slate-400);
 }
 
 /* Custom Color Picker */
@@ -170,8 +126,13 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 0 1px #cbd5e1;
+  border: 2px solid var(--border-inverse-soft);
+  box-shadow: 0 0 0 1px var(--slate-300);
+}
+
+.colorPickerWrapper:focus-within .colorSwatch {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
 }
 
 /* Seamless Input */
@@ -192,12 +153,13 @@
 }
 
 .inputSeamless:hover {
-  background: rgba(15, 23, 42, 0.03);
+  background: var(--surface-hover-bg);
 }
 
-.inputSeamless:focus {
-  outline: none;
-  background: #fff;
-  border-color: #93c5fd !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+.inputSeamless:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 1px;
+  background: var(--panel);
+  border-color: var(--blue-300) !important;
+  box-shadow: var(--focus-ring-soft);
 }

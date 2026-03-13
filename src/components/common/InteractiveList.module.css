@@ -1,0 +1,50 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item {
+  min-width: 0;
+  position: relative;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--slate-400);
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.hoverActions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: opacity 0.15s ease;
+}
+
+.hiddenUntilHover {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dimUntilHover {
+  opacity: var(--opacity-disabled);
+}
+
+.item:hover .hiddenUntilHover,
+.item:focus-within .hiddenUntilHover,
+.item:hover .dimUntilHover,
+.item:focus-within .dimUntilHover {
+  opacity: 1;
+  pointer-events: auto;
+}

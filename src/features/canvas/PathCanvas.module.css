@@ -9,7 +9,7 @@
   height: 100%;
   width: 100%;
   position: relative;
-  background-color: #fafafa;
+  background-color: var(--slate-50);
 }
 
 .editingMode {
@@ -41,7 +41,7 @@
   padding: 0.75rem 1rem;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.85);
-  color: #f8fafc;
+  color: var(--slate-50);
   font-size: 0.82rem;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
   pointer-events: none;

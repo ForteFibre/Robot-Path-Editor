@@ -1,0 +1,115 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stack {
+  gap: 0.35rem;
+}
+
+.floating {
+  gap: 0.35rem;
+}
+
+.compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.floating .label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compact .label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  width: 2.5rem;
+  flex-shrink: 0;
+}
+
+.trailing {
+  margin-left: auto;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.stack .control > * {
+  width: 100%;
+}
+
+.stack .control > input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--text);
+  background-color: var(--panel);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.stack .control > input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.floating .control {
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 0.25rem 0.5rem;
+  transition: all 0.2s;
+}
+
+.floating .control:focus-within {
+  border-color: var(--blue-300);
+  box-shadow: var(--focus-ring);
+  background: var(--panel);
+}
+
+.floating .control > input {
+  width: 100%;
+  border: none !important;
+  background: transparent !important;
+  padding: 0.2rem 0 !important;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  outline: none;
+}
+
+.floating .control > input:disabled {
+  color: var(--slate-400);
+  cursor: not-allowed;
+}
+
+.compact .control {
+  flex: 1;
+}

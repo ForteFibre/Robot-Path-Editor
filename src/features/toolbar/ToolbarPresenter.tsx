@@ -46,7 +46,7 @@ export const ToolbarPresenter = ({
     >
       <div className={styles.leftSection} aria-label="branding and menus">
         <div className={styles.logo}>
-          <Waypoints size={20} color="#3b82f6" />
+          <Waypoints size={20} className={styles.logoIcon} />
           <h1>Robot Path Editor</h1>
         </div>
 

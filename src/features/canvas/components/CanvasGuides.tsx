@@ -2,6 +2,7 @@ import { worldToCanvasPoint, type SnapGuide } from '../../../domain/geometry';
 import { type ReactElement } from 'react';
 import { Circle, Line, Text } from 'react-konva';
 import { WORLD_GUIDE_EXTENT } from '../../../domain/metricScale';
+import { canvasTheme } from '../canvasTheme';
 
 type CanvasGuidesProps = {
   snapGuide: SnapGuide;
@@ -29,7 +30,7 @@ export const CanvasGuides = ({
             WORLD_GUIDE_EXTENT,
             -snapGuide.x,
           ]}
-          stroke="#14b8a6"
+          stroke={canvasTheme.guides.lineStroke}
           strokeWidth={2 / k}
           dash={[8 / k, 4 / k]}
           listening={false}
@@ -44,7 +45,7 @@ export const CanvasGuides = ({
             -snapGuide.y,
             WORLD_GUIDE_EXTENT,
           ]}
-          stroke="#14b8a6"
+          stroke={canvasTheme.guides.lineStroke}
           strokeWidth={2 / k}
           dash={[8 / k, 4 / k]}
           listening={false}
@@ -61,7 +62,7 @@ export const CanvasGuides = ({
             snapGuideLineEnd.x,
             snapGuideLineEnd.y,
           ]}
-          stroke="#14b8a6"
+          stroke={canvasTheme.guides.lineStroke}
           strokeWidth={2 / k}
           dash={[8 / k, 4 / k]}
           listening={false}
@@ -73,7 +74,7 @@ export const CanvasGuides = ({
           x={snapGuidePoint.x}
           y={snapGuidePoint.y}
           radius={5 / k}
-          fill="#14b8a6"
+          fill={canvasTheme.guides.pointFill}
           listening={false}
         />
       )}
@@ -82,7 +83,7 @@ export const CanvasGuides = ({
         <Text
           x={snapGuidePoint.x + 10 / k}
           y={snapGuidePoint.y - 10 / k}
-          fill="#0f766e"
+          fill={canvasTheme.guides.labelFill}
           fontSize={12 / k}
           fontStyle="bold"
           text={snapGuide.label}

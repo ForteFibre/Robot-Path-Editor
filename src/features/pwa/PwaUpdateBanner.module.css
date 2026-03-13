@@ -1,10 +1,14 @@
 .banner {
   margin: 0.5rem 1rem 0;
   padding: 0.75rem 0.9rem;
-  border-radius: 0.75rem;
-  border: 1px solid #bfdbfe;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  color: #1e3a8a;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--accent-border);
+  background: linear-gradient(
+    135deg,
+    var(--accent-bg) 0%,
+    var(--blue-100) 100%
+  );
+  color: var(--blue-900);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,7 +28,7 @@
 
 .description {
   font-size: 0.8rem;
-  color: #1d4ed8;
+  color: var(--accent-strong);
 }
 
 .actions {
@@ -34,25 +38,25 @@
 }
 
 .primaryAction {
-  border-color: #60a5fa;
-  background: #2563eb;
-  color: #eff6ff;
+  border-color: var(--blue-300);
+  background: var(--blue-600);
+  color: var(--accent-bg);
 }
 
 .primaryAction:hover {
-  border-color: #3b82f6;
-  background: #1d4ed8;
+  border-color: var(--accent);
+  background: var(--accent-strong);
 }
 
 .secondaryAction {
-  border-color: #93c5fd;
-  background: #dbeafe;
-  color: #1d4ed8;
+  border-color: var(--blue-300);
+  background: var(--blue-100);
+  color: var(--accent-strong);
 }
 
 .secondaryAction:hover {
-  border-color: #60a5fa;
-  background: #bfdbfe;
+  border-color: var(--blue-400);
+  background: var(--accent-border);
 }
 
 @media (max-width: 960px) {
