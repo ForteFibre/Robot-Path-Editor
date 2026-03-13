@@ -1,0 +1,28 @@
+/* Shared interactive state styles */
+
+[data-ui-focus='primary']:focus-visible {
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
+}
+
+[data-ui-focus='toolbar']:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+[data-ui-focus='toolbar-layer']:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+  position: relative;
+  z-index: 1;
+}
+
+[data-ui-focus='input-accent']:focus-visible {
+  outline: 2px solid var(--color-border-input-focus);
+  outline-offset: 2px;
+}
+
+[data-ui-hover='drag-handle']:hover {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-surface-active);
+}

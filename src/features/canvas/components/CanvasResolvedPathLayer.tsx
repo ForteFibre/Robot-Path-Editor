@@ -28,6 +28,7 @@ type CanvasResolvedPathLayerProps = {
   mode: EditorMode;
   k: number;
   rMinDragTargets: RMinDragTarget[];
+  isVelocityOverlayVisible: boolean;
 };
 
 export const CanvasResolvedPathLayer = ({
@@ -35,6 +36,7 @@ export const CanvasResolvedPathLayer = ({
   mode,
   k,
   rMinDragTargets,
+  isVelocityOverlayVisible,
 }: CanvasResolvedPathLayerProps): ReactElement => {
   const {
     path,
@@ -58,6 +60,7 @@ export const CanvasResolvedPathLayer = ({
         discretizedSamples={detail?.samples ?? []}
         k={k}
         isActive={isActive}
+        suppressActiveStroke={isActive && isVelocityOverlayVisible}
         mode={mode}
       />
 

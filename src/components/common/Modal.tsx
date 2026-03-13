@@ -66,6 +66,7 @@ export const Modal = ({
             <button
               type="button"
               className={styles.closeButton}
+              data-ui-focus="primary"
               onClick={onClose}
               aria-label="close"
             >

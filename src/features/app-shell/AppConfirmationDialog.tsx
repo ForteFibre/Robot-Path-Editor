@@ -71,7 +71,7 @@ export const AppConfirmationDialog = (): ReactElement | null => {
             {cancelLabel}
           </Button>
           <Button
-            variant={tone === 'danger' ? 'danger' : 'primary'}
+            variant={tone === 'danger' ? 'destructive' : 'primary'}
             onClick={() => {
               handleConfirm().catch(() => undefined);
             }}

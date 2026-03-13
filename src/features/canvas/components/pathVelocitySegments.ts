@@ -4,6 +4,7 @@ import {
   getSegmentVelocityAtTime,
 } from '../../../domain/pathTimingMotion';
 import type { TimedPathSegment } from '../../../domain/pathTiming';
+import { canvasTheme } from '../canvasTheme';
 
 const EPSILON = 1e-9;
 const DEFAULT_MAX_WORLD_STEP_LENGTH = 0.1;
@@ -26,6 +27,12 @@ export type VelocityRenderSegment =
 
 const DEFAULT_VELOCITY_COLOR_BIN_COUNT = 24;
 
+type RgbColor = {
+  r: number;
+  g: number;
+  b: number;
+};
+
 const lerp = (start: number, end: number, ratio: number): number => {
   return start + (end - start) * ratio;
 };
@@ -38,10 +45,163 @@ const clampRatio = (ratio: number): number => {
   return Math.min(Math.max(ratio, 0), 1);
 };
 
+const clampChannel = (value: number): number => {
+  return Math.min(255, Math.max(0, Math.round(value)));
+};
+
+const formatHexColor = ({ r, g, b }: RgbColor): string => {
+  return `#${[r, g, b]
+    .map((channel) => channel.toString(16).padStart(2, '0'))
+    .join('')}`;
+};
+
+const parseHexColor = (color: string): RgbColor | null => {
+  const normalizedColor = color.trim();
+
+  if (!normalizedColor.startsWith('#')) {
+    return null;
+  }
+
+  const hexBody = normalizedColor.slice(1);
+  const expandedHex =
+    hexBody.length === 3
+      ? hexBody
+          .split('')
+          .map((digit) => `${digit}${digit}`)
+          .join('')
+      : hexBody;
+
+  if (!/^[0-9a-f]{6}$/iu.test(expandedHex)) {
+    return null;
+  }
+
+  return {
+    r: Number.parseInt(expandedHex.slice(0, 2), 16),
+    g: Number.parseInt(expandedHex.slice(2, 4), 16),
+    b: Number.parseInt(expandedHex.slice(4, 6), 16),
+  };
+};
+
+const parseRgbChannel = (channel: string): number | null => {
+  const trimmedChannel = channel.trim();
+
+  if (trimmedChannel.length === 0) {
+    return null;
+  }
+
+  if (trimmedChannel.endsWith('%')) {
+    const percentage = Number.parseFloat(trimmedChannel.slice(0, -1));
+    if (!Number.isFinite(percentage)) {
+      return null;
+    }
+
+    return clampChannel((percentage / 100) * 255);
+  }
+
+  const numeric = Number.parseFloat(trimmedChannel);
+  if (!Number.isFinite(numeric)) {
+    return null;
+  }
+
+  return clampChannel(numeric);
+};
+
+const parseRgbColor = (color: string): RgbColor | null => {
+  const rgbColorPattern = /^rgba?\((.+)\)$/iu;
+  const match = rgbColorPattern.exec(color.trim());
+  if (match === null) {
+    return null;
+  }
+
+  const rawChannelSource = match[1];
+  if (rawChannelSource === undefined) {
+    return null;
+  }
+
+  const rawChannels = rawChannelSource.replace(/\s*\/\s*[^\s,)]+/u, '').trim();
+  const channels = rawChannels.includes(',')
+    ? rawChannels.split(',')
+    : rawChannels.split(/\s+/u);
+
+  if (channels.length < 3) {
+    return null;
+  }
+
+  const parsedChannels = channels
+    .slice(0, 3)
+    .map((channel) => parseRgbChannel(channel));
+
+  if (parsedChannels.includes(null)) {
+    return null;
+  }
+
+  return {
+    r: parsedChannels[0] ?? 0,
+    g: parsedChannels[1] ?? 0,
+    b: parsedChannels[2] ?? 0,
+  };
+};
+
+const parseThemeColorToRgb = (color: string): RgbColor => {
+  const parsedColor = parseHexColor(color) ?? parseRgbColor(color);
+  if (parsedColor !== null) {
+    return parsedColor;
+  }
+
+  throw new TypeError(
+    `Canvas velocity theme color must be hex/rgb format, received: ${color}`,
+  );
+};
+
+type VelocityColorScale = {
+  low: RgbColor;
+  high: RgbColor;
+};
+
+let cachedVelocityColorScale: VelocityColorScale | null = null;
+
+const getVelocityColorScale = (): VelocityColorScale => {
+  if (cachedVelocityColorScale !== null) {
+    return cachedVelocityColorScale;
+  }
+
+  cachedVelocityColorScale = {
+    low: parseThemeColorToRgb(canvasTheme.velocity.low),
+    high: parseThemeColorToRgb(canvasTheme.velocity.high),
+  };
+
+  return cachedVelocityColorScale;
+};
+
+const interpolateChannel = (
+  start: number,
+  end: number,
+  ratio: number,
+): number => {
+  return clampChannel(start + (end - start) * ratio);
+};
+
 export function getVelocityColor(ratio: number): string {
   const normalizedRatio = clampRatio(ratio);
-  const hue = Math.round(normalizedRatio * 120);
-  return `hsl(${hue}, 85%, 50%)`;
+  const velocityColorScale = getVelocityColorScale();
+
+  return formatHexColor({
+    r: interpolateChannel(
+      velocityColorScale.low.r,
+      velocityColorScale.high.r,
+      normalizedRatio,
+    ),
+    g: interpolateChannel(
+      velocityColorScale.low.g,
+      velocityColorScale.high.g,
+      normalizedRatio,
+    ),
+    b: interpolateChannel(
+      velocityColorScale.low.b,
+      velocityColorScale.high.b,
+      normalizedRatio,
+    ),
+  });
 }
 
 const quantizeVelocityRatio = (ratio: number, numBins: number): number => {

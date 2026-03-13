@@ -1,12 +1,5 @@
 import type { HeadingKeyframe, PathModel, Point, Waypoint } from './models';
-
-const DEFAULT_PATH_COLORS = [
-  '#1f77b4',
-  '#ff7f0e',
-  '#2ca02c',
-  '#9467bd',
-  '#d62728',
-];
+import { getDefaultPathColor } from '../styles/pathColorPalette';
 
 export const makeId = (): string => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -30,7 +23,7 @@ export const createPath = (index: number): PathModel => {
   return {
     id: makeId(),
     name: `Path ${index + 1}`,
-    color: DEFAULT_PATH_COLORS[index % DEFAULT_PATH_COLORS.length] ?? '#1f77b4',
+    color: getDefaultPathColor(index),
     visible: true,
     waypoints: [],
     headingKeyframes: [],

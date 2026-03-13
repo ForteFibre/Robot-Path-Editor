@@ -1,6 +1,13 @@
 import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import styles from './InteractiveList.module.css';
 
+export const interactiveListClasses = {
+  item: styles.item,
+  hoverActions: styles.hoverActions,
+  hiddenUntilHover: styles.hiddenUntilHover,
+  dimUntilHover: styles.dimUntilHover,
+} as const;
+
 export type InteractiveListProps<T> = Omit<
   HTMLAttributes<HTMLElement>,
   'children'

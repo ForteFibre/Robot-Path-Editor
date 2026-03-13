@@ -31,17 +31,12 @@
   transition: transform 0.1s;
 }
 
-.itemActivation:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .itemActivationIconActive {
-  color: var(--accent);
+  color: var(--color-accent-fg);
 }
 
 .itemActivationIconInactive {
-  color: var(--slate-300);
+  color: var(--color-text-tertiary);
 }
 
 .itemActivation:hover {
@@ -74,7 +69,7 @@
 .actionBtn {
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: var(--color-text-muted);
   padding: 0.35rem;
   display: flex;
   align-items: center;
@@ -83,14 +78,9 @@
   cursor: pointer;
 }
 
-.actionBtn:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .actionBtn:hover {
-  background: var(--slate-200);
-  color: var(--text);
+  background: var(--color-bg-surface-active);
+  color: var(--color-text-primary);
 }
 
 .actionBtn:disabled {
@@ -99,12 +89,12 @@
 }
 
 .actionBtnDanger:hover {
-  background: var(--danger-bg);
-  color: var(--danger);
+  background: var(--color-status-error-bg);
+  color: var(--color-status-error-accent);
 }
 
 .hiddenPathIcon {
-  color: var(--slate-400);
+  color: var(--color-text-tertiary);
 }
 
 /* Custom Color Picker */
@@ -126,13 +116,13 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid var(--border-inverse-soft);
-  box-shadow: 0 0 0 1px var(--slate-300);
+  border: 2px solid var(--color-border-inverse-soft);
+  box-shadow: 0 0 0 1px var(--color-border-input);
 }
 
 .colorPickerWrapper:focus-within .colorSwatch {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
 }
 
 /* Seamless Input */
@@ -141,7 +131,7 @@
   min-width: 0;
   background: transparent;
   border: 1px solid transparent !important;
-  color: var(--text);
+  color: var(--color-text-primary);
   font-weight: 500;
   font-size: 0.9rem;
   padding: 0.2rem 0.4rem !important;
@@ -153,13 +143,11 @@
 }
 
 .inputSeamless:hover {
-  background: var(--surface-hover-bg);
+  background: var(--color-bg-surface-hover);
 }
 
 .inputSeamless:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: 1px;
-  background: var(--panel);
-  border-color: var(--blue-300) !important;
-  box-shadow: var(--focus-ring-soft);
+  background: var(--color-bg-surface);
+  border-color: var(--color-border-input-focus) !important;
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
 }

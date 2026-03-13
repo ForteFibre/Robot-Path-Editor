@@ -64,6 +64,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={`${styles.modeSegmentButton} ${mode === 'path' ? styles.isActive : ''}`}
+            data-ui-focus="toolbar"
             onClick={onSelectPathMode}
             aria-pressed={mode === 'path'}
           >
@@ -73,6 +74,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={`${styles.modeSegmentButton} ${mode === 'heading' ? styles.isActive : ''}`}
+            data-ui-focus="toolbar"
             onClick={onSelectHeadingMode}
             aria-pressed={mode === 'heading'}
           >
@@ -85,6 +87,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={`${styles.toolButton} ${tool === 'select' ? styles.toolActive : ''}`}
+            data-ui-focus="toolbar-layer"
             onClick={() => {
               onSelectTool('select');
             }}
@@ -97,6 +100,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={`${styles.toolButton} ${tool === 'add-point' ? styles.toolActive : ''}`}
+            data-ui-focus="toolbar-layer"
             onClick={() => {
               onSelectTool('add-point');
             }}
@@ -114,6 +118,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={styles.historyButton}
+            data-ui-focus="toolbar-layer"
             onClick={() => {
               onUndo();
             }}
@@ -126,6 +131,7 @@ export const ToolbarPresenter = ({
           <button
             type="button"
             className={styles.historyButton}
+            data-ui-focus="toolbar-layer"
             onClick={() => {
               onRedo();
             }}

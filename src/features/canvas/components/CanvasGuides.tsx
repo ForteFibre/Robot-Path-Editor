@@ -1,8 +1,9 @@
 import { worldToCanvasPoint, type SnapGuide } from '../../../domain/geometry';
 import { type ReactElement } from 'react';
-import { Circle, Line, Text } from 'react-konva';
+import { Circle, Line } from 'react-konva';
 import { WORLD_GUIDE_EXTENT } from '../../../domain/metricScale';
 import { canvasTheme } from '../canvasTheme';
+import { CanvasZoomInvariantText } from './CanvasZoomInvariantText';
 
 type CanvasGuidesProps = {
   snapGuide: SnapGuide;
@@ -80,11 +81,12 @@ export const CanvasGuides = ({
       )}
 
       {snapGuide.label === null || snapGuidePoint === null ? null : (
-        <Text
+        <CanvasZoomInvariantText
+          k={k}
           x={snapGuidePoint.x + 10 / k}
           y={snapGuidePoint.y - 10 / k}
           fill={canvasTheme.guides.labelFill}
-          fontSize={12 / k}
+          fontSize={12}
           fontStyle="bold"
           text={snapGuide.label}
           listening={false}

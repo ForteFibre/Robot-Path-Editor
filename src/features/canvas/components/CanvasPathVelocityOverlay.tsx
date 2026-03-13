@@ -9,6 +9,8 @@ type CanvasPathVelocityOverlayProps = {
   k: number;
 };
 
+const VELOCITY_OVERLAY_STROKE_WIDTH = 3.6;
+
 export const CanvasPathVelocityOverlay = ({
   timing,
   k,
@@ -51,7 +53,8 @@ export const CanvasPathVelocityOverlay = ({
               key={key}
               points={[start.x, start.y, end.x, end.y]}
               stroke={segment.color}
-              strokeWidth={2 / k}
+              strokeWidth={VELOCITY_OVERLAY_STROKE_WIDTH}
+              strokeScaleEnabled={false}
               lineCap="round"
               lineJoin="round"
               opacity={0.55}
@@ -89,7 +92,8 @@ export const CanvasPathVelocityOverlay = ({
               context.strokeShape(shape);
             }}
             stroke={segment.color}
-            strokeWidth={2 / k}
+            strokeWidth={VELOCITY_OVERLAY_STROKE_WIDTH}
+            strokeScaleEnabled={false}
             lineCap="round"
             lineJoin="round"
             opacity={0.55}

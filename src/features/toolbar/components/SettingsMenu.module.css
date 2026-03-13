@@ -6,20 +6,20 @@
   border: 1px solid transparent;
   border-radius: 0.375rem;
   background: transparent;
-  color: var(--slate-600);
+  color: var(--color-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   height: var(--toolbar-item-h);
 }
 
 .trigger:hover {
-  background: var(--slate-100);
-  color: var(--text);
+  background: var(--color-bg-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .trigger.isOpen {
-  background: var(--accent-bg);
-  color: var(--accent-strong);
+  background: var(--color-accent-bg);
+  color: var(--color-accent-fg-strong);
 }
 
 /* Modal Content Styles */
@@ -33,10 +33,10 @@
 .settingsSection {
   display: flex;
   flex-direction: column;
-  background: var(--slate-50);
+  background: var(--color-bg-surface-subtle);
   padding: 1.25rem;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--slate-200);
+  border: 1px solid var(--color-bg-surface-active);
 }
 
 .sectionTitle {
@@ -45,21 +45,21 @@
   gap: 0.5rem;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--slate-800);
+  color: var(--color-text-primary);
   margin: 0 0 1rem 0;
 }
 
 .sectionTitle svg {
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .activeBadge {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-accent-fg);
   margin-left: auto;
-  box-shadow: 0 0 0 2px var(--accent-bg);
+  box-shadow: 0 0 0 2px var(--color-accent-bg);
 }
 
 .fieldGroup {
@@ -75,12 +75,12 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--slate-700);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .checkboxLabel input[type='checkbox'] {
-  accent-color: var(--accent);
+  accent-color: var(--color-accent-fg);
   width: 1rem;
   height: 1rem;
   margin: 0;
@@ -96,9 +96,9 @@
   padding: 0.6rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--slate-700);
-  border: 1px dashed var(--slate-300);
-  background: var(--panel);
+  color: var(--color-text-primary);
+  border: 1px dashed var(--color-border-input);
+  background: var(--color-bg-surface);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
@@ -106,9 +106,9 @@
 }
 
 .loadButton:hover {
-  background: var(--slate-100);
-  border-color: var(--slate-400);
-  color: var(--text);
+  background: var(--color-bg-surface-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
 }
 
 .bgActions {
@@ -117,5 +117,5 @@
   align-items: center;
   margin-top: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px dashed var(--slate-200);
+  border-top: 1px dashed var(--color-bg-surface-active);
 }

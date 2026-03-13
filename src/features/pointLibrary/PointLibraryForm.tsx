@@ -44,6 +44,7 @@ export const PointLibraryForm = ({
           id={nameInputId}
           ref={nameInputRef}
           type="text"
+          data-ui-focus="input-accent"
           value={draft.name}
           onChange={(event) => {
             onChange({ name: event.target.value });
@@ -60,6 +61,7 @@ export const PointLibraryForm = ({
             value={draft.x}
             step={DEFAULT_COORDINATE_INPUT_STEP}
             disabled={disabledCoordinates}
+            data-ui-focus="input-accent"
             onChange={(value) => {
               onChange({ x: value });
             }}
@@ -74,6 +76,7 @@ export const PointLibraryForm = ({
             value={draft.y}
             step={DEFAULT_COORDINATE_INPUT_STEP}
             disabled={disabledCoordinates}
+            data-ui-focus="input-accent"
             onChange={(value) => {
               onChange({ y: value });
             }}
@@ -87,6 +90,7 @@ export const PointLibraryForm = ({
           <NumberInput
             value={draft.robotHeading}
             disabled={disabledRobotHeading}
+            data-ui-focus="input-accent"
             onChange={(value) => {
               onChange({ robotHeading: value });
             }}

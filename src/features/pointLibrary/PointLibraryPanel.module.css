@@ -5,7 +5,7 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--color-bg-canvas);
 }
 
 .list {
@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--slate-400);
+  color: var(--color-text-muted);
   padding: 2rem;
   text-align: center;
   font-size: 0.85rem;
@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border-bottom: 1px solid var(--slate-100);
+  border-bottom: 1px solid var(--color-border-subtle);
   background: transparent;
   transition: background 0.15s ease;
   position: relative;
@@ -42,19 +42,19 @@
 
 .item:hover,
 .item:focus-within {
-  background: var(--slate-50);
+  background: var(--color-bg-surface-subtle);
 }
 
 .itemHighlighted {
-  background: var(--violet-50);
+  background: var(--color-bg-surface-selected);
 }
 
 .itemEditing {
-  background: var(--panel);
-  border: 1px solid var(--accent);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-accent-fg);
   border-radius: var(--radius-md);
   margin: 4px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  box-shadow: 0 4px 6px -1px var(--color-shadow-surface-hover);
   overflow: hidden;
 }
 
@@ -65,35 +65,6 @@
   padding: 0.6rem 0.75rem;
   gap: 0.5rem;
   min-height: 2.5rem;
-}
-
-.dragHandle {
-  color: var(--slate-400);
-  cursor: grab;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  transition:
-    color 0.15s,
-    background 0.15s;
-  background: transparent;
-  border: none;
-}
-
-.dragHandle:hover {
-  color: var(--slate-600);
-  background: var(--slate-200);
-}
-
-.dragHandle:active {
-  cursor: grabbing;
-}
-
-.dragHandle:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
 }
 
 .titleButton {
@@ -114,11 +85,6 @@
   outline: none;
 }
 
-.titleButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .itemHeader {
   display: flex;
   align-items: center;
@@ -135,7 +101,7 @@
   white-space: nowrap;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .statusGroup {
@@ -146,15 +112,15 @@
 }
 
 .lockBadge {
-  color: var(--slate-400);
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
 }
 
 .usageCount {
   font-size: 0.7rem;
-  color: var(--muted);
-  background: var(--slate-100);
+  color: var(--color-text-muted);
+  background: var(--color-bg-surface-hover);
   padding: 0.1rem 0.35rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -184,11 +150,6 @@
   font-size: 0.75rem;
 }
 
-.coordButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .coord {
   display: flex;
   align-items: center;
@@ -196,7 +157,7 @@
 }
 
 .coordLabel {
-  color: var(--slate-400);
+  color: var(--color-text-muted);
   font-size: 0.65rem;
   font-weight: 700;
 }
@@ -218,9 +179,9 @@
   justify-content: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background: var(--accent-bg);
-  color: var(--accent);
-  border: 1px solid transparent;
+  background: var(--color-accent-bg);
+  color: var(--color-accent-fg);
+  border: 1px solid var(--color-accent-border);
   border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-weight: 600;
@@ -230,13 +191,8 @@
 }
 
 .addButton:hover {
-  background: var(--accent);
-  color: var(--panel);
-}
-
-.addButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  background: var(--color-accent-fg);
+  color: var(--color-text-inverse);
 }
 
 .iconActionButton {
@@ -247,7 +203,7 @@
   height: 2rem;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--slate-300); /* Low contrast initially */
+  color: var(--color-text-tertiary);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -256,28 +212,23 @@
 
 .item:hover .iconActionButton,
 .item:focus-within .iconActionButton {
-  color: var(--slate-500); /* Higher contrast on hover inside item */
+  color: var(--color-text-muted);
 }
 
 .iconActionButton:hover {
-  background: var(--slate-200);
-  color: var(--text) !important;
-}
-
-.iconActionButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  background: var(--color-bg-surface-active);
+  color: var(--color-text-primary) !important;
 }
 
 .dangerActionButton:hover {
-  background: var(--danger-bg);
-  color: var(--danger) !important;
+  background: var(--color-status-error-bg);
+  color: var(--color-status-error-accent) !important;
 }
 
 .editor {
   padding: 0.75rem;
-  background: var(--slate-50);
-  border-bottom: 1px solid var(--slate-200);
+  background: var(--color-bg-surface-subtle);
+  border-bottom: 1px solid var(--color-border-input-subtle);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -285,9 +236,9 @@
 
 .itemEditing .editor {
   border-bottom: none;
-  background: var(--panel);
+  background: var(--color-bg-surface);
   padding: 0.5rem 0.75rem 0.75rem;
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .formStack {
@@ -300,10 +251,10 @@
 .numberInput {
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--slate-300);
+  border: 1px solid var(--color-border-input);
   border-radius: var(--radius-sm);
-  background: var(--panel);
-  color: var(--text);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
   font-size: 0.8rem;
   padding: 0.35rem 0.5rem;
   transition:
@@ -313,10 +264,8 @@
 
 .textInput:focus-visible,
 .numberInput:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: 1px;
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
+  border-color: var(--color-border-input-focus);
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
 }
 
 .numberInput {
@@ -334,8 +283,8 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  background: var(--panel);
-  border: 1px solid var(--slate-200);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-input-subtle);
   border-radius: var(--radius-sm);
   padding: 0.25rem 0.4rem;
   transition:
@@ -344,8 +293,8 @@
 }
 
 .compactField:focus-within {
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
+  border-color: var(--color-border-input-focus);
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
 }
 
 .compactField .numberInput {
@@ -364,13 +313,13 @@
 .compactLabel {
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--slate-400);
+  color: var(--color-text-muted);
   user-select: none;
 }
 
 .headingUnit {
   font-size: 0.75rem;
-  color: var(--slate-400);
+  color: var(--color-text-muted);
 }
 
 .editorActions {

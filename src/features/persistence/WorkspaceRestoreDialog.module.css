@@ -1,7 +1,7 @@
 .lead {
   margin: 0;
   font-size: var(--text-base);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.7;
 }
 
@@ -12,10 +12,10 @@
   flex-direction: column;
   gap: 0.2rem;
   padding: 0.875rem 1rem;
-  border: 1px solid var(--panel-border);
-  border-left: 3px solid var(--slate-400);
+  border: 1px solid var(--color-border-default);
+  border-left: 3px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
-  background: var(--bg);
+  background: var(--color-bg-surface-subtle);
 }
 
 .savedMetaLabel {
@@ -23,18 +23,18 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--slate-400);
+  color: var(--color-text-muted);
 }
 
 .savedMetaValue {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .savedMetaSubtext {
   font-size: 0.78rem;
-  color: var(--slate-400);
+  color: var(--color-text-muted);
 }
 
 .restoreChoiceButton {
@@ -43,25 +43,20 @@
   align-items: flex-start;
   gap: 0.3rem;
   padding: 0.875rem 1rem;
-  border: 1.5px solid var(--panel-border);
+  border: 1.5px solid var(--color-border-default);
   border-radius: var(--radius-xl);
-  background: var(--bg);
-  color: var(--slate-700);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .restoreChoiceButton:hover:not(:disabled) {
-  border-color: var(--blue-300);
-  background: var(--accent-bg);
-  color: var(--accent-strong);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
-}
-
-.restoreChoiceButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  border-color: var(--color-border-input-focus);
+  background: var(--color-accent-bg);
+  color: var(--color-accent-fg-strong);
+  box-shadow: 0 2px 8px var(--color-shadow-accent-soft);
 }
 
 .restoreChoiceButton:disabled {
@@ -78,11 +73,11 @@
 .restoreChoiceValue {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .restoreChoiceSubtext {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
   line-height: 1.4;
 }

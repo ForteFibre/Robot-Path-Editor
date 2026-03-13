@@ -48,6 +48,8 @@ export const CanvasRenderer = ({
   addPointPreview,
 }: CanvasRendererProps): ReactElement => {
   const k = canvasTransform.k;
+  const activePathTiming = scene.activePathTiming;
+  const isVelocityOverlayVisible = activePathTiming !== null;
 
   return (
     <Stage
@@ -104,11 +106,12 @@ export const CanvasRenderer = ({
               mode={mode}
               k={k}
               rMinDragTargets={rMinDragTargets}
+              isVelocityOverlayVisible={isVelocityOverlayVisible}
             />
           ))}
 
-          {scene.activePathTiming === null ? null : (
-            <CanvasPathVelocityOverlay timing={scene.activePathTiming} k={k} />
+          {activePathTiming === null ? null : (
+            <CanvasPathVelocityOverlay timing={activePathTiming} k={k} />
           )}
 
           <CanvasGuides snapGuide={snapGuide} k={k} />

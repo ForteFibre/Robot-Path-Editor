@@ -220,7 +220,7 @@ export const SettingsMenu = (): ReactElement => {
                     </label>
 
                     <Button
-                      variant="danger"
+                      variant="destructive"
                       size="sm"
                       title="Remove Image"
                       onClick={handleRemoveBackgroundImage}

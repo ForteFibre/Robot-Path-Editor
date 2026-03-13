@@ -117,11 +117,11 @@ const createAcceleratingMotionProfile = (
 
 describe('pathVelocitySegments', () => {
   it('maps the minimum velocity ratio to red', () => {
-    expect(getVelocityColor(0)).toBe('hsl(0, 85%, 50%)');
+    expect(getVelocityColor(0)).toBe('#dc2626');
   });
 
   it('maps the maximum velocity ratio to green', () => {
-    expect(getVelocityColor(1)).toBe('hsl(120, 85%, 50%)');
+    expect(getVelocityColor(1)).toBe('#16a34a');
   });
 
   it('returns no segments for empty timed segments', () => {
@@ -210,10 +210,10 @@ describe('pathVelocitySegments', () => {
     ];
 
     expect(buildVelocityPolylines(segments, 5, 24)[0]?.color).toBe(
-      'hsl(60, 85%, 50%)',
+      getVelocityColor(0.5),
     );
     expect(buildVelocityPolylines(segments, 5, 96)[0]?.color).toBe(
-      'hsl(61, 85%, 50%)',
+      getVelocityColor(49 / 96),
     );
   });
 

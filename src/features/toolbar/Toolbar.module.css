@@ -5,8 +5,8 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-2) var(--space-5);
-  border-bottom: 2px solid var(--panel-border);
-  background: var(--bg);
+  border-bottom: 2px solid var(--color-border-default);
+  background: var(--color-bg-canvas);
   position: relative;
   z-index: 100;
   transition:
@@ -15,8 +15,8 @@
 }
 
 .toolbar[data-mode='heading'] {
-  background: var(--orange-50);
-  border-bottom-color: var(--orange-500);
+  background: var(--color-status-warning-bg);
+  border-bottom-color: var(--color-status-warning-icon);
 }
 
 .leftSection {
@@ -55,14 +55,14 @@
 }
 
 .logoIcon {
-  color: var(--accent);
+  color: var(--color-accent-fg);
 }
 
 .logo h1 {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -70,10 +70,10 @@
 .modeSegmentControl {
   display: flex;
   align-items: center;
-  background: var(--slate-100);
+  background: var(--color-bg-surface-hover);
   padding: 0.2rem;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--color-border-default);
   gap: 0.2rem;
   height: var(--toolbar-item-h);
 }
@@ -87,7 +87,7 @@
   height: 100%;
   border: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: var(--radius-md);
@@ -98,33 +98,28 @@
 }
 
 .modeSegmentButton:hover:not(.isActive) {
-  color: var(--text);
+  color: var(--color-text-primary);
   background: var(--surface-hover-strong-bg);
 }
 
 .modeSegmentButton.isActive {
-  background: var(--panel);
-  color: var(--accent-strong);
+  background: var(--color-bg-surface);
+  color: var(--color-accent-fg-strong);
   box-shadow: var(--shadow-sm);
 }
 
-.modeSegmentButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-}
-
 .toolbar[data-mode='heading'] .modeSegmentButton.isActive {
-  color: var(--orange-600);
+  color: var(--color-status-warning-text);
 }
 
 /* Tool Switch */
 .toolSwitch {
   display: flex;
   align-items: center;
-  background: var(--panel);
+  background: var(--color-bg-surface);
   padding: 0;
   border-radius: var(--radius-md);
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--color-border-default);
   gap: 0;
   overflow: hidden;
   height: var(--toolbar-item-h);
@@ -138,7 +133,7 @@
   border: none;
   border-radius: 0;
   background: transparent;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -148,7 +143,7 @@
 
 .toolButton:hover:not(.toolActive) {
   background: var(--surface-hover-bg);
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .toolButton:active:not(.toolActive) {
@@ -156,15 +151,8 @@
 }
 
 .toolButton.toolActive {
-  background: var(--accent-bg);
-  color: var(--accent-strong);
-}
-
-.toolButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-  position: relative;
-  z-index: 1;
+  background: var(--color-accent-bg);
+  color: var(--color-accent-fg-strong);
 }
 
 /* Export Settings Popover */
@@ -179,7 +167,7 @@
   width: var(--panel-width-sm);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--dropdown-shadow);
   padding: var(--space-4);
@@ -205,13 +193,13 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--slate-600);
+  color: var(--color-text-secondary);
 }
 
 .exportPopoverActions {
   display: flex;
   gap: var(--space-2);
-  border-top: 1px solid var(--panel-border);
+  border-top: 1px solid var(--color-border-default);
   padding-top: var(--space-4);
 }
 
@@ -224,7 +212,7 @@
   grid-template-columns: 80px 1fr;
   align-items: center;
   gap: var(--space-2);
-  color: var(--slate-700);
+  color: var(--color-text-primary);
   font-size: 0.85rem;
 }
 
@@ -234,7 +222,7 @@
 }
 
 .exportHint {
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
 }
 
@@ -242,8 +230,8 @@
 .historyGroup {
   display: inline-flex;
   align-items: center;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
   border-radius: 0.375rem;
   overflow: hidden;
   height: var(--toolbar-item-h);
@@ -257,18 +245,18 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--muted);
+  color: var(--color-text-muted);
   transition: all 0.2s;
   height: 100%;
 }
 
 .historyButton:not(:last-child) {
-  border-right: 1px solid var(--panel-border);
+  border-right: 1px solid var(--color-border-default);
 }
 
 .historyButton:hover:not(:disabled) {
   background: var(--surface-hover-bg);
-  color: var(--text);
+  color: var(--color-text-primary);
 }
 
 .historyButton:active:not(:disabled) {
@@ -281,25 +269,18 @@
   background: transparent;
 }
 
-.historyButton:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
-  position: relative;
-  z-index: 1;
-}
-
 /* Main Actions Divider */
 .mainDivider {
   width: 1px;
   height: 24px;
-  background-color: var(--panel-border);
+  background-color: var(--color-border-default);
   margin: 0 var(--space-1);
 }
 
 .hasActiveBg {
-  background: var(--sky-100);
-  color: var(--sky-700);
-  border-color: var(--sky-200);
+  background: var(--color-status-info-bg);
+  color: var(--color-status-info-text);
+  border-color: var(--color-status-info-border);
 }
 
 .backgroundFields {
@@ -307,7 +288,7 @@
   flex-direction: column;
   gap: var(--space-2);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--panel-border);
+  border-top: 1px solid var(--color-border-default);
 }
 
 .backgroundActions {
@@ -330,7 +311,7 @@
 }
 
 .checkboxLabel input[type='checkbox'] {
-  accent-color: var(--accent);
+  accent-color: var(--color-accent-fg);
   width: 1rem;
   height: 1rem;
   margin: 0;

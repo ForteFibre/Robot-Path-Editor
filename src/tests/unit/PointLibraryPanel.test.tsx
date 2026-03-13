@@ -125,6 +125,33 @@ describe('PointLibraryPanel', () => {
     expect(createDraftRow).toHaveClass(requireClassName(panelStyles.item));
   });
 
+  it('delete 操作ボタンに破壊的スタイルクラスを適用する', () => {
+    mockUsePointLibraryPanelController.mockReturnValue(
+      createControllerState({
+        items: [
+          {
+            id: 'point-1',
+            name: 'Alpha',
+            x: 1,
+            y: 2,
+            robotHeading: 90,
+            usageCount: 0,
+            isLocked: false,
+          },
+        ],
+      }),
+    );
+
+    render(<PointLibraryPanel />);
+
+    const deleteButton = screen.getByRole('button', { name: 'delete Alpha' });
+
+    expect(deleteButton).toHaveClass(
+      requireClassName(panelStyles.iconActionButton),
+      requireClassName(panelStyles.dangerActionButton),
+    );
+  });
+
   it('new/create draft action の aria-label とイベントを維持する', () => {
     const controllerState = createControllerState({
       createDraft: {

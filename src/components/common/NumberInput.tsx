@@ -11,6 +11,7 @@ type NumberInputProps = {
   placeholder?: string;
   id?: string;
   'aria-label'?: string;
+  'data-ui-focus'?: string;
 };
 
 export const NumberInput = ({
@@ -24,6 +25,7 @@ export const NumberInput = ({
   placeholder,
   id,
   'aria-label': ariaLabel,
+  'data-ui-focus': dataUiFocus,
 }: NumberInputProps): ReactElement => {
   const [textValue, setTextValue] = useState(
     value === null ? '' : value.toString(),
@@ -99,6 +101,7 @@ export const NumberInput = ({
       placeholder={placeholder}
       id={id}
       aria-label={ariaLabel}
+      data-ui-focus={dataUiFocus}
     />
   );
 };

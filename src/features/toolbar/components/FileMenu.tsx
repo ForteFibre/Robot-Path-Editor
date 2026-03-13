@@ -69,6 +69,7 @@ const renderFileMenuRow = (row: FileMenuRow): ReactNode => {
       key={row.key}
       type="button"
       className={styles.menuItem}
+      data-ui-focus="toolbar"
       onClick={row.onClick}
       aria-label={row.ariaLabel}
     >
@@ -159,6 +160,7 @@ export const FileMenu = ({
       <button
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.isOpen : ''}`}
+        data-ui-focus="toolbar"
         onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label="file menu"
@@ -190,6 +192,7 @@ export const FileMenu = ({
             <select
               id="export-target-modal"
               className={styles.modalSelect}
+              data-ui-focus="input-accent"
               value={workspaceCommands.csvExport.target}
               onChange={(event) => {
                 workspaceCommands.csvExport.setTarget(

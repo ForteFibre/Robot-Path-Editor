@@ -56,6 +56,7 @@ export const WorkspaceRestoreDialog = ({
           <button
             type="button"
             className={styles.restoreChoiceButton}
+            data-ui-focus="primary"
             onClick={onRestoreLastEdit}
             disabled={isBusy}
             aria-label={`IndexedDBの自動保存を復元 (${formatAbsoluteDateTime(
@@ -78,6 +79,7 @@ export const WorkspaceRestoreDialog = ({
           <button
             type="button"
             className={styles.restoreChoiceButton}
+            data-ui-focus="primary"
             onClick={onRestoreLinkedFile}
             disabled={isBusy}
             aria-label={`リンクされたJSONファイルを読み込む (${formatAbsoluteDateTime(

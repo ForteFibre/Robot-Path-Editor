@@ -1,9 +1,10 @@
 import { type ReactElement } from 'react';
-import { Circle, Line, Text } from 'react-konva';
+import { Circle, Line } from 'react-konva';
 import { worldToCanvasPoint } from '../../../domain/geometry';
 import { formatMetricValue } from '../../../domain/metricScale';
 import { canvasTheme } from '../canvasTheme';
 import type { RMinDragTarget } from '../types/rMinDragTarget';
+import { CanvasZoomInvariantText } from './CanvasZoomInvariantText';
 
 type CanvasRMinDragProps = {
   rMinDragTarget: RMinDragTarget;
@@ -42,12 +43,13 @@ export const CanvasRMinDrag = ({
         listening={false}
       />
 
-      <Text
+      <CanvasZoomInvariantText
+        k={k}
         x={(centerCanvasPoint.x + waypointCanvasPoint.x) / 2}
         y={(centerCanvasPoint.y + waypointCanvasPoint.y) / 2}
-        offsetY={6 / k}
+        offsetY={6}
         fill={canvasTheme.rMinDrag.labelFill}
-        fontSize={12 / k}
+        fontSize={12}
         align="center"
         text={`r: ${
           rMinDragTarget.isAuto

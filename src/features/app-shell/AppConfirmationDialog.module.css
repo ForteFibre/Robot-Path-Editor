@@ -19,16 +19,16 @@
 }
 
 .iconBadgeInfo {
-  background: var(--blue-100);
-  color: var(--blue-900);
+  background: var(--color-status-info-dismiss-bg);
+  color: var(--color-status-info-text);
 }
 
 .iconBadgeDanger {
-  background: var(--red-100);
-  color: var(--red-800);
+  background: var(--color-status-error-dismiss-bg);
+  color: var(--color-status-error-text);
 }
 
 .message {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }

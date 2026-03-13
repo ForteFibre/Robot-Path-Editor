@@ -17,8 +17,8 @@
 
 .collapseButton {
   border: 1px solid var(--border-subtle);
-  background: var(--slate-50);
-  color: var(--slate-700);
+  background: var(--color-bg-surface-subtle);
+  color: var(--color-text-primary);
   border-radius: var(--radius-pill);
   padding: 0.35rem 0.75rem;
   font-size: 0.75rem;
@@ -27,7 +27,7 @@
 }
 
 .collapseButton:hover {
-  background: var(--slate-100);
+  background: var(--color-bg-surface-hover);
 }
 
 .sections {
@@ -48,7 +48,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--slate-600);
+  color: var(--color-text-secondary);
 }
 
 .settingList {
@@ -64,7 +64,7 @@
   align-items: center;
   padding: 0.4rem 0.5rem;
   border-radius: var(--radius-lg);
-  background: var(--slate-50);
+  background: var(--color-bg-surface-subtle);
   border: 1px solid transparent;
   cursor: help;
 }
@@ -75,14 +75,14 @@
 
 .checkbox {
   margin: 0;
-  accent-color: var(--teal-700);
+  accent-color: var(--color-accent-fg);
   cursor: pointer;
 }
 
 .settingLabel {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 

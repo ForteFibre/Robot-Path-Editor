@@ -7,10 +7,10 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0 0.8rem;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--color-border-default);
   border-radius: 0.375rem;
-  background: var(--panel);
-  color: var(--slate-700);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -19,19 +19,14 @@
 }
 
 .trigger:hover {
-  background: var(--slate-100);
-  border-color: var(--slate-300);
-}
-
-.trigger:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  background: var(--color-bg-surface-hover);
+  border-color: var(--color-border-input);
 }
 
 .trigger.isOpen {
-  background: var(--accent-bg);
-  border-color: var(--blue-300);
-  color: var(--accent-strong);
+  background: var(--color-accent-bg);
+  border-color: var(--color-border-input-focus);
+  color: var(--color-accent-fg-strong);
 }
 
 .dropdown {
@@ -41,7 +36,7 @@
   min-width: 220px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--color-border-default);
   border-radius: 0.5rem;
   box-shadow: var(--dropdown-shadow);
   padding: var(--space-2);
@@ -61,7 +56,7 @@
   border: none;
   border-radius: 0.35rem;
   background: transparent;
-  color: var(--slate-700);
+  color: var(--color-text-primary);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -70,24 +65,19 @@
 }
 
 .menuItem:hover {
-  background: var(--slate-100);
-  color: var(--text);
-}
-
-.menuItem:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  background: var(--color-bg-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .divider {
   height: 1px;
-  background: var(--slate-200);
+  background: var(--color-border-subtle);
   margin: 0.25rem 0;
 }
 
 .linkedFileName {
   padding: 0.35rem 0.75rem 0.5rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
   font-size: 0.75rem;
   line-height: 1.4;
 }
@@ -101,26 +91,24 @@
 
 .modalSelect {
   padding: 0.5rem;
-  border: 1px solid var(--slate-300);
+  border: 1px solid var(--color-border-input);
   border-radius: var(--radius-md);
   font-size: 0.9rem;
-  color: var(--text);
-  background-color: var(--panel);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface);
   outline: none;
   transition: border-color 0.2s;
 }
 
 .modalSelect:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: 1px;
-  border-color: var(--accent);
+  border-color: var(--color-accent-fg);
   box-shadow: var(--focus-ring);
 }
 
 .modalHint {
   margin: -0.25rem 0 0 0;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .modalActions {
@@ -129,5 +117,5 @@
   justify-content: flex-end;
   margin-top: var(--space-2);
   padding-top: var(--space-4);
-  border-top: 1px solid var(--slate-100);
+  border-top: 1px solid var(--color-bg-surface-hover);
 }

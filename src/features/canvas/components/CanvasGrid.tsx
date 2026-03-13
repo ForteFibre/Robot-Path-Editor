@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react';
-import { Line, Text } from 'react-konva';
+import { Line } from 'react-konva';
 import { getCanvasGridSize, getCanvasGridValues } from '../../../domain/canvas';
 import { canvasToWorldPoint } from '../../../domain/geometry';
 import {
@@ -9,6 +9,7 @@ import {
 } from '../../../domain/metricScale';
 import type { CanvasTransform } from '../../../domain/canvasTransform';
 import { canvasTheme } from '../canvasTheme';
+import { CanvasZoomInvariantText } from './CanvasZoomInvariantText';
 
 const LABEL_SCREEN_PADDING = 12;
 
@@ -91,24 +92,26 @@ export const CanvasGrid = ({
       />
 
       {xValues.map((value) => (
-        <Text
+        <CanvasZoomInvariantText
           key={`grid-x-${value}`}
+          k={k}
           x={labelCanvasX}
           y={-value - 4 / k}
           text={formatMetricValue(value, labelDecimals)}
-          fontSize={12 / k}
+          fontSize={12}
           fill={canvasTheme.grid.label}
           listening={false}
         />
       ))}
 
       {yValues.map((value) => (
-        <Text
+        <CanvasZoomInvariantText
           key={`grid-y-${value}`}
+          k={k}
           x={-value + 4 / k}
           y={labelCanvasY}
           text={formatMetricValue(value, labelDecimals)}
-          fontSize={12 / k}
+          fontSize={12}
           fill={canvasTheme.grid.label}
           listening={false}
         />

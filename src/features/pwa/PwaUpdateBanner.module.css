@@ -2,13 +2,13 @@
   margin: 0.5rem 1rem 0;
   padding: 0.75rem 0.9rem;
   border-radius: var(--radius-xl);
-  border: 1px solid var(--accent-border);
+  border: 1px solid var(--color-accent-border);
   background: linear-gradient(
     135deg,
-    var(--accent-bg) 0%,
-    var(--blue-100) 100%
+    var(--color-accent-bg) 0%,
+    var(--color-action-secondary-bg-hover) 100%
   );
-  color: var(--blue-900);
+  color: var(--color-accent-fg-strong);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -28,7 +28,7 @@
 
 .description {
   font-size: 0.8rem;
-  color: var(--accent-strong);
+  color: var(--color-accent-fg-strong);
 }
 
 .actions {
@@ -38,25 +38,25 @@
 }
 
 .primaryAction {
-  border-color: var(--blue-300);
-  background: var(--blue-600);
-  color: var(--accent-bg);
+  border-color: var(--color-border-input-focus);
+  background: var(--color-accent-fg-strong);
+  color: var(--color-accent-bg);
 }
 
 .primaryAction:hover {
-  border-color: var(--accent);
-  background: var(--accent-strong);
+  border-color: var(--color-accent-fg);
+  background: var(--color-accent-fg-strong);
 }
 
 .secondaryAction {
-  border-color: var(--blue-300);
-  background: var(--blue-100);
-  color: var(--accent-strong);
+  border-color: var(--color-border-input-focus);
+  background: var(--color-action-secondary-bg-hover);
+  color: var(--color-accent-fg-strong);
 }
 
 .secondaryAction:hover {
-  border-color: var(--blue-400);
-  background: var(--accent-border);
+  border-color: var(--color-accent-fg);
+  background: var(--color-accent-border);
 }
 
 @media (max-width: 960px) {

@@ -93,9 +93,8 @@ export const HeadingKeyframeInspectorPanel = ({
 
       <div className={styles.section}>
         <Button
-          variant="ghost"
+          variant="destructive"
           size="sm"
-          danger
           style={{ width: '100%' }}
           onClick={() => {
             deleteHeadingKeyframe(path.id, headingKeyframe.id);

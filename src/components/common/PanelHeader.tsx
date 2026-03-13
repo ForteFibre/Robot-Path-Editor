@@ -28,6 +28,7 @@ export function PanelHeader({
 }: PanelHeaderProps) {
   const rootClassName = [
     styles.root,
+    compact ? styles.rootCompact : '',
     divider ? styles.divider : '',
     className ?? '',
   ]

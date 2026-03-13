@@ -16,8 +16,10 @@ import {
 } from '../../components/common/SidePanel';
 import styles from './Sidebar.module.css';
 import { Button } from '../../components/common/Button';
-import { InteractiveList } from '../../components/common/InteractiveList';
-import interactiveListStyles from '../../components/common/InteractiveList.module.css';
+import {
+  InteractiveList,
+  interactiveListClasses,
+} from '../../components/common/InteractiveList';
 
 export type SidebarPresenterProps = {
   hostRef?: Ref<HTMLElement> | undefined;
@@ -73,13 +75,14 @@ export const SidebarPresenter = ({
             return (
               <SidePanelCard
                 active={isActive}
-                className={[styles.pathCard, interactiveListStyles.item]
+                className={[styles.pathCard, interactiveListClasses.item]
                   .filter(Boolean)
                   .join(' ')}
               >
                 <button
                   type="button"
                   className={styles.itemActivation}
+                  data-ui-focus="primary"
                   onClick={() => {
                     onSetActivePath(path.id);
                   }}
@@ -118,6 +121,7 @@ export const SidebarPresenter = ({
                     <input
                       type="text"
                       className={styles.inputSeamless}
+                      data-ui-focus="input-accent"
                       value={path.name}
                       onChange={(event) => {
                         onRenamePath(path.id, event.target.value);
@@ -129,8 +133,8 @@ export const SidebarPresenter = ({
                   <div
                     className={[
                       styles.itemActions,
-                      interactiveListStyles.hoverActions,
-                      interactiveListStyles.dimUntilHover,
+                      interactiveListClasses.hoverActions,
+                      interactiveListClasses.dimUntilHover,
                     ]
                       .filter(Boolean)
                       .join(' ')}
@@ -138,6 +142,7 @@ export const SidebarPresenter = ({
                     <button
                       type="button"
                       className={styles.actionBtn}
+                      data-ui-focus="primary"
                       onClick={() => {
                         onTogglePathVisible(path.id);
                       }}
@@ -154,6 +159,7 @@ export const SidebarPresenter = ({
                     <button
                       type="button"
                       className={styles.actionBtn}
+                      data-ui-focus="primary"
                       onClick={() => {
                         onDuplicatePath(path.id);
                       }}
@@ -166,6 +172,7 @@ export const SidebarPresenter = ({
                     <button
                       type="button"
                       className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                      data-ui-focus="primary"
                       disabled={paths.length <= 1}
                       onClick={() => {
                         onDeletePath(path.id);

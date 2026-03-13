@@ -74,7 +74,12 @@ export const SidePanelCard = forwardRef<HTMLLIElement, SidePanelCardProps>(
       .filter(Boolean)
       .join(' ');
     return (
-      <li ref={ref} className={cls} {...rest}>
+      <li
+        ref={ref}
+        className={cls}
+        data-selected={active ? 'true' : 'false'}
+        {...rest}
+      >
         {children}
       </li>
     );

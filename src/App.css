@@ -22,24 +22,47 @@ select {
 }
 
 button {
-  border: 1px solid var(--slate-300);
-  background: var(--panel);
-  color: var(--text);
+  border: 1px solid var(--color-action-neutral-border);
+  background: var(--color-action-neutral-bg);
+  color: var(--color-action-neutral-text);
   padding: 0.375rem 0.625rem;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 button:hover {
-  border-color: var(--slate-400);
-  background: var(--slate-50);
+  border-color: var(--color-action-neutral-border-hover);
+  background: var(--color-action-neutral-bg-hover);
+}
+
+button:focus-visible:not([data-ui-focus]) {
+  outline: var(--focus-outline-width) solid var(--color-focus-outline);
+  outline-offset: var(--focus-outline-offset);
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
+}
+
+button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
 }
 
 .app-status {
+  --status-bg: var(--color-status-info-bg);
+  --status-border: var(--color-status-info-border);
+  --status-text: var(--color-status-info-text);
+  --status-dismiss-bg: var(--color-status-info-dismiss-bg);
+  --status-dismiss-border: var(--color-status-info-dismiss-border);
+  --status-dismiss-text: var(--color-status-info-dismiss-text);
+  --status-dismiss-bg-hover: var(--color-status-info-dismiss-bg-hover);
+  --status-dismiss-border-hover: var(--color-status-info-dismiss-border-hover);
+
   margin: 0.5rem 1rem 0;
   padding: 0.55rem 0.7rem;
   border-radius: var(--radius-lg);
   border: 1px solid;
+  background: var(--status-bg);
+  border-color: var(--status-border);
+  color: var(--status-text);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -48,62 +71,57 @@ button:hover {
 }
 
 .app-status-error {
-  background: var(--danger-bg);
-  border-color: var(--danger-border);
-  color: var(--red-800);
+  --status-bg: var(--color-status-error-bg);
+  --status-border: var(--color-status-error-border);
+  --status-text: var(--color-status-error-text);
+  --status-dismiss-bg: var(--color-status-error-dismiss-bg);
+  --status-dismiss-border: var(--color-status-error-dismiss-border);
+  --status-dismiss-text: var(--color-status-error-dismiss-text);
+  --status-dismiss-bg-hover: var(--color-status-error-dismiss-bg-hover);
+  --status-dismiss-border-hover: var(--color-status-error-dismiss-border-hover);
 }
 
 .app-status-info {
-  background: var(--accent-bg);
-  border-color: var(--accent-border);
-  color: var(--accent-strong);
+  --status-bg: var(--color-status-info-bg);
+  --status-border: var(--color-status-info-border);
+  --status-text: var(--color-status-info-text);
+  --status-dismiss-bg: var(--color-status-info-dismiss-bg);
+  --status-dismiss-border: var(--color-status-info-dismiss-border);
+  --status-dismiss-text: var(--color-status-info-dismiss-text);
+  --status-dismiss-bg-hover: var(--color-status-info-dismiss-bg-hover);
+  --status-dismiss-border-hover: var(--color-status-info-dismiss-border-hover);
 }
 
 .app-status-success {
-  background: var(--green-50);
-  border-color: var(--green-200);
-  color: var(--green-800);
+  --status-bg: var(--color-status-success-bg);
+  --status-border: var(--color-status-success-border);
+  --status-text: var(--color-status-success-text);
+  --status-dismiss-bg: var(--color-status-success-dismiss-bg);
+  --status-dismiss-border: var(--color-status-success-dismiss-border);
+  --status-dismiss-text: var(--color-status-success-dismiss-text);
+  --status-dismiss-bg-hover: var(--color-status-success-dismiss-bg-hover);
+  --status-dismiss-border-hover: var(
+    --color-status-success-dismiss-border-hover
+  );
 }
 
 .app-status button {
-  border-color: var(--red-300);
-  background: var(--red-100);
-  color: var(--red-800);
+  border-color: var(--status-dismiss-border);
+  background: var(--status-dismiss-bg);
+  color: var(--status-dismiss-text);
   font-size: var(--text-sm);
   padding: 0.25rem 0.55rem;
 }
 
 .app-status button:hover {
-  border-color: var(--red-300);
-  background: var(--danger-border);
-}
-
-.app-status-info button {
-  border-color: var(--blue-300);
-  background: var(--blue-100);
-  color: var(--accent-strong);
-}
-
-.app-status-info button:hover {
-  border-color: var(--blue-400);
-  background: var(--accent-border);
-}
-
-.app-status-success button {
-  border-color: var(--green-300);
-  background: var(--green-100);
-  color: var(--green-800);
-}
-
-.app-status-success button:hover {
-  border-color: var(--green-400);
-  background: var(--green-200);
+  border-color: var(--status-dismiss-border-hover);
+  background: var(--status-dismiss-bg-hover);
 }
 
 .canvas-shell {
   min-width: 0;
   min-height: 0;
-  background: var(--bg);
+  background: var(--color-bg-canvas);
 }
 
 .path-canvas {

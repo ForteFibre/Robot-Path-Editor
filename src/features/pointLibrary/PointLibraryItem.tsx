@@ -111,6 +111,7 @@ export const PointLibraryItem = ({
           <button
             type="button"
             className={styles.titleButton}
+            data-ui-focus="primary"
             onClick={() => {
               onSelect(item.id);
             }}
@@ -136,6 +137,7 @@ export const PointLibraryItem = ({
           <button
             type="button"
             className={styles.addButton}
+            data-ui-focus="primary"
             onClick={() => {
               onSelect(item.id);
               onInsert(item.id);
@@ -151,6 +153,7 @@ export const PointLibraryItem = ({
           <button
             type="button"
             className={styles.coordButton}
+            data-ui-focus="primary"
             onClick={() => {
               onSelect(item.id);
             }}
@@ -176,6 +179,7 @@ export const PointLibraryItem = ({
             <button
               type="button"
               className={styles.iconActionButton}
+              data-ui-focus="primary"
               onClick={() => {
                 onSelect(item.id);
                 setIsEditing(true);
@@ -188,6 +192,7 @@ export const PointLibraryItem = ({
             <button
               type="button"
               className={styles.iconActionButton}
+              data-ui-focus="primary"
               onClick={() => {
                 onToggleLock(item.id);
               }}
@@ -203,6 +208,7 @@ export const PointLibraryItem = ({
             <button
               type="button"
               className={`${styles.iconActionButton} ${styles.dangerActionButton}`}
+              data-ui-focus="primary"
               onClick={() => {
                 onDelete(item.id);
               }}

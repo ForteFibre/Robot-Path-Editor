@@ -1,6 +1,6 @@
 /* Design tokens */
 :root {
-  /* ── Colors: Slate ── */
+  /* ── Primitive Colors: Slate ── */
   --slate-50: #f8fafc;
   --slate-100: #f1f5f9;
   --slate-200: #e2e8f0;
@@ -8,94 +8,200 @@
   --slate-400: #94a3b8;
   --slate-500: #64748b;
   --slate-600: #475569;
-  --slate-700: #334155;
-  --slate-800: #1e293b;
   --slate-900: #0f172a;
 
-  /* ── Colors: Blue ── */
+  /* ── Primitive Colors: Blue ── */
   --blue-50: #eff6ff;
   --blue-100: #dbeafe;
   --blue-200: #bfdbfe;
   --blue-300: #93c5fd;
   --blue-400: #60a5fa;
   --blue-500: #3b82f6;
-  --blue-600: #2563eb;
   --blue-700: #1d4ed8;
-  --blue-800: #1e40af;
-  --blue-900: #1e3a8a;
 
-  /* ── Colors: Red ── */
+  /* ── Primitive Colors: Red ── */
   --red-50: #fef2f2;
   --red-100: #fee2e2;
   --red-200: #fecaca;
   --red-300: #fca5a5;
-  --red-500: #ef4444;
+  --red-400: #f87171;
   --red-600: #dc2626;
   --red-700: #b91c1c;
   --red-800: #991b1b;
 
-  /* ── Colors: Green ── */
+  /* ── Primitive Colors: Green ── */
   --green-50: #f0fdf4;
   --green-100: #dcfce7;
   --green-200: #bbf7d0;
-  --green-500: #22c55e;
-  --green-600: #16a34a;
-  --green-700: #15803d;
   --green-300: #86efac;
   --green-400: #4ade80;
+  --green-600: #16a34a;
+  --green-700: #15803d;
   --green-800: #166534;
 
-  /* ── Colors: Violet ── */
+  /* ── Primitive Colors: Violet ── */
   --violet-50: #f5f3ff;
-  --violet-100: #ede9fe;
-  --violet-200: #ddd6fe;
   --violet-500: #8b5cf6;
   --violet-700: #6d28d9;
-  --violet-800: #5b21b6;
 
-  /* ── Colors: Purple ── */
-  --purple-300: #d8b4fe;
-
-  /* ── Colors: Amber ── */
+  /* ── Primitive Colors: Amber ── */
   --amber-600: #d97706;
-  --amber-700: #b45309;
 
-  /* ── Colors: Orange ── */
-  --orange-50: #fff7ed;
-  --orange-500: #f97316;
+  /* ── Primitive Colors: Orange ── */
   --orange-600: #ea580c;
 
-  /* ── Colors: Sky ── */
-  --sky-100: #e0f2fe;
-  --sky-200: #bae6fd;
-  --sky-700: #0369a1;
-
-  /* ── Colors: Teal ── */
-  --teal-700: #0f766e;
-
-  /* ── Colors: Yellow ── */
-  --yellow-200: #fcd34d;
+  /* ── Primitive Colors: Yellow ── */
   --yellow-50: #fffbeb;
+  --yellow-200: #fcd34d;
   --yellow-amber: #f59e0b;
   --yellow-900: #78350f;
 
-  /* ── Semantic ── */
-  --bg: var(--slate-50);
-  --panel: #ffffff;
-  --panel-border: #dbe3ef;
-  --text: var(--slate-900);
-  --text-secondary: var(--slate-600);
-  --muted: var(--slate-500);
-  --accent: var(--blue-500);
-  --accent-dark: var(--blue-700);
-  --accent-bg: var(--blue-50);
-  --accent-border: var(--blue-200);
-  --accent-strong: var(--blue-700);
-  --danger: var(--red-600);
-  --danger-dark: var(--red-700);
-  --danger-bg: var(--red-50);
-  --danger-border: var(--red-200);
-  --danger-strong: var(--red-700);
+  /* ── Semantic Colors (`--color-*`) ── */
+  --color-bg-canvas: var(--slate-50);
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-subtle: var(--slate-50);
+  --color-bg-surface-hover: var(--slate-100);
+  --color-bg-surface-active: var(--slate-200);
+  --color-bg-surface-selected: var(--violet-50);
+  --color-bg-overlay: rgba(0, 0, 0, 0.45);
+
+  --color-border-default: #dbe3ef;
+  --color-border-strong: var(--slate-400);
+  --color-border-subtle: rgba(148, 163, 184, 0.4);
+  --color-border-accent-subtle: rgba(20, 184, 166, 0.2);
+  --color-border-inverse-soft: rgba(255, 255, 255, 0.8);
+  --color-border-input: var(--slate-300);
+  --color-border-input-subtle: var(--slate-200);
+  --color-border-input-focus: var(--blue-300);
+
+  --color-text-primary: var(--slate-900);
+  --color-text-secondary: var(--slate-600);
+  --color-text-muted: var(--slate-500);
+  --color-text-tertiary: var(--slate-400);
+  --color-text-inverse: #ffffff;
+
+  --color-accent-fg: var(--blue-500);
+  --color-accent-fg-strong: var(--blue-700);
+  --color-accent-bg: var(--blue-50);
+  --color-accent-border: var(--blue-200);
+
+  --color-action-primary-bg: var(--color-accent-fg);
+  --color-action-primary-bg-hover: var(--color-accent-fg-strong);
+  --color-action-primary-border: var(--color-accent-fg);
+  --color-action-primary-border-hover: var(--color-accent-fg-strong);
+  --color-action-primary-text: var(--color-text-inverse);
+
+  --color-action-secondary-bg: var(--color-accent-bg);
+  --color-action-secondary-bg-hover: var(--blue-100);
+  --color-action-secondary-border: var(--color-accent-border);
+  --color-action-secondary-border-hover: var(--blue-300);
+  --color-action-secondary-text: var(--color-accent-fg-strong);
+
+  --color-action-destructive-bg: var(--color-status-error-bg);
+  --color-action-destructive-bg-hover: var(--red-100);
+  --color-action-destructive-border: var(--color-status-error-border);
+  --color-action-destructive-border-hover: var(--red-300);
+  --color-action-destructive-text: var(--color-status-error-accent-strong);
+
+  --color-action-ghost-bg: var(--color-bg-surface);
+  --color-action-ghost-bg-hover: var(--color-bg-surface-hover);
+  --color-action-ghost-border: var(--color-border-default);
+  --color-action-ghost-border-hover: var(--color-border-strong);
+  --color-action-ghost-text: var(--color-text-secondary);
+  --color-action-ghost-text-hover: var(--color-text-primary);
+
+  --color-action-neutral-bg: var(--color-bg-surface);
+  --color-action-neutral-bg-hover: var(--color-bg-surface-subtle);
+  --color-action-neutral-border: var(--color-border-default);
+  --color-action-neutral-border-hover: var(--color-border-strong);
+  --color-action-neutral-text: var(--color-text-primary);
+
+  --color-path-series-1: var(--blue-700);
+  --color-path-series-2: var(--orange-600);
+  --color-path-series-3: var(--green-700);
+  --color-path-series-4: var(--violet-700);
+  --color-path-series-5: var(--red-700);
+
+  --color-canvas-grid-line: var(--color-border-default);
+  --color-canvas-grid-origin-axis: var(--color-border-strong);
+  --color-canvas-grid-label: var(--color-text-tertiary);
+
+  --color-canvas-guides-line: var(--color-accent-fg);
+  --color-canvas-guides-point: var(--color-accent-fg);
+  --color-canvas-guides-label: var(--color-accent-fg-strong);
+
+  --color-canvas-rmin-ring: var(--color-focus-ring);
+  --color-canvas-rmin-line: var(--color-accent-fg-strong);
+  --color-canvas-rmin-label: var(--color-accent-fg-strong);
+  --color-canvas-rmin-center: var(--color-accent-fg);
+
+  --color-canvas-robot-body: rgba(255, 255, 255, 0.82);
+
+  --color-canvas-waypoint-selected-fill: var(--color-text-primary);
+  --color-canvas-waypoint-library-fill: var(--color-bg-surface-selected);
+  --color-canvas-waypoint-default-fill: var(--color-bg-surface);
+  --color-canvas-waypoint-library-stroke: var(--violet-700);
+  --color-canvas-waypoint-library-inactive-fill: var(--violet-500);
+  --color-canvas-waypoint-label: var(--color-text-primary);
+  --color-canvas-waypoint-path-heading-stroke: var(--color-accent-fg);
+  --color-canvas-waypoint-robot-heading-stroke: var(--green-600);
+  --color-canvas-waypoint-break-label: var(--color-status-error-accent-strong);
+
+  --color-canvas-heading-keyframe-selected-fill: var(--green-800);
+  --color-canvas-heading-keyframe-default-fill: var(--green-100);
+  --color-canvas-heading-keyframe-stroke: var(--green-600);
+  --color-canvas-heading-keyframe-label: var(--green-800);
+  --color-canvas-heading-keyframe-handle: var(--green-600);
+
+  --color-canvas-resolved-heading-range-stroke: var(--green-600);
+
+  --color-canvas-velocity-low: var(--color-status-error-accent);
+  --color-canvas-velocity-high: var(--green-600);
+
+  --color-canvas-drop-overlay-bg: rgba(15, 23, 42, 0.85);
+
+  --color-status-info-bg: var(--blue-50);
+  --color-status-info-border: var(--blue-200);
+  --color-status-info-text: var(--blue-700);
+  --color-status-info-dismiss-bg: var(--blue-100);
+  --color-status-info-dismiss-border: var(--blue-300);
+  --color-status-info-dismiss-text: var(--blue-700);
+  --color-status-info-dismiss-bg-hover: var(--blue-200);
+  --color-status-info-dismiss-border-hover: var(--blue-400);
+
+  --color-status-success-bg: var(--green-50);
+  --color-status-success-border: var(--green-200);
+  --color-status-success-text: var(--green-800);
+  --color-status-success-dismiss-bg: var(--green-100);
+  --color-status-success-dismiss-border: var(--green-300);
+  --color-status-success-dismiss-text: var(--green-800);
+  --color-status-success-dismiss-bg-hover: var(--green-200);
+  --color-status-success-dismiss-border-hover: var(--green-400);
+
+  --color-status-error-accent: var(--red-600);
+  --color-status-error-accent-strong: var(--red-700);
+  --color-status-error-bg: var(--red-50);
+  --color-status-error-border: var(--red-200);
+  --color-status-error-text: var(--red-800);
+  --color-status-error-dismiss-bg: var(--red-100);
+  --color-status-error-dismiss-border: var(--red-300);
+  --color-status-error-dismiss-text: var(--red-800);
+  --color-status-error-dismiss-bg-hover: var(--red-200);
+  --color-status-error-dismiss-border-hover: var(--red-400);
+
+  --color-status-warning-bg: var(--yellow-50);
+  --color-status-warning-border: var(--yellow-200);
+  --color-status-warning-accent: var(--yellow-amber);
+  --color-status-warning-text: var(--yellow-900);
+  --color-status-warning-icon: var(--amber-600);
+
+  --color-focus-outline: var(--blue-700);
+  --color-focus-ring: rgba(59, 130, 246, 0.35);
+  --color-focus-ring-soft: rgba(59, 130, 246, 0.1);
+  --color-shadow-surface-soft: rgba(15, 23, 42, 0.03);
+  --color-shadow-surface-hover: rgba(15, 23, 42, 0.08);
+  --color-shadow-accent-soft: rgba(59, 130, 246, 0.18);
+  --color-shadow-destructive-soft: rgba(239, 68, 68, 0.16);
 
   /* ── Spacing ── */
   --space-1: 0.25rem;
@@ -114,22 +220,17 @@
   /* ── Opacity ── */
   --opacity-disabled: 0.4;
   --opacity-muted: 0.3;
-  --opacity-placeholder: 0.55;
-  --opacity-overlay: 0.5;
 
   /* ── Surfaces / Effects ── */
   --glass-bg: rgba(248, 250, 252, 0.97);
   --glass-blur: blur(8px);
   --dropdown-shadow:
     0 8px 24px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
-  --overlay-bg: rgba(0, 0, 0, 0.45);
   --surface-hover-bg: rgba(15, 23, 42, 0.03);
   --surface-hover-strong-bg: rgba(15, 23, 42, 0.04);
   --surface-active-bg: rgba(15, 23, 42, 0.05);
-  --border-subtle: rgba(148, 163, 184, 0.4);
-  --border-accent-subtle: rgba(20, 184, 166, 0.2);
-  --border-inverse-soft: rgba(255, 255, 255, 0.8);
-  --focus-ring-soft: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  --border-subtle: var(--color-border-subtle);
+  --border-accent-subtle: var(--color-border-accent-subtle);
   --modal-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.2), 0 10px 20px -8px rgba(0, 0, 0, 0.08),
     0 0 0 1px rgba(15, 23, 42, 0.04);
@@ -150,13 +251,12 @@
 
   /* ── Shadows ── */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
 
   /* ── Focus ── */
-  --focus-outline-color: var(--blue-700);
+  --focus-outline-color: var(--color-focus-outline);
   --focus-outline-width: 2px;
   --focus-outline-offset: 2px;
   --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color);
-  --focus-ring: 0 0 0 2px rgba(59, 130, 246, 0.35);
+  --focus-ring: 0 0 0 2px var(--color-focus-ring);
 }

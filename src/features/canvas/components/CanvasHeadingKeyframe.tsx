@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react';
-import { Circle, Group, Line, Text } from 'react-konva';
+import { Circle, Group, Line } from 'react-konva';
 import { pointFromHeading, worldToCanvasPoint } from '../../../domain/geometry';
 import { getHeadingHandleDistance } from '../../../domain/canvas';
 import type { EditorMode } from '../../../domain/models';
@@ -8,6 +8,7 @@ import type {
   ResolvedPathModel,
 } from '../../../domain/pointResolution';
 import { canvasTheme } from '../canvasTheme';
+import { CanvasZoomInvariantText } from './CanvasZoomInvariantText';
 
 type CanvasHeadingKeyframeProps = {
   path: ResolvedPathModel;
@@ -66,10 +67,11 @@ export const CanvasHeadingKeyframe = ({
         strokeWidth={2 / k}
       />
 
-      <Text
+      <CanvasZoomInvariantText
+        k={k}
         x={canvasPoint.x + 8 / k}
         y={canvasPoint.y - 8 / k}
-        fontSize={12 / k}
+        fontSize={12}
         fill={canvasTheme.headingKeyframe.labelFill}
         text={headingKeyframe.name}
         listening={false}

@@ -82,7 +82,7 @@ export const WorkspaceFileConflictDialog = ({
 
         <DialogActions>
           <Button
-            variant="danger"
+            variant="destructive"
             style={{ width: '100%' }}
             onClick={onConfirmOverwrite}
             disabled={isBusy}

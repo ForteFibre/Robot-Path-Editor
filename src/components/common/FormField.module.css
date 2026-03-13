@@ -28,13 +28,13 @@
 .label {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .floating .label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--slate-600);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -42,7 +42,7 @@
 .compact .label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--slate-600);
+  color: var(--color-text-secondary);
   width: 2.5rem;
   flex-shrink: 0;
 }
@@ -65,33 +65,51 @@
 .stack .control > input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid var(--slate-300);
+  border: 1px solid var(--color-border-input);
   border-radius: var(--radius-md);
   font-size: 0.9rem;
-  color: var(--text);
-  background-color: var(--panel);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface);
   outline: none;
-  transition: border-color 0.2s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
   box-sizing: border-box;
 }
 
-.stack .control > input:focus {
-  border-color: var(--accent);
-  box-shadow: var(--focus-ring);
+.stack .control > input:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.stack .control > input:focus-visible {
+  border-color: var(--color-border-input-focus);
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
+}
+
+.stack .control > input:disabled {
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-surface-subtle);
+  border-color: var(--color-border-input-subtle);
+  cursor: not-allowed;
 }
 
 .floating .control {
-  background: var(--slate-50);
-  border: 1px solid var(--slate-200);
+  background: var(--color-bg-surface-subtle);
+  border: 1px solid var(--color-border-input-subtle);
   border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
-  transition: all 0.2s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .floating .control:focus-within {
-  border-color: var(--blue-300);
-  box-shadow: var(--focus-ring);
-  background: var(--panel);
+  border-color: var(--color-border-input-focus);
+  box-shadow: 0 0 0 2px var(--color-focus-ring-soft);
+  background: var(--color-bg-surface);
 }
 
 .floating .control > input {
@@ -101,12 +119,12 @@
   padding: 0.2rem 0 !important;
   font-family: inherit;
   font-size: 0.85rem;
-  color: var(--text);
+  color: var(--color-text-primary);
   outline: none;
 }
 
 .floating .control > input:disabled {
-  color: var(--slate-400);
+  color: var(--color-text-muted);
   cursor: not-allowed;
 }
 

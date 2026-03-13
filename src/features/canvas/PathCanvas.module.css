@@ -9,7 +9,7 @@
   height: 100%;
   width: 100%;
   position: relative;
-  background-color: var(--slate-50);
+  background-color: var(--color-bg-canvas);
 }
 
 .editingMode {
@@ -40,10 +40,10 @@
   z-index: 2;
   padding: 0.75rem 1rem;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.85);
-  color: var(--slate-50);
+  background: var(--color-canvas-drop-overlay-bg);
+  color: var(--color-text-inverse);
   font-size: 0.82rem;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+  box-shadow: var(--shadow-lg);
   pointer-events: none;
 }
 

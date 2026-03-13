@@ -53,6 +53,7 @@ type CanvasPathProps = {
   discretizedSamples: HeadingSample[];
   k: number;
   isActive: boolean;
+  suppressActiveStroke: boolean;
   mode: EditorMode;
 };
 
@@ -143,8 +144,13 @@ const renderVisibleSegments = (params: {
   geometrySegments: PathGeometrySegment[];
   k: number;
   isActive: boolean;
+  suppressActiveStroke: boolean;
 }): ReactElement[] => {
-  const { path, geometrySegments, k, isActive } = params;
+  const { path, geometrySegments, k, isActive, suppressActiveStroke } = params;
+
+  if (isActive && suppressActiveStroke) {
+    return [];
+  }
 
   return geometrySegments.map((segment, index) => {
     const renderData = toCanvasPathSegmentRenderData(segment);
@@ -196,6 +202,7 @@ export const CanvasPath = ({
   discretizedSamples,
   k,
   isActive,
+  suppressActiveStroke,
   mode,
 }: CanvasPathProps): ReactElement | null => {
   if (!path.visible) {
@@ -214,6 +221,7 @@ export const CanvasPath = ({
     geometrySegments,
     k,
     isActive,
+    suppressActiveStroke,
   });
 
   return (

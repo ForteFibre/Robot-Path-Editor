@@ -4,10 +4,11 @@ import type {
 } from '../../../domain/pointResolution';
 import type { EditorMode } from '../../../domain/models';
 import { type ReactElement } from 'react';
-import { Circle, Group, Line, Text } from 'react-konva';
+import { Circle, Group, Line } from 'react-konva';
 import { pointFromHeading, worldToCanvasPoint } from '../../../domain/geometry';
 import { getHeadingHandleDistance } from '../../../domain/canvas';
 import { canvasTheme } from '../canvasTheme';
+import { CanvasZoomInvariantText } from './CanvasZoomInvariantText';
 
 type CanvasWaypointProps = {
   path: ResolvedPathModel;
@@ -188,10 +189,11 @@ export const CanvasWaypoint = ({
         strokeWidth={2 / k}
       />
 
-      <Text
+      <CanvasZoomInvariantText
+        k={k}
         x={waypointCanvasPoint.x + 8 / k}
         y={waypointCanvasPoint.y - 8 / k}
-        fontSize={12 / k}
+        fontSize={12}
         fill={canvasTheme.waypoint.labelFill}
         text={waypoint.name}
         listening={false}
@@ -228,10 +230,11 @@ export const CanvasWaypoint = ({
       })}
 
       {isBreak ? (
-        <Text
+        <CanvasZoomInvariantText
+          k={k}
           x={waypointCanvasPoint.x + 12 / k}
           y={waypointCanvasPoint.y + 12 / k}
-          fontSize={12 / k}
+          fontSize={12}
           fill={canvasTheme.waypoint.breakLabelFill}
           text="⚠ break"
           listening={false}

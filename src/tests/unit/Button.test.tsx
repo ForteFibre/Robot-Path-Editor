@@ -29,11 +29,11 @@ describe('Button', () => {
     );
   });
 
-  it('danger variant の外観クラスを付与する', () => {
-    render(<Button variant="danger">Delete</Button>);
+  it('destructive variant の外観クラスを付与する', () => {
+    render(<Button variant="destructive">Delete</Button>);
 
     expect(screen.getByRole('button', { name: 'Delete' })).toHaveClass(
-      requireClassName(styles.danger),
+      requireClassName(styles.destructive),
     );
   });
 

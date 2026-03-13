@@ -1,11 +1,54 @@
 import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
 import { beforeEach, vi } from 'vitest';
+import { resetCanvasThemeCache } from '../features/canvas/canvasTheme';
 import { deleteLinkedFileHandle } from '../io/workspaceFileLinkPersistence';
 import { deleteWorkspacePersistence } from '../io/workspacePersistence';
 import { resetWorkspaceStore } from '../store/workspaceStore';
 
+const CANVAS_THEME_TEST_TOKENS: Record<string, string> = {
+  '--color-canvas-grid-line': '#dbe3ef',
+  '--color-canvas-grid-origin-axis': '#94a3b8',
+  '--color-canvas-grid-label': '#94a3b8',
+  '--color-canvas-guides-line': '#3b82f6',
+  '--color-canvas-guides-point': '#3b82f6',
+  '--color-canvas-guides-label': '#1d4ed8',
+  '--color-canvas-rmin-ring': 'rgba(59, 130, 246, 0.35)',
+  '--color-canvas-rmin-line': '#1d4ed8',
+  '--color-canvas-rmin-label': '#1d4ed8',
+  '--color-canvas-rmin-center': '#3b82f6',
+  '--color-canvas-robot-body': 'rgba(255, 255, 255, 0.82)',
+  '--color-canvas-waypoint-selected-fill': '#0f172a',
+  '--color-canvas-waypoint-library-fill': '#f5f3ff',
+  '--color-canvas-waypoint-default-fill': '#ffffff',
+  '--color-canvas-waypoint-library-stroke': '#6d28d9',
+  '--color-canvas-waypoint-library-inactive-fill': '#8b5cf6',
+  '--color-canvas-waypoint-label': '#0f172a',
+  '--color-canvas-waypoint-path-heading-stroke': '#3b82f6',
+  '--color-canvas-waypoint-robot-heading-stroke': '#16a34a',
+  '--color-canvas-waypoint-break-label': '#b91c1c',
+  '--color-canvas-heading-keyframe-selected-fill': '#166534',
+  '--color-canvas-heading-keyframe-default-fill': '#dcfce7',
+  '--color-canvas-heading-keyframe-stroke': '#16a34a',
+  '--color-canvas-heading-keyframe-label': '#166534',
+  '--color-canvas-heading-keyframe-handle': '#16a34a',
+  '--color-canvas-resolved-heading-range-stroke': '#16a34a',
+  '--color-canvas-velocity-low': '#dc2626',
+  '--color-canvas-velocity-high': '#16a34a',
+  '--color-canvas-drop-overlay-bg': 'rgba(15, 23, 42, 0.85)',
+};
+
+const applyCanvasThemeTestTokens = (): void => {
+  Object.entries(CANVAS_THEME_TEST_TOKENS).forEach(
+    ([tokenName, tokenValue]) => {
+      document.documentElement.style.setProperty(tokenName, tokenValue);
+    },
+  );
+};
+
 beforeEach(async () => {
+  resetCanvasThemeCache();
+  applyCanvasThemeTestTokens();
   resetWorkspaceStore();
   await deleteLinkedFileHandle();
   await deleteWorkspacePersistence();

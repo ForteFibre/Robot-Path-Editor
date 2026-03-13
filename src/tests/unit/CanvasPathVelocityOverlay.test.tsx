@@ -9,13 +9,19 @@ type KonvaLineMockProps = {
   points?: number[];
   stroke?: string;
   strokeWidth?: number;
+  strokeScaleEnabled?: boolean;
   opacity?: number;
+  lineCap?: string;
+  lineJoin?: string;
 };
 
 type KonvaShapeMockProps = {
   stroke?: string;
   strokeWidth?: number;
+  strokeScaleEnabled?: boolean;
   opacity?: number;
+  lineCap?: string;
+  lineJoin?: string;
   sceneFunc?: (context: CanvasRenderingContext2D, shape: object) => void;
 };
 
@@ -55,7 +61,11 @@ vi.mock('react-konva', async () => {
         'data-points': JSON.stringify(resolvedProps.points ?? []),
         'data-stroke': resolvedProps.stroke ?? '',
         'data-stroke-width': resolvedProps.strokeWidth?.toString() ?? '',
+        'data-stroke-scale-enabled':
+          resolvedProps.strokeScaleEnabled?.toString() ?? '',
         'data-opacity': resolvedProps.opacity?.toString() ?? '',
+        'data-line-cap': resolvedProps.lineCap ?? '',
+        'data-line-join': resolvedProps.lineJoin ?? '',
       });
     },
     Shape: (props: unknown) => {
@@ -66,7 +76,11 @@ vi.mock('react-konva', async () => {
         'data-testid': 'konva-shape',
         'data-stroke': resolvedProps.stroke ?? '',
         'data-stroke-width': resolvedProps.strokeWidth?.toString() ?? '',
+        'data-stroke-scale-enabled':
+          resolvedProps.strokeScaleEnabled?.toString() ?? '',
         'data-opacity': resolvedProps.opacity?.toString() ?? '',
+        'data-line-cap': resolvedProps.lineCap ?? '',
+        'data-line-join': resolvedProps.lineJoin ?? '',
       });
     },
   };
@@ -170,7 +184,7 @@ const createTiming = (
 };
 
 describe('CanvasPathVelocityOverlay', () => {
-  it('renders velocity segments in canvas coordinates with scale-aware stroke width', () => {
+  it('renders velocity segments in canvas coordinates with zoom-invariant screen stroke width', () => {
     recordedShapeProps.length = 0;
     render(<CanvasPathVelocityOverlay timing={createTiming()} k={4} />);
 
@@ -181,12 +195,18 @@ describe('CanvasPathVelocityOverlay', () => {
       'data-points',
       JSON.stringify([-2, -1, -4, -3]),
     );
-    expect(lines[0]).toHaveAttribute('data-stroke', 'hsl(23, 85%, 50%)');
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '0.5');
+    expect(lines[0]).toHaveAttribute(
+      'data-stroke',
+      pathVelocitySegmentsModule.getVelocityColor(0.1875),
+    );
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
     expect(lines[0]).toHaveAttribute('data-opacity', '0.55');
+    expect(lines[0]).toHaveAttribute('data-line-cap', 'round');
+    expect(lines[0]).toHaveAttribute('data-line-join', 'round');
   });
 
-  it('recomputes quantized velocity colors when the zoom level changes', () => {
+  it('recomputes quantized velocity colors when the zoom level changes while keeping stroke width fixed on screen', () => {
     const timing = createTiming([
       createLineSegment({
         sectionIndex: 0,
@@ -216,16 +236,30 @@ describe('CanvasPathVelocityOverlay', () => {
 
     let lines = screen.getAllByTestId('konva-line');
     expect(lines).toHaveLength(2);
-    expect(lines[0]).toHaveAttribute('data-stroke', 'hsl(75, 85%, 50%)');
-    expect(lines[1]).toHaveAttribute('data-stroke', 'hsl(120, 85%, 50%)');
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '2');
+    expect(lines[0]).toHaveAttribute(
+      'data-stroke',
+      pathVelocitySegmentsModule.getVelocityColor(0.625),
+    );
+    expect(lines[1]).toHaveAttribute(
+      'data-stroke',
+      pathVelocitySegmentsModule.getVelocityColor(1),
+    );
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
 
     rerender(<CanvasPathVelocityOverlay timing={timing} k={4} />);
 
     lines = screen.getAllByTestId('konva-line');
-    expect(lines[0]).toHaveAttribute('data-stroke', 'hsl(76, 85%, 50%)');
-    expect(lines[1]).toHaveAttribute('data-stroke', 'hsl(120, 85%, 50%)');
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '0.5');
+    expect(lines[0]).toHaveAttribute(
+      'data-stroke',
+      pathVelocitySegmentsModule.getVelocityColor(61 / 96),
+    );
+    expect(lines[1]).toHaveAttribute(
+      'data-stroke',
+      pathVelocitySegmentsModule.getVelocityColor(1),
+    );
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
   });
 
   it('increases the velocity overlay sampling density as the zoom level increases', () => {
@@ -356,6 +390,11 @@ describe('CanvasPathVelocityOverlay', () => {
 
     const shapes = screen.getAllByTestId('konva-shape');
     expect(shapes).toHaveLength(1);
+    expect(shapes[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(shapes[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
+    expect(shapes[0]).toHaveAttribute('data-opacity', '0.55');
+    expect(shapes[0]).toHaveAttribute('data-line-cap', 'round');
+    expect(shapes[0]).toHaveAttribute('data-line-join', 'round');
 
     const shapeProps = readKonvaShapeMockProps(recordedShapeProps[0]);
     const beginPath = vi.fn();

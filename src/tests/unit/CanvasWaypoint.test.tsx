@@ -10,8 +10,19 @@ type KonvaCircleMockProps = {
   radius?: number;
 };
 
+type KonvaTextMockProps = {
+  text?: string;
+  fontSize?: number;
+  scaleX?: number;
+  scaleY?: number;
+};
+
 const readKonvaCircleMockProps = (props: unknown): KonvaCircleMockProps => {
   return (props ?? {}) as KonvaCircleMockProps;
+};
+
+const readKonvaTextMockProps = (props: unknown): KonvaTextMockProps => {
+  return (props ?? {}) as KonvaTextMockProps;
 };
 
 vi.mock('react-konva', async () => {
@@ -29,7 +40,21 @@ vi.mock('react-konva', async () => {
     Group: ({ children }: { children?: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
     Line: () => React.createElement('div', { 'data-testid': 'konva-line' }),
-    Text: () => React.createElement('div', { 'data-testid': 'konva-text' }),
+    Text: (props: unknown) => {
+      const resolvedProps = readKonvaTextMockProps(props);
+
+      return React.createElement(
+        'div',
+        {
+          'data-testid': 'konva-text',
+          'data-text': resolvedProps.text ?? '',
+          'data-font-size': resolvedProps.fontSize?.toString() ?? '',
+          'data-scale-x': resolvedProps.scaleX?.toString() ?? '',
+          'data-scale-y': resolvedProps.scaleY?.toString() ?? '',
+        },
+        resolvedProps.text ?? '',
+      );
+    },
   };
 });
 
@@ -83,5 +108,27 @@ describe('CanvasWaypoint', () => {
     expect(circles[0]).toHaveAttribute('data-radius', '6');
     expect(circles[1]).toHaveAttribute('data-radius', '5');
     expect(circles[2]).toHaveAttribute('data-radius', '5');
+  });
+
+  it('keeps label font rendering zoom-invariant via text scale cancelation', () => {
+    render(
+      <CanvasWaypoint
+        path={path}
+        waypoint={waypoint}
+        k={250}
+        isSelected={false}
+        isBreak={false}
+        isCoordinateLocked={false}
+        mode="path"
+        isActive={true}
+      />,
+    );
+
+    const label = screen.getByTestId('konva-text');
+
+    expect(label).toHaveAttribute('data-text', 'WP 1');
+    expect(label).toHaveAttribute('data-font-size', '12');
+    expect(Number(label.dataset.scaleX)).toBeCloseTo(1 / 250);
+    expect(Number(label.dataset.scaleY)).toBeCloseTo(1 / 250);
   });
 });

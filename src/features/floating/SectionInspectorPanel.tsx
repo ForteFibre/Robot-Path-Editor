@@ -117,6 +117,7 @@ export const SectionInspectorPanel = ({
               <button
                 type="button"
                 className={styles.resetBtn}
+                data-ui-focus="primary"
                 onClick={() => {
                   setSectionRMin(path.id, section.index, null);
                 }}

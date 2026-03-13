@@ -12,6 +12,8 @@ type KonvaLineMockProps = {
   points?: number[];
   stroke?: string;
   strokeWidth?: number;
+  fill?: string;
+  opacity?: number;
 };
 
 type KonvaShapeMockProps = {
@@ -39,6 +41,8 @@ vi.mock('react-konva', async () => {
         'data-points': JSON.stringify(resolvedProps.points ?? []),
         'data-stroke': resolvedProps.stroke ?? '',
         'data-stroke-width': resolvedProps.strokeWidth?.toString() ?? '',
+        'data-fill': resolvedProps.fill ?? '',
+        'data-opacity': resolvedProps.opacity?.toString() ?? '',
       });
     },
     Shape: (props: unknown) => {
@@ -103,7 +107,7 @@ const geometrySegments: PathGeometrySegment[] = [
 ];
 
 describe('CanvasPath', () => {
-  it('renders the visible stroke for active paths', () => {
+  it('renders the visible stroke for active paths when suppression is disabled', () => {
     render(
       <CanvasPath
         path={path}
@@ -111,6 +115,7 @@ describe('CanvasPath', () => {
         discretizedSamples={samples}
         k={1}
         isActive={true}
+        suppressActiveStroke={false}
         mode="path"
       />,
     );
@@ -122,6 +127,60 @@ describe('CanvasPath', () => {
       'data-points',
       JSON.stringify([0, 0, -0, -1]),
     );
+  });
+
+  it('does not render active path stroke when suppression is enabled', () => {
+    render(
+      <CanvasPath
+        path={path}
+        geometrySegments={geometrySegments}
+        discretizedSamples={samples}
+        k={1}
+        isActive={true}
+        suppressActiveStroke={true}
+        mode="path"
+      />,
+    );
+
+    expect(screen.queryByTestId('konva-line')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('konva-shape')).not.toBeInTheDocument();
+  });
+
+  it('heading mode では suppression 中でも heading glyph を維持し、path.color の本体ストロークのみ抑制する', () => {
+    render(
+      <CanvasPath
+        path={path}
+        geometrySegments={geometrySegments}
+        discretizedSamples={samples}
+        k={1}
+        isActive={true}
+        suppressActiveStroke={true}
+        mode="heading"
+      />,
+    );
+
+    const lines = screen.getAllByTestId('konva-line');
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toHaveAttribute('data-stroke', '');
+    expect(lines[0]).toHaveAttribute('data-fill', '#ff0000');
+    expect(lines[0]).toHaveAttribute('data-opacity', '0.9');
+    expect(screen.queryByTestId('konva-shape')).not.toBeInTheDocument();
+  });
+
+  it('keeps non-active path stroke rendering even when suppression flag is enabled', () => {
+    render(
+      <CanvasPath
+        path={path}
+        geometrySegments={geometrySegments}
+        discretizedSamples={samples}
+        k={1}
+        isActive={false}
+        suppressActiveStroke={true}
+        mode="path"
+      />,
+    );
+
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(1);
   });
 
   it('converts arc geometry into Konva render data with canvas-space angles', () => {

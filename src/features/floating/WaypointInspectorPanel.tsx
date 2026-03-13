@@ -152,6 +152,7 @@ export const WaypointInspectorPanel = ({
                 <button
                   type="button"
                   className={styles.resetBtn}
+                  data-ui-focus="primary"
                   disabled={isLibraryPointLocked}
                   onClick={() => {
                     updateWaypoint(path.id, waypoint.id, {
@@ -206,9 +207,8 @@ export const WaypointInspectorPanel = ({
         )}
 
         <Button
-          variant="ghost"
+          variant="destructive"
           size="sm"
-          danger
           style={{ width: '100%' }}
           onClick={() => {
             deleteWaypoint(path.id, waypoint.id);

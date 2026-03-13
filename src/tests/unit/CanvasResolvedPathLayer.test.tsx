@@ -51,8 +51,11 @@ vi.mock('../../features/canvas/components/CanvasPath', async () => {
   const React = await import('react');
 
   return {
-    CanvasPath: () =>
-      React.createElement('div', { 'data-testid': 'canvas-path' }),
+    CanvasPath: ({ suppressActiveStroke }: { suppressActiveStroke: boolean }) =>
+      React.createElement('div', {
+        'data-testid': 'canvas-path',
+        'data-suppress-active-stroke': suppressActiveStroke ? 'true' : 'false',
+      }),
   };
 });
 
@@ -192,6 +195,7 @@ describe('CanvasResolvedPathLayer', () => {
         mode="path"
         k={1}
         rMinDragTargets={rMinDragTargets}
+        isVelocityOverlayVisible={false}
       />,
     );
 
@@ -203,6 +207,7 @@ describe('CanvasResolvedPathLayer', () => {
         mode="path"
         k={1}
         rMinDragTargets={rMinDragTargets}
+        isVelocityOverlayVisible={false}
       />,
     );
 
@@ -216,6 +221,7 @@ describe('CanvasResolvedPathLayer', () => {
         mode="path"
         k={1}
         rMinDragTargets={[]}
+        isVelocityOverlayVisible={false}
       />,
     );
 
@@ -233,6 +239,7 @@ describe('CanvasResolvedPathLayer', () => {
         mode="heading"
         k={1}
         rMinDragTargets={[]}
+        isVelocityOverlayVisible={false}
       />,
     );
 
@@ -241,5 +248,52 @@ describe('CanvasResolvedPathLayer', () => {
       'hk-1',
     );
     expect(screen.getByTestId('konva-line')).toBeInTheDocument();
+  });
+
+  it('速度オーバーレイ中は active path の本体ストロークを抑制するフラグを渡す', () => {
+    const { rerender } = render(
+      <CanvasResolvedPathLayer
+        visiblePath={createVisiblePath(true)}
+        mode="path"
+        k={1}
+        rMinDragTargets={[]}
+        isVelocityOverlayVisible={true}
+      />,
+    );
+
+    expect(screen.getByTestId('canvas-path')).toHaveAttribute(
+      'data-suppress-active-stroke',
+      'true',
+    );
+
+    rerender(
+      <CanvasResolvedPathLayer
+        visiblePath={createVisiblePath(true)}
+        mode="heading"
+        k={1}
+        rMinDragTargets={[]}
+        isVelocityOverlayVisible={true}
+      />,
+    );
+
+    expect(screen.getByTestId('canvas-path')).toHaveAttribute(
+      'data-suppress-active-stroke',
+      'true',
+    );
+
+    rerender(
+      <CanvasResolvedPathLayer
+        visiblePath={createVisiblePath(false)}
+        mode="path"
+        k={1}
+        rMinDragTargets={[]}
+        isVelocityOverlayVisible={true}
+      />,
+    );
+
+    expect(screen.getByTestId('canvas-path')).toHaveAttribute(
+      'data-suppress-active-stroke',
+      'false',
+    );
   });
 });

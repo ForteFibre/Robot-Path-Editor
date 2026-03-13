@@ -49,6 +49,7 @@ const PathItemCard = ({
       <button
         type="button"
         className={styles.itemButton}
+        data-ui-focus="input-accent"
         onClick={onSelect}
         aria-pressed={isActive}
         aria-label={`Select ${isWaypoint ? 'waypoint' : 'heading keyframe'} ${itemLabel}`}
@@ -128,6 +129,8 @@ const SortableWaypointRow = ({
           <button
             type="button"
             className={styles.dragHandle}
+            data-ui-focus="input-accent"
+            data-ui-hover="drag-handle"
             {...attributes}
             {...listeners}
             aria-label={`Reorder waypoint ${itemLabel}`}
