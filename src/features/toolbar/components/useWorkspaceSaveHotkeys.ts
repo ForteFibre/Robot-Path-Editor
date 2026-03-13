@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
+import type { WorkspaceFileCommands } from '../../workspace-file/types';
 
 type UseWorkspaceSaveHotkeysOptions = {
-  onSave: () => void;
-  onSaveAs: () => void;
+  workspaceCommands: Pick<WorkspaceFileCommands, 'save' | 'saveAs'>;
 };
 
 const isEditableTarget = (target: EventTarget | null): boolean => {
@@ -19,8 +19,7 @@ const isEditableTarget = (target: EventTarget | null): boolean => {
 };
 
 export const useWorkspaceSaveHotkeys = ({
-  onSave,
-  onSaveAs,
+  workspaceCommands,
 }: UseWorkspaceSaveHotkeysOptions): void => {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -41,11 +40,11 @@ export const useWorkspaceSaveHotkeys = ({
       event.preventDefault();
 
       if (event.shiftKey) {
-        onSaveAs();
+        workspaceCommands.saveAs().catch(() => undefined);
         return;
       }
 
-      onSave();
+      workspaceCommands.save().catch(() => undefined);
     };
 
     globalThis.addEventListener('keydown', onKeyDown);
@@ -53,5 +52,5 @@ export const useWorkspaceSaveHotkeys = ({
     return () => {
       globalThis.removeEventListener('keydown', onKeyDown);
     };
-  }, [onSave, onSaveAs]);
+  }, [workspaceCommands]);
 };

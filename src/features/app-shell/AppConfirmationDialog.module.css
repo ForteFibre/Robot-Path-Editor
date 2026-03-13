@@ -1,0 +1,88 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.messageRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.iconBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.iconBadgeInfo {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.iconBadgeDanger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.message {
+  color: #475569;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.cancelButton,
+.confirmButton {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background-color 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.cancelButton:hover,
+.confirmButton:hover {
+  transform: translateY(-1px);
+}
+
+.cancelButton {
+  background: rgba(148, 163, 184, 0.18);
+  color: inherit;
+}
+
+.cancelButton:hover {
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.confirmButtonDefault {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.confirmButtonDefault:hover {
+  background: #1d4ed8;
+}
+
+.confirmButtonDanger {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.confirmButtonDanger:hover {
+  background: #b91c1c;
+}

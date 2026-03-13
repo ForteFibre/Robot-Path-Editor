@@ -1,5 +1,10 @@
 import type { LoadResult } from '../../io/workspacePersistence';
-import type { WorkspacePersistedState } from '../../store/types';
+import type { AppError } from '../../errors/appError';
+import type { AppNotification } from '../../errors/appNotification';
+import type {
+  WorkspaceAutosavePayload,
+  WorkspaceDocument,
+} from '../../domain/workspaceContract';
 
 export type WorkspacePersistenceRecoveredResult = Extract<
   LoadResult,
@@ -8,15 +13,17 @@ export type WorkspacePersistenceRecoveredResult = Extract<
 
 export type WorkspacePersistenceAutosaveOnlyResult = {
   kind: 'autosave-only';
-  autosave: WorkspacePersistedState;
+  autosave: WorkspaceAutosavePayload;
   savedAt: number;
+  linkedFileUnreadable: boolean;
+  linkedFileName: string | null;
 };
 
 export type WorkspacePersistenceConflictResult = {
   kind: 'conflict';
-  autosave: WorkspacePersistedState;
+  autosave: WorkspaceAutosavePayload;
   autoSavedAt: number;
-  linkedFile: WorkspacePersistedState;
+  linkedFile: WorkspaceDocument;
   linkedFileModifiedAt: number;
   linkedFileName: string;
 };
@@ -40,22 +47,53 @@ export type ConflictState = {
   linkedFileModifiedAt: number;
 };
 
+export type WorkspaceFileActionResult = {
+  fileName: string;
+};
+
 export type WorkspaceAutosaveState =
   | {
       kind: 'idle';
       savedAt: number | null;
-      message: null;
+      error: null;
     }
   | {
       kind: 'saving';
       savedAt: number | null;
-      message: null;
+      error: null;
     }
   | {
       kind: 'error';
       savedAt: number | null;
-      message: string;
+      error: AppError;
     };
+
+export type WorkspaceRestoreDialogState = {
+  result: WorkspacePersistenceRestoreCandidate | null;
+  isBusy: boolean;
+  onStartFresh: () => void;
+  onRestoreLastEdit: () => void;
+  onRestoreLinkedFile: () => void;
+  onLoadFromFile: (file: File) => Promise<void>;
+};
+
+export type WorkspacePersistenceFacade = {
+  autosaveState: WorkspaceAutosaveState;
+  recoveredNotification: AppNotification | null;
+  restoreDialog: WorkspaceRestoreDialogState;
+  pendingSaveConflict: ConflictState | null;
+  linkedFileName: string | null;
+  isFileSystemAccessSupported: boolean;
+  newWorkspace: () => Promise<void>;
+  importJsonFile: (file: File) => Promise<WorkspaceFileActionResult>;
+  openLinkedWorkspace: () => Promise<WorkspaceFileActionResult | null>;
+  saveWorkspace: () => Promise<WorkspaceFileActionResult | null>;
+  saveWorkspaceAs: () => Promise<WorkspaceFileActionResult | null>;
+  restoreLinkedWorkspace: () => Promise<WorkspaceFileActionResult | null>;
+  startFresh: () => Promise<void>;
+  cancelSaveConflict: () => void;
+  confirmOverwriteSaveConflict: () => Promise<WorkspaceFileActionResult | null>;
+};
 
 export const createIdleWorkspaceAutosaveState = (
   savedAt: number | null,
@@ -63,6 +101,6 @@ export const createIdleWorkspaceAutosaveState = (
   return {
     kind: 'idle',
     savedAt,
-    message: null,
+    error: null,
   };
 };

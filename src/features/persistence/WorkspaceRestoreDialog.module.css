@@ -168,20 +168,6 @@
   cursor: wait;
 }
 
-/* --- Error banner --- */
-
-.error {
-  margin: 0;
-  padding: 0.75rem 1rem;
-  border: 1px solid #fca5a5;
-  border-left: 3px solid #ef4444;
-  border-radius: 0.625rem;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
 @media (max-width: 480px) {
   .restoreChoices,
   .primaryActions {

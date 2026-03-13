@@ -1,16 +1,8 @@
 import { type ReactElement } from 'react';
 import { Circle, Line, Text } from 'react-konva';
-import { worldToCanvasPoint, type Point } from '../../../domain/geometry';
+import { worldToCanvasPoint } from '../../../domain/geometry';
 import { formatMetricValue } from '../../../domain/metricScale';
-
-export type RMinDragTarget = {
-  pathId: string;
-  sectionIndex: number;
-  center: Point;
-  waypointPoint: Point;
-  rMin: number;
-  isAuto: boolean;
-};
+import type { RMinDragTarget } from '../types/rMinDragTarget';
 
 type CanvasRMinDragProps = {
   rMinDragTarget: RMinDragTarget;

@@ -1,4 +1,4 @@
-import { normalizePathSections } from '../../domain/models';
+import { normalizePathSections } from '../../domain/modelNormalization';
 import type { EditorMode, Waypoint } from '../../domain/models';
 import {
   getEffectiveWaypointName,
@@ -8,16 +8,20 @@ import type { DomainState, WaypointUpdatePatch } from '../types';
 import { updateLibraryPoint } from './libraryMutators';
 import {
   appendWaypoint,
-  findWaypoint,
-  isWaypointCoordinateLocked,
-  isWaypointRobotHeadingLocked,
-  normalizeDomainState,
   removeWaypointAt,
-  resolveWaypointLibraryPoint,
-  resolveWaypointPoint,
   updatePoint,
   updatePath,
-} from './shared';
+} from './structure';
+import {
+  isWaypointCoordinateLocked,
+  isWaypointRobotHeadingLocked,
+} from './locking';
+import {
+  findWaypoint,
+  resolveWaypointLibraryPoint,
+  resolveWaypointPoint,
+} from './lookups';
+import { normalizeWorkspaceDomainState as normalizeDomainState } from '../../domain/workspaceNormalization';
 
 const isWaypointPatchNoOp = (
   waypoint: Waypoint,

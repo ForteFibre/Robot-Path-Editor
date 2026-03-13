@@ -1,9 +1,10 @@
 import { Check, Plus, X } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
 import styles from './PointLibraryPanel.module.css';
 import { PointLibraryForm } from './PointLibraryForm';
 import { PointLibraryItem } from './PointLibraryItem';
-import { type LibraryPointDraft, usePointLibrary } from './usePointLibrary';
+import { type LibraryPointDraft } from './usePointLibrary';
+import { usePointLibraryPanelController } from './usePointLibraryPanelController';
 
 type CreateLibraryPointRowProps = {
   draft: LibraryPointDraft;
@@ -78,44 +79,20 @@ const CreateLibraryPointRow = ({
 
 export const PointLibraryPanel = (): ReactElement => {
   const {
-    defaultDraft,
+    cancelCreate,
+    changeCreateDraft,
+    createDraft,
+    deletePoint,
     highlightedLibraryPointId,
     items,
-    selectedLibraryPointId,
-    createPoint,
+    insertPoint,
+    saveCreateDraft,
+    savePoint,
     selectPoint,
-    updatePointItem,
-    insertPointIntoPath,
-    deletePoint,
+    selectedLibraryPointId,
+    startCreate,
     togglePointLock,
-  } = usePointLibrary();
-  const [createDraft, setCreateDraft] = useState<LibraryPointDraft | null>(
-    null,
-  );
-
-  const handleCreate = (): void => {
-    if (createDraft !== null) {
-      return;
-    }
-
-    setCreateDraft({ ...defaultDraft });
-  };
-
-  const handleCreateSave = (): void => {
-    if (createDraft === null) {
-      return;
-    }
-
-    const createdId = createPoint(createDraft);
-    if (createdId !== null) {
-      setCreateDraft(null);
-    }
-  };
-
-  const handleSelectPoint = (pointId: string): void => {
-    setCreateDraft(null);
-    selectPoint(pointId);
-  };
+  } = usePointLibraryPanelController();
 
   return (
     <section className={styles.panel} aria-label="point library management">
@@ -124,7 +101,7 @@ export const PointLibraryPanel = (): ReactElement => {
         <button
           type="button"
           className="icon-button icon-button--small"
-          onClick={handleCreate}
+          onClick={startCreate}
           aria-label="new library point"
           title="New library point"
         >
@@ -144,14 +121,10 @@ export const PointLibraryPanel = (): ReactElement => {
               item={item}
               isSelected={selectedLibraryPointId === item.id}
               isHighlighted={highlightedLibraryPointId === item.id}
-              onSelect={handleSelectPoint}
-              onSave={(pointId, patch) => {
-                updatePointItem(pointId, patch);
-              }}
-              onInsert={insertPointIntoPath}
-              onDelete={(pointId) => {
-                deletePoint(pointId);
-              }}
+              onSelect={selectPoint}
+              onSave={savePoint}
+              onInsert={insertPoint}
+              onDelete={deletePoint}
               onToggleLock={togglePointLock}
             />
           ))}
@@ -159,22 +132,9 @@ export const PointLibraryPanel = (): ReactElement => {
           {createDraft === null ? null : (
             <CreateLibraryPointRow
               draft={createDraft}
-              onChange={(patch) => {
-                setCreateDraft((current) => {
-                  if (current === null) {
-                    return current;
-                  }
-
-                  return {
-                    ...current,
-                    ...patch,
-                  };
-                });
-              }}
-              onSave={handleCreateSave}
-              onCancel={() => {
-                setCreateDraft(null);
-              }}
+              onChange={changeCreateDraft}
+              onSave={saveCreateDraft}
+              onCancel={cancelCreate}
             />
           )}
         </ul>

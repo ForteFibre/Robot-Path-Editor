@@ -2,11 +2,26 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { temporal } from 'zundo';
 import {
-  cloneDomainState,
-  createDomainActions,
   createInitialDomainState,
-  type DomainActions,
-} from './slices/domainSlice';
+  createPathActions,
+  type PathActions,
+} from './slices/pathSlice';
+import {
+  createWaypointActions,
+  type WaypointActions,
+} from './slices/waypointSlice';
+import {
+  createHeadingKeyframeActions,
+  type HeadingKeyframeActions,
+} from './slices/headingKeyframeSlice';
+import {
+  createLibraryActions,
+  type LibraryActions,
+} from './slices/librarySlice';
+import {
+  createWorkspaceActions,
+  type WorkspaceActions,
+} from './slices/workspaceSlice';
 import {
   createInitialUiState,
   createUiActions,
@@ -15,31 +30,30 @@ import {
 import type {
   DomainState,
   UiState,
-  WorkspacePersistedState,
   WorkspaceSetState,
-  WorkspaceSnapshot,
   WorkspaceState,
 } from './types';
+import { normalizeUiState } from './slices/uiSlice';
 
-const toWorkspaceSnapshot = (
-  domain: DomainState,
-  ui: UiState,
-): WorkspaceSnapshot => {
+const createInitialSelection = (pathId: string): UiState['selection'] => {
   return {
-    mode: ui.mode,
-    tool: ui.tool,
-    paths: domain.paths,
-    points: domain.points,
-    lockedPointIds: domain.lockedPointIds,
-    activePathId: domain.activePathId,
-    canvasTransform: ui.canvasTransform,
-    selection: ui.selection,
-    isDragging: ui.isDragging,
-    snapSettings: ui.snapSettings,
-    snapPanelOpen: ui.snapPanelOpen,
-    backgroundImage: ui.backgroundImage,
-    robotPreviewEnabled: ui.robotPreviewEnabled,
-    robotSettings: ui.robotSettings,
+    pathId,
+    waypointId: null,
+    headingKeyframeId: null,
+    sectionIndex: null,
+  };
+};
+
+const createInitialWorkspaceState = (): WorkspaceState => {
+  const domain = createInitialDomainState();
+  const ui = normalizeUiState(domain, {
+    ...createInitialUiState(),
+    selection: createInitialSelection(domain.activePathId),
+  });
+
+  return {
+    domain,
+    ui,
   };
 };
 
@@ -55,7 +69,11 @@ type WorkspaceHistoryState = {
 
 export type WorkspaceStoreState = WorkspaceState &
   UiActions &
-  DomainActions &
+  PathActions &
+  WaypointActions &
+  HeadingKeyframeActions &
+  LibraryActions &
+  WorkspaceActions &
   WorkspaceHistoryState & {
     historyRevision: number;
   };
@@ -123,20 +141,40 @@ export const useWorkspaceStore = create<WorkspaceStoreState>()(
         setState: setWorkspaceState,
       });
 
-      const domainActions = createDomainActions({
+      const pathActions = createPathActions({
+        setState: setWorkspaceState,
+      });
+
+      const waypointActions = createWaypointActions({
+        setState: setWorkspaceState,
+      });
+
+      const headingKeyframeActions = createHeadingKeyframeActions({
+        setState: setWorkspaceState,
+      });
+
+      const libraryActions = createLibraryActions({
+        setState: setWorkspaceState,
+      });
+
+      const workspaceActions = createWorkspaceActions({
         setState: setWorkspaceState,
         clearHistory: () => {
           history().clear();
           bumpHistoryRevision();
         },
+        createInitialState: createInitialWorkspaceState,
       });
 
       return {
-        domain: createInitialDomainState(),
-        ui: createInitialUiState(),
+        ...createInitialWorkspaceState(),
         historyRevision: 0,
         ...uiActions,
-        ...domainActions,
+        ...pathActions,
+        ...waypointActions,
+        ...headingKeyframeActions,
+        ...libraryActions,
+        ...workspaceActions,
 
         undo: (steps) => {
           history().undo(steps);
@@ -236,7 +274,8 @@ export const useWorkspaceActions = () => {
       setRobotSettings: state.setRobotSettings,
       insertLibraryWaypoint: state.insertLibraryWaypoint,
       insertLibraryWaypointAtEndOfPath: state.insertLibraryWaypointAtEndOfPath,
-      importWorkspace: state.importWorkspace,
+      importWorkspaceDocument: state.importWorkspaceDocument,
+      restoreWorkspaceAutosave: state.restoreWorkspaceAutosave,
       resetWorkspace: state.resetWorkspace,
       undo: state.undo,
       redo: state.redo,
@@ -249,36 +288,7 @@ export const useWorkspaceActions = () => {
   );
 };
 
-export const getWorkspaceSnapshot = (): WorkspaceSnapshot => {
-  const state = useWorkspaceStore.getState();
-  return toWorkspaceSnapshot(state.domain, state.ui);
-};
-
-export const getWorkspacePersistedState = (): WorkspacePersistedState => {
-  const state = useWorkspaceStore.getState();
-
-  return {
-    domain: cloneDomainState(state.domain),
-    ui: {
-      mode: state.ui.mode,
-      tool: state.ui.tool,
-      selection: state.ui.selection,
-      canvasTransform: state.ui.canvasTransform,
-      backgroundImage: state.ui.backgroundImage,
-      robotPreviewEnabled: state.ui.robotPreviewEnabled,
-      robotSettings: state.ui.robotSettings,
-    },
-  };
-};
-
-export const getDomainSnapshot = (): DomainState => {
-  return cloneDomainState(useWorkspaceStore.getState().domain);
-};
-
 export const resetWorkspaceStore = (): void => {
-  useWorkspaceStore.setState({
-    domain: createInitialDomainState(),
-    ui: createInitialUiState(),
-  });
+  useWorkspaceStore.setState(createInitialWorkspaceState());
   useWorkspaceStore.temporal.getState().clear();
 };

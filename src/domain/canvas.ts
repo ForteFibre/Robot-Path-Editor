@@ -1,4 +1,4 @@
-import type { CanvasTransform } from './models';
+import type { CanvasTransform } from './canvasTransform';
 import {
   MAX_CANVAS_SCALE as MAX_CANVAS_SCALE_VALUE,
   MIN_CANVAS_SCALE as MIN_CANVAS_SCALE_VALUE,

@@ -1,17 +1,14 @@
 import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
 import { beforeEach, vi } from 'vitest';
-import { resetWorkspacePersistenceBootstrapForTests } from '../features/persistence/bootstrapWorkspacePersistence';
 import { deleteLinkedFileHandle } from '../io/workspaceFileLinkPersistence';
 import { deleteWorkspacePersistence } from '../io/workspacePersistence';
 import { resetWorkspaceStore } from '../store/workspaceStore';
 
 beforeEach(async () => {
-  resetWorkspacePersistenceBootstrapForTests();
   resetWorkspaceStore();
   await deleteLinkedFileHandle();
   await deleteWorkspacePersistence();
-  globalThis.confirm = vi.fn(() => true);
 });
 
 type PointerCapturePolyfillElement = Element & {

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useWorkspaceHistory } from '../../../store/workspaceHistory';
+import { useWorkspaceHistoryActions } from '../../workspace-file/useWorkspaceHistoryActions';
 
 const isEditableTarget = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) {
@@ -15,7 +15,7 @@ const isEditableTarget = (target: EventTarget | null): boolean => {
 };
 
 export const useUndoRedoHotkeys = (): void => {
-  const { canRedo, canUndo, redo, undo } = useWorkspaceHistory();
+  const { canRedo, canUndo, redo, undo } = useWorkspaceHistoryActions();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {

@@ -1,87 +1,90 @@
-import { deserializeWorkspace } from '../../io/workspaceIO';
+import { deserializeWorkspace } from '../../io/workspaceCodec';
 import { loadLinkedFileHandle } from '../../io/workspaceFileLinkPersistence';
 import { loadWorkspacePersistence } from '../../io/workspacePersistence';
 import type { WorkspacePersistenceBootstrapResult } from './types';
 
-let bootstrapPromise: Promise<WorkspacePersistenceBootstrapResult> | null =
-  null;
-
-const loadLinkedWorkspaceCandidate = async (): Promise<{
-  linkedFile: Awaited<ReturnType<typeof deserializeWorkspace>>;
-  linkedFileModifiedAt: number;
-  linkedFileName: string;
-} | null> => {
-  const linkedRecord = await loadLinkedFileHandle().catch(() => null);
+const loadLinkedWorkspaceCandidate = async (): Promise<
+  | {
+      kind: 'loaded';
+      linkedFile: Awaited<ReturnType<typeof deserializeWorkspace>>;
+      linkedFileModifiedAt: number;
+      linkedFileName: string;
+    }
+  | {
+      kind: 'missing';
+    }
+  | {
+      kind: 'unreadable';
+      linkedFileName: string;
+    }
+> => {
+  const linkedRecord = await loadLinkedFileHandle();
 
   if (linkedRecord === null) {
-    return null;
+    return {
+      kind: 'missing',
+    };
   }
 
   try {
     const linkedFile = await linkedRecord.handle.getFile();
 
     return {
+      kind: 'loaded',
       linkedFile: deserializeWorkspace(await linkedFile.text()),
       linkedFileModifiedAt: linkedFile.lastModified,
       linkedFileName: linkedRecord.handle.name,
     };
   } catch {
-    return null;
+    return {
+      kind: 'unreadable',
+      linkedFileName: linkedRecord.handle.name,
+    };
   }
 };
 
 export const bootstrapWorkspacePersistence =
-  (): Promise<WorkspacePersistenceBootstrapResult> => {
-    if (bootstrapPromise !== null) {
-      return bootstrapPromise;
+  async (): Promise<WorkspacePersistenceBootstrapResult> => {
+    const autosaveResult = await loadWorkspacePersistence();
+
+    if (autosaveResult.kind === 'recovered') {
+      return autosaveResult;
     }
 
-    const nextBootstrapPromise: Promise<WorkspacePersistenceBootstrapResult> =
-      (async () => {
-        const autosaveResult = await loadWorkspacePersistence();
+    if (autosaveResult.kind !== 'loaded') {
+      return {
+        kind: 'no-restore',
+      } as const;
+    }
 
-        if (autosaveResult.kind === 'recovered') {
-          return autosaveResult;
-        }
+    const linkedWorkspaceCandidate = await loadLinkedWorkspaceCandidate();
 
-        if (autosaveResult.kind !== 'loaded') {
-          return {
-            kind: 'no-restore',
-          } as const;
-        }
+    if (linkedWorkspaceCandidate.kind === 'missing') {
+      return {
+        kind: 'autosave-only',
+        autosave: autosaveResult.workspace,
+        savedAt: autosaveResult.savedAt,
+        linkedFileUnreadable: false,
+        linkedFileName: null,
+      } as const;
+    }
 
-        const linkedWorkspaceCandidate = await loadLinkedWorkspaceCandidate();
+    if (linkedWorkspaceCandidate.kind === 'unreadable') {
+      return {
+        kind: 'autosave-only',
+        autosave: autosaveResult.workspace,
+        savedAt: autosaveResult.savedAt,
+        linkedFileUnreadable: true,
+        linkedFileName: linkedWorkspaceCandidate.linkedFileName,
+      } as const;
+    }
 
-        if (linkedWorkspaceCandidate === null) {
-          return {
-            kind: 'autosave-only',
-            autosave: autosaveResult.workspace,
-            savedAt: autosaveResult.savedAt,
-          } as const;
-        }
-
-        return {
-          kind: 'conflict',
-          autosave: autosaveResult.workspace,
-          autoSavedAt: autosaveResult.savedAt,
-          linkedFile: linkedWorkspaceCandidate.linkedFile,
-          linkedFileModifiedAt: linkedWorkspaceCandidate.linkedFileModifiedAt,
-          linkedFileName: linkedWorkspaceCandidate.linkedFileName,
-        } as const;
-      })();
-
-    const cachedBootstrapPromise = nextBootstrapPromise.catch(
-      (error: unknown) => {
-        bootstrapPromise = null;
-        throw error;
-      },
-    );
-
-    bootstrapPromise = cachedBootstrapPromise;
-
-    return cachedBootstrapPromise;
+    return {
+      kind: 'conflict',
+      autosave: autosaveResult.workspace,
+      autoSavedAt: autosaveResult.savedAt,
+      linkedFile: linkedWorkspaceCandidate.linkedFile,
+      linkedFileModifiedAt: linkedWorkspaceCandidate.linkedFileModifiedAt,
+      linkedFileName: linkedWorkspaceCandidate.linkedFileName,
+    } as const;
   };
-
-export const resetWorkspacePersistenceBootstrapForTests = (): void => {
-  bootstrapPromise = null;
-};

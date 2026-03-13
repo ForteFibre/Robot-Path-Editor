@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { WorkspacePersistedState } from '../../store/types';
+import type {
+  WorkspaceAutosavePayload,
+  WorkspaceDocument,
+} from '../../domain/workspaceContract';
 import type { loadLinkedFileHandle } from '../../io/workspaceFileLinkPersistence';
 import type { loadWorkspacePersistence } from '../../io/workspacePersistence';
 
@@ -15,7 +18,7 @@ vi.mock('../../io/workspaceFileLinkPersistence', () => {
   };
 });
 
-const createWorkspace = (): WorkspacePersistedState => {
+const createWorkspaceDocument = (): WorkspaceDocument => {
   return {
     domain: {
       paths: [],
@@ -23,7 +26,22 @@ const createWorkspace = (): WorkspacePersistedState => {
       lockedPointIds: [],
       activePathId: 'path-1',
     },
-    ui: {
+    backgroundImage: null,
+    robotSettings: {
+      length: 0.9,
+      width: 0.7,
+      acceleration: 5,
+      deceleration: 5,
+      maxVelocity: 2,
+      centripetalAcceleration: 5,
+    },
+  };
+};
+
+const createAutosavePayload = (): WorkspaceAutosavePayload => {
+  return {
+    document: createWorkspaceDocument(),
+    session: {
       mode: 'path',
       tool: 'select',
       selection: {
@@ -37,25 +55,16 @@ const createWorkspace = (): WorkspacePersistedState => {
         y: 0,
         k: 50,
       },
-      backgroundImage: null,
       robotPreviewEnabled: true,
-      robotSettings: {
-        length: 0.9,
-        width: 0.7,
-        acceleration: 5,
-        deceleration: 5,
-        maxVelocity: 2,
-        centripetalAcceleration: 5,
-      },
     },
   };
 };
 
-const createWorkspaceJson = (workspace: WorkspacePersistedState): string => {
+const createWorkspaceJson = (workspace: WorkspaceDocument): string => {
   return JSON.stringify({
     version: 1,
     coordinateSystem: 'ros-x-up-y-left',
-    workspace,
+    document: workspace,
   });
 };
 
@@ -66,7 +75,7 @@ const createLinkedHandle = (options?: {
 }) => {
   const {
     fileName = 'linked-workspace.json',
-    fileText = createWorkspaceJson(createWorkspace()),
+    fileText = createWorkspaceJson(createWorkspaceDocument()),
     lastModified = 1_762_000_000_500,
   } = options ?? {};
 
@@ -89,7 +98,6 @@ const createLinkedHandle = (options?: {
 
 describe('bootstrapWorkspacePersistence', () => {
   let bootstrapWorkspacePersistence: () => Promise<unknown>;
-  let resetWorkspacePersistenceBootstrapForTests: () => void;
   let mockedLoadWorkspacePersistence: ReturnType<
     typeof vi.mocked<typeof loadWorkspacePersistence>
   >;
@@ -115,16 +123,12 @@ describe('bootstrapWorkspacePersistence', () => {
     );
     bootstrapWorkspacePersistence =
       bootstrapModule.bootstrapWorkspacePersistence;
-    resetWorkspacePersistenceBootstrapForTests =
-      bootstrapModule.resetWorkspacePersistenceBootstrapForTests;
-
-    resetWorkspacePersistenceBootstrapForTests();
     mockedLoadWorkspacePersistence.mockReset();
     mockedLoadLinkedFileHandle.mockReset();
   });
 
-  it('loads workspace persistence only once and reuses the same promise', async () => {
-    const workspace = createWorkspace();
+  it('loads workspace persistence fresh on each invocation', async () => {
+    const workspace = createAutosavePayload();
     mockedLoadWorkspacePersistence.mockResolvedValue({
       kind: 'loaded',
       workspace,
@@ -139,17 +143,21 @@ describe('bootstrapWorkspacePersistence', () => {
       kind: 'autosave-only',
       autosave: workspace,
       savedAt: 1_762_000_000_000,
+      linkedFileUnreadable: false,
+      linkedFileName: null,
     });
     await expect(secondLoad).resolves.toEqual({
       kind: 'autosave-only',
       autosave: workspace,
       savedAt: 1_762_000_000_000,
+      linkedFileUnreadable: false,
+      linkedFileName: null,
     });
-    expect(mockedLoadWorkspacePersistence).toHaveBeenCalledTimes(1);
-    expect(mockedLoadLinkedFileHandle).toHaveBeenCalledTimes(1);
+    expect(mockedLoadWorkspacePersistence).toHaveBeenCalledTimes(2);
+    expect(mockedLoadLinkedFileHandle).toHaveBeenCalledTimes(2);
   });
 
-  it('clears the cached promise after an error so a later retry can succeed', async () => {
+  it('retries cleanly after an error without requiring an explicit reset', async () => {
     mockedLoadWorkspacePersistence
       .mockRejectedValueOnce(new Error('read failed'))
       .mockResolvedValueOnce({ kind: 'missing' });
@@ -164,7 +172,7 @@ describe('bootstrapWorkspacePersistence', () => {
     expect(mockedLoadWorkspacePersistence).toHaveBeenCalledTimes(2);
   });
 
-  it('allows tests to reset the bootstrap cache explicitly', async () => {
+  it('returns fresh results on later calls without any reset helper', async () => {
     mockedLoadWorkspacePersistence
       .mockResolvedValueOnce({ kind: 'missing' })
       .mockResolvedValueOnce({
@@ -178,8 +186,6 @@ describe('bootstrapWorkspacePersistence', () => {
       kind: 'no-restore',
     });
 
-    resetWorkspacePersistenceBootstrapForTests();
-
     await expect(bootstrapWorkspacePersistence()).resolves.toEqual({
       kind: 'recovered',
       reason: 'corrupt',
@@ -189,16 +195,13 @@ describe('bootstrapWorkspacePersistence', () => {
   });
 
   it('returns a conflict candidate when autosave and linked file both exist', async () => {
-    const autosaveWorkspace = createWorkspace();
-    const linkedBaseWorkspace = createWorkspace();
+    const autosaveWorkspace = createAutosavePayload();
+    const linkedBaseWorkspace = createWorkspaceDocument();
     const linkedWorkspace = {
       ...linkedBaseWorkspace,
-      ui: {
-        ...linkedBaseWorkspace.ui,
-        robotSettings: {
-          ...linkedBaseWorkspace.ui.robotSettings,
-          length: 1.25,
-        },
+      robotSettings: {
+        ...linkedBaseWorkspace.robotSettings,
+        length: 1.25,
       },
     };
 
@@ -224,17 +227,15 @@ describe('bootstrapWorkspacePersistence', () => {
 
     await expect(bootstrapWorkspacePersistence()).resolves.toMatchObject({
       linkedFile: {
-        ui: {
-          robotSettings: {
-            length: 1.25,
-          },
+        robotSettings: {
+          length: 1.25,
         },
       },
     });
   });
 
   it('falls back to autosave-only when the linked file cannot be read', async () => {
-    const workspace = createWorkspace();
+    const workspace = createAutosavePayload();
 
     mockedLoadWorkspacePersistence.mockResolvedValue({
       kind: 'loaded',
@@ -254,6 +255,31 @@ describe('bootstrapWorkspacePersistence', () => {
       kind: 'autosave-only',
       autosave: workspace,
       savedAt: 1_762_000_000_000,
+      linkedFileUnreadable: true,
+      linkedFileName: 'linked-workspace.json',
+    });
+  });
+
+  it('marks the linked file unreadable when parsing the linked file fails', async () => {
+    const workspace = createAutosavePayload();
+
+    mockedLoadWorkspacePersistence.mockResolvedValue({
+      kind: 'loaded',
+      workspace,
+      savedAt: 1_762_000_000_000,
+    });
+    mockedLoadLinkedFileHandle.mockResolvedValue(
+      createLinkedHandle({
+        fileText: '{"version":2,"document":',
+      }),
+    );
+
+    await expect(bootstrapWorkspacePersistence()).resolves.toEqual({
+      kind: 'autosave-only',
+      autosave: workspace,
+      savedAt: 1_762_000_000_000,
+      linkedFileUnreadable: true,
+      linkedFileName: 'linked-workspace.json',
     });
   });
 });

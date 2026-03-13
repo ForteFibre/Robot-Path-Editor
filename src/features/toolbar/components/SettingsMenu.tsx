@@ -1,71 +1,41 @@
-import { type ChangeEvent, useState, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import { Bot, Image as ImageIcon, Settings, Trash2 } from 'lucide-react';
 import { NumberInput } from '../../../components/common/NumberInput';
 import { Modal } from '../../../components/common/Modal';
-import { useWorkspaceActions } from '../../../store/workspaceStore';
-import {
-  useBackgroundImage,
-  useEditorTool,
-  useRobotPreviewEnabled,
-  useRobotSettings,
-} from '../../../store/workspaceSelectors';
 import styles from './SettingsMenu.module.css';
+import { useSettingsMenuController } from './useSettingsMenuController';
 
 export const SettingsMenu = (): ReactElement => {
   const {
-    setBackgroundImage,
-    updateBackgroundImage,
-    setTool,
-    setRobotPreviewEnabled,
-    setRobotSettings,
-  } = useWorkspaceActions();
-  const backgroundImage = useBackgroundImage();
-  const tool = useEditorTool();
-  const isRobotPreviewEnabled = useRobotPreviewEnabled();
-  const robotSettings = useRobotSettings();
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleBgImageLoad = (event: ChangeEvent<HTMLInputElement>): void => {
-    const file = event.target.files?.[0];
-    if (file === undefined) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      const dataUrl = loadEvent.target?.result;
-      if (typeof dataUrl !== 'string') {
-        return;
-      }
-
-      const image = new globalThis.Image();
-      image.onload = () => {
-        setBackgroundImage({
-          url: dataUrl,
-          width: image.width,
-          height: image.height,
-          x: 0,
-          y: 0,
-          scale: 1,
-          alpha: 1,
-        });
-      };
-      image.src = dataUrl;
-    };
-
-    reader.readAsDataURL(file);
-    event.target.value = '';
-  };
+    backgroundImage,
+    closeMenu,
+    handleBackgroundImageLoad,
+    handleBackgroundImageOpacityChange,
+    handleBackgroundImageScaleChange,
+    handleBackgroundImageXChange,
+    handleBackgroundImageYChange,
+    handleRemoveBackgroundImage,
+    handleRobotAccelerationChange,
+    handleRobotCentripetalAccelerationChange,
+    handleRobotDecelerationChange,
+    handleRobotLengthChange,
+    handleRobotMaxVelocityChange,
+    handleRobotWidthChange,
+    handleToggleImageLock,
+    handleToggleRobotPreview,
+    isOpen,
+    isRobotPreviewEnabled,
+    openMenu,
+    robotSettings,
+    tool,
+  } = useSettingsMenuController();
 
   return (
     <>
       <button
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.isOpen : ''}`}
-        onClick={() => {
-          setIsOpen(true);
-        }}
+        onClick={openMenu}
         aria-expanded={isOpen}
         aria-label="open settings menu"
         title="Settings"
@@ -73,13 +43,7 @@ export const SettingsMenu = (): ReactElement => {
         <Settings size={16} />
       </button>
 
-      <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
-        title="Settings"
-      >
+      <Modal isOpen={isOpen} onClose={closeMenu} title="Settings">
         <div className={styles.modalContent} aria-label="settings menu content">
           {/* Robot Settings Section */}
           <div className={styles.settingsSection} aria-label="robot settings">
@@ -97,11 +61,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.01}
                     step={0.01}
                     value={robotSettings.length}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ length: value });
-                      }
-                    }}
+                    onChange={handleRobotLengthChange}
                   />
                 </div>
               </div>
@@ -114,11 +74,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.01}
                     step={0.01}
                     value={robotSettings.width}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ width: value });
-                      }
-                    }}
+                    onChange={handleRobotWidthChange}
                   />
                 </div>
               </div>
@@ -128,7 +84,7 @@ export const SettingsMenu = (): ReactElement => {
                   type="checkbox"
                   checked={isRobotPreviewEnabled}
                   onChange={(event) => {
-                    setRobotPreviewEnabled(event.target.checked);
+                    handleToggleRobotPreview(event.target.checked);
                   }}
                   aria-label="Robot Preview"
                 />
@@ -144,11 +100,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.001}
                     step={0.01}
                     value={robotSettings.maxVelocity}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ maxVelocity: value });
-                      }
-                    }}
+                    onChange={handleRobotMaxVelocityChange}
                   />
                 </div>
               </div>
@@ -161,11 +113,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.001}
                     step={0.01}
                     value={robotSettings.acceleration}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ acceleration: value });
-                      }
-                    }}
+                    onChange={handleRobotAccelerationChange}
                   />
                 </div>
               </div>
@@ -178,11 +126,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.001}
                     step={0.01}
                     value={robotSettings.deceleration}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ deceleration: value });
-                      }
-                    }}
+                    onChange={handleRobotDecelerationChange}
                   />
                 </div>
               </div>
@@ -197,11 +141,7 @@ export const SettingsMenu = (): ReactElement => {
                     min={0.001}
                     step={0.01}
                     value={robotSettings.centripetalAcceleration}
-                    onChange={(value) => {
-                      if (value !== null) {
-                        setRobotSettings({ centripetalAcceleration: value });
-                      }
-                    }}
+                    onChange={handleRobotCentripetalAccelerationChange}
                   />
                 </div>
               </div>
@@ -216,9 +156,9 @@ export const SettingsMenu = (): ReactElement => {
             <h3 className={styles.sectionTitle}>
               <ImageIcon size={16} />
               Background Image
-              {backgroundImage !== null ? (
+              {backgroundImage === null ? null : (
                 <span className={styles.activeBadge} />
-              ) : null}
+              )}
             </h3>
 
             <div className={styles.fieldGroup}>
@@ -229,7 +169,7 @@ export const SettingsMenu = (): ReactElement => {
                     id="background-image-file-input"
                     type="file"
                     accept="image/*"
-                    onChange={handleBgImageLoad}
+                    onChange={handleBackgroundImageLoad}
                     className="visually-hidden"
                   />
                 </label>
@@ -242,11 +182,7 @@ export const SettingsMenu = (): ReactElement => {
                         aria-label="X (m)"
                         value={backgroundImage.x}
                         step={0.1}
-                        onChange={(value) => {
-                          if (value !== null) {
-                            updateBackgroundImage({ x: value });
-                          }
-                        }}
+                        onChange={handleBackgroundImageXChange}
                       />
                     </div>
                   </div>
@@ -257,11 +193,7 @@ export const SettingsMenu = (): ReactElement => {
                         aria-label="Y (m)"
                         value={backgroundImage.y}
                         step={0.1}
-                        onChange={(value) => {
-                          if (value !== null) {
-                            updateBackgroundImage({ y: value });
-                          }
-                        }}
+                        onChange={handleBackgroundImageYChange}
                       />
                     </div>
                   </div>
@@ -273,11 +205,7 @@ export const SettingsMenu = (): ReactElement => {
                         value={backgroundImage.scale}
                         step={0.1}
                         min={0.0001}
-                        onChange={(value) => {
-                          if (value !== null) {
-                            updateBackgroundImage({ scale: value });
-                          }
-                        }}
+                        onChange={handleBackgroundImageScaleChange}
                       />
                     </div>
                   </div>
@@ -290,11 +218,7 @@ export const SettingsMenu = (): ReactElement => {
                         step={0.1}
                         min={0}
                         max={1}
-                        onChange={(value) => {
-                          if (value !== null) {
-                            updateBackgroundImage({ alpha: value });
-                          }
-                        }}
+                        onChange={handleBackgroundImageOpacityChange}
                       />
                     </div>
                   </div>
@@ -305,9 +229,7 @@ export const SettingsMenu = (): ReactElement => {
                         type="checkbox"
                         checked={tool !== 'edit-image'}
                         onChange={(event) => {
-                          setTool(
-                            event.target.checked ? 'select' : 'edit-image',
-                          );
+                          handleToggleImageLock(event.target.checked);
                         }}
                       />
                       <span>Lock Image</span>
@@ -317,9 +239,7 @@ export const SettingsMenu = (): ReactElement => {
                       type="button"
                       className="icon-button btn-danger icon-button--small"
                       title="Remove Image"
-                      onClick={() => {
-                        setBackgroundImage(null);
-                      }}
+                      onClick={handleRemoveBackgroundImage}
                     >
                       <Trash2 size={14} /> Remove
                     </button>

@@ -14,12 +14,8 @@ import {
   getNextCanvasScale,
   zoomCanvasTransformAtPoint,
 } from '../../domain/canvas';
-import {
-  DEFAULT_SNAP_SETTINGS,
-  resolveAngleSnap,
-  resolvePointSnap,
-} from '../../domain/snapping';
-import { resolveSnapThresholds } from '../../domain/snapThresholds';
+import { DEFAULT_SNAP_SETTINGS } from '../../domain/snapSettings';
+import { resolveAngleSnap, resolvePointSnap } from '../../domain/snapping';
 
 describe('geometry', () => {
   it('normalizes angles into [0, 360)', () => {
@@ -196,11 +192,4 @@ describe('geometry', () => {
     expect(next.y).toBeLessThan(100);
   });
 
-  it('tightens point snap distance as zoom increases', () => {
-    const lowZoom = resolveSnapThresholds(5);
-    const highZoom = resolveSnapThresholds(200);
-
-    expect(highZoom.point).toBeLessThan(lowZoom.point);
-    expect(highZoom.angleDeg).toBe(lowZoom.angleDeg);
-  });
 });

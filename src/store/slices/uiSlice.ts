@@ -1,20 +1,19 @@
 import {
-  initialWorkspace,
-  normalizeRobotMotionSettings,
   type BackgroundImage,
   type RobotMotionSettings,
 } from '../../domain/models';
+import {
+  DEFAULT_ROBOT_MOTION_SETTINGS,
+  normalizeRobotMotionSettings,
+} from '../../domain/modelNormalization';
+import { normalizeWorkspaceSession } from '../../domain/workspaceNormalization';
 import { zoomCanvasTransformAtPoint } from '../../domain/canvas';
+import { DEFAULT_CANVAS_SCALE } from '../../domain/metricScale';
 import {
   DEFAULT_SNAP_SETTINGS,
   type SnapToggleKey,
-} from '../../domain/snapping';
-import type {
-  DomainState,
-  UiState,
-  WorkspacePersistedUiState,
-  WorkspaceSetState,
-} from '../types';
+} from '../../domain/snapSettings';
+import type { DomainState, UiState, WorkspaceSetState } from '../types';
 
 export type UiActions = {
   setMode: (mode: UiState['mode']) => void;
@@ -38,22 +37,27 @@ type UiActionDeps = {
 };
 
 export const createInitialUiState = (): UiState => {
-  const workspace = initialWorkspace();
-  const firstLibraryPointId =
-    workspace.points.find((point) => point.isLibrary)?.id ?? null;
-
   return {
-    mode: workspace.mode,
-    tool: workspace.tool,
-    selection: workspace.selection,
-    selectedLibraryPointId: firstLibraryPointId,
-    canvasTransform: workspace.canvasTransform,
+    mode: 'path',
+    tool: 'select',
+    selection: {
+      pathId: null,
+      waypointId: null,
+      headingKeyframeId: null,
+      sectionIndex: null,
+    },
+    selectedLibraryPointId: null,
+    canvasTransform: {
+      x: 200,
+      y: 100,
+      k: DEFAULT_CANVAS_SCALE,
+    },
     isDragging: false,
     snapSettings: DEFAULT_SNAP_SETTINGS,
-    snapPanelOpen: workspace.snapPanelOpen,
-    backgroundImage: workspace.backgroundImage,
-    robotPreviewEnabled: workspace.robotPreviewEnabled,
-    robotSettings: workspace.robotSettings,
+    snapPanelOpen: false,
+    backgroundImage: null,
+    robotPreviewEnabled: true,
+    robotSettings: DEFAULT_ROBOT_MOTION_SETTINGS,
   };
 };
 
@@ -71,68 +75,19 @@ const resolveValidSelectedLibraryPointId = (
   return domain.points.find((point) => point.isLibrary)?.id ?? null;
 };
 
-const resolveValidSelection = (
-  domain: DomainState,
-  selection: UiState['selection'],
-): UiState['selection'] => {
-  if (selection.pathId === null) {
-    return {
-      pathId: null,
-      waypointId: null,
-      headingKeyframeId: null,
-      sectionIndex: null,
-    };
-  }
-
-  const selectedPath = domain.paths.find(
-    (path) => path.id === selection.pathId,
-  );
-  if (selectedPath === undefined) {
-    return {
-      pathId: domain.activePathId,
-      waypointId: null,
-      headingKeyframeId: null,
-      sectionIndex: null,
-    };
-  }
-
-  const headingKeyframeId =
-    selection.headingKeyframeId === null ||
-    selectedPath.headingKeyframes.some(
-      (keyframe) => keyframe.id === selection.headingKeyframeId,
-    )
-      ? selection.headingKeyframeId
-      : null;
-
-  const waypointId =
-    selection.waypointId === null ||
-    selectedPath.waypoints.some(
-      (waypoint) => waypoint.id === selection.waypointId,
-    )
-      ? selection.waypointId
-      : null;
-
-  const sectionIndex =
-    selection.sectionIndex !== null &&
-    selection.sectionIndex >= 0 &&
-    selection.sectionIndex < selectedPath.waypoints.length - 1 &&
-    waypointId === null &&
-    headingKeyframeId === null
-      ? selection.sectionIndex
-      : null;
-
-  return {
-    pathId: selectedPath.id,
-    waypointId,
-    headingKeyframeId,
-    sectionIndex,
-  };
-};
-
 export const normalizeUiState = (domain: DomainState, ui: UiState): UiState => {
+  const session = normalizeWorkspaceSession(domain, {
+    mode: ui.mode,
+    tool: ui.tool,
+    selection: ui.selection,
+    canvasTransform: ui.canvasTransform,
+    robotPreviewEnabled: ui.robotPreviewEnabled,
+  });
+
   return {
     ...ui,
-    selection: resolveValidSelection(domain, ui.selection),
+    ...session,
+    robotSettings: normalizeRobotMotionSettings(ui.robotSettings),
     selectedLibraryPointId: resolveValidSelectedLibraryPointId(
       domain,
       ui.selectedLibraryPointId,
@@ -142,25 +97,7 @@ export const normalizeUiState = (domain: DomainState, ui: UiState): UiState => {
       ...ui.snapSettings,
     },
     snapPanelOpen: ui.snapPanelOpen,
-    backgroundImage: ui.backgroundImage,
-    robotPreviewEnabled: ui.robotPreviewEnabled,
-    robotSettings: normalizeRobotMotionSettings(ui.robotSettings),
   };
-};
-
-export const createImportedUiState = (
-  domain: DomainState,
-  persisted: WorkspacePersistedUiState,
-): UiState => {
-  return normalizeUiState(domain, {
-    ...persisted,
-    selectedLibraryPointId: null,
-    isDragging: false,
-    snapSettings: DEFAULT_SNAP_SETTINGS,
-    snapPanelOpen: true,
-    robotPreviewEnabled: persisted.robotPreviewEnabled ?? true,
-    robotSettings: normalizeRobotMotionSettings(persisted.robotSettings),
-  });
 };
 
 export const createUiActions = ({ setState }: UiActionDeps): UiActions => {

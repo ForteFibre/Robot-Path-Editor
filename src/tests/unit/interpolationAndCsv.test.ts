@@ -15,8 +15,8 @@ import {
   DEFAULT_CSV_EXPORT_STEP,
   MIN_RENDER_STEP,
 } from '../../domain/metricScale';
+import type { CsvWorkspaceSource } from '../../domain/workspaceContract';
 import { generateWorkspaceCsvFiles } from '../../io/csv';
-import type { DomainState } from '../../store/types';
 import type { PathModel, Point } from '../../domain/models';
 
 const createPoints = (
@@ -191,10 +191,9 @@ describe('interpolation and csv', () => {
   });
 
   it('exports csv files with the x,y,theta header', () => {
-    const domain: DomainState = {
+    const domain: CsvWorkspaceSource = {
       paths: [basePath],
       points,
-      lockedPointIds: [],
       activePathId: basePath.id,
     };
 
@@ -210,10 +209,9 @@ describe('interpolation and csv', () => {
   });
 
   it('exports theta in radians', () => {
-    const domain: DomainState = {
+    const domain: CsvWorkspaceSource = {
       paths: [basePath],
       points,
-      lockedPointIds: [],
       activePathId: basePath.id,
     };
 
@@ -235,10 +233,9 @@ describe('interpolation and csv', () => {
       visible: false,
     };
 
-    const domain: DomainState = {
+    const domain: CsvWorkspaceSource = {
       paths: [hiddenPath],
       points,
-      lockedPointIds: [],
       activePathId: hiddenPath.id,
     };
 
@@ -291,10 +288,9 @@ describe('interpolation and csv', () => {
       ],
     };
 
-    const domain: DomainState = {
+    const domain: CsvWorkspaceSource = {
       paths: [basePath, secondPath],
       points,
-      lockedPointIds: [],
       activePathId: basePath.id,
     };
 
@@ -391,10 +387,9 @@ describe('interpolation and csv', () => {
       ],
     };
 
-    const domain: DomainState = {
+    const domain: CsvWorkspaceSource = {
       paths: [basePath, secondPath, thirdPath],
       points,
-      lockedPointIds: [],
       activePathId: basePath.id,
     };
 

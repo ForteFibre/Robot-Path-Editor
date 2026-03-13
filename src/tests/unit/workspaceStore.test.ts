@@ -2,6 +2,7 @@ import { useWorkspaceStore } from '../../store/workspaceStore';
 import { MAX_CANVAS_SCALE, MIN_CANVAS_SCALE } from '../../domain/canvas';
 import {
   selectActivePath,
+  selectCanvasInteractionSnapshot,
   selectEditorMode,
   selectRobotSettings,
   selectSnapPanelOpen,
@@ -68,7 +69,7 @@ describe('workspaceStore', () => {
     expect(state.ui.isDragging).toBe(true);
   });
 
-  it('supports domain actions for path and waypoint operations', () => {
+  it('supports composed slice actions for path and waypoint operations', () => {
     const store = useWorkspaceStore.getState();
 
     store.setMode('path');
@@ -186,6 +187,18 @@ describe('workspaceStore', () => {
     expect(selectSelection(current).pathId).toBe(selectedPathId);
     expect(selectSnapPanelOpen(current)).toBe(false);
     expect(selectSnapSettings(current).alignX).toBe(true);
+
+    expect(selectCanvasInteractionSnapshot(current)).toEqual({
+      mode: current.ui.mode,
+      tool: current.ui.tool,
+      paths: current.domain.paths,
+      points: current.domain.points,
+      lockedPointIds: current.domain.lockedPointIds,
+      activePathId: current.domain.activePathId,
+      canvasTransform: current.ui.canvasTransform,
+      selection: current.ui.selection,
+      backgroundImage: current.ui.backgroundImage,
+    });
   });
 
   it('toggles snap settings and panel state without affecting history', () => {
@@ -275,17 +288,10 @@ describe('workspaceStore', () => {
     expect(store.canUndo()).toBe(true);
 
     const current = useWorkspaceStore.getState();
-    store.importWorkspace({
+    store.importWorkspaceDocument({
       domain: current.domain,
-      ui: {
-        mode: current.ui.mode,
-        tool: current.ui.tool,
-        selection: current.ui.selection,
-        canvasTransform: current.ui.canvasTransform,
-        backgroundImage: current.ui.backgroundImage,
-        robotPreviewEnabled: current.ui.robotPreviewEnabled,
-        robotSettings: current.ui.robotSettings,
-      },
+      backgroundImage: current.ui.backgroundImage,
+      robotSettings: current.ui.robotSettings,
     });
 
     expect(store.canUndo()).toBe(false);

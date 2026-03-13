@@ -1,14 +1,14 @@
-import { createHeadingKeyframe } from '../../domain/models';
+import { createHeadingKeyframe } from '../../domain/factories';
 import type { HeadingKeyframe } from '../../domain/models';
 import { normalizeOptionalName } from '../../domain/naming';
 import type { DomainState } from '../types';
 import {
   appendHeadingKeyframe,
-  findHeadingKeyframe,
   nextHeadingKeyframeName,
   removeHeadingKeyframe,
   updatePath,
-} from './shared';
+} from './structure';
+import { findHeadingKeyframe } from './lookups';
 
 type HeadingKeyframePatch = Partial<Omit<HeadingKeyframe, 'id'>>;
 

@@ -10,13 +10,14 @@ import {
   type Point,
 } from '../../domain/geometry';
 import { discretizePathDetailed } from '../../domain/interpolation';
-import { initialWorkspace, type Workspace } from '../../domain/models';
+import type { PathModel } from '../../domain/models';
 import {
   createPointIndex,
   resolvePathModel,
 } from '../../domain/pointResolution';
-import type { RMinDragTarget } from '../../features/canvas/components/CanvasRMinDrag';
+import type { RMinDragTarget } from '../../features/canvas/types/rMinDragTarget';
 import { resolveStageHit } from '../../features/canvas/hooks/canvasHitTesting';
+import type { CanvasInteractionSnapshot } from '../../store/types';
 
 const createStageAtScreen = (x: number, y: number): Konva.Stage => {
   return {
@@ -25,7 +26,7 @@ const createStageAtScreen = (x: number, y: number): Konva.Stage => {
 };
 
 const createStageAtWorld = (
-  workspace: Workspace,
+  workspace: CanvasInteractionSnapshot,
   worldPoint: Point,
 ): Konva.Stage => {
   const screenPoint = worldToScreen(worldPoint, workspace.canvasTransform);
@@ -34,8 +35,8 @@ const createStageAtWorld = (
 };
 
 const createDiscretizedByPath = (
-  workspace: Workspace,
-  activePath: Workspace['paths'][number],
+  workspace: CanvasInteractionSnapshot,
+  activePath: PathModel,
 ) => {
   return new Map([
     [
@@ -50,17 +51,35 @@ const createDiscretizedByPath = (
 };
 
 const createStraightPathFixture = () => {
-  const workspace = initialWorkspace();
-  const activePath = workspace.paths[0];
+  const activePath: PathModel = {
+    id: 'path-1',
+    name: 'Path 1',
+    color: '#2563eb',
+    visible: true,
+    waypoints: [],
+    headingKeyframes: [],
+    sectionRMin: [],
+  };
 
-  if (activePath === undefined) {
-    throw new Error('expected initial active path');
-  }
-
-  workspace.canvasTransform = {
-    x: 0,
-    y: 0,
-    k: 1,
+  const workspace: CanvasInteractionSnapshot = {
+    mode: 'path',
+    tool: 'select',
+    paths: [activePath],
+    points: [],
+    lockedPointIds: [],
+    activePathId: activePath.id,
+    canvasTransform: {
+      x: 0,
+      y: 0,
+      k: 1,
+    },
+    selection: {
+      pathId: activePath.id,
+      waypointId: null,
+      headingKeyframeId: null,
+      sectionIndex: null,
+    },
+    backgroundImage: null,
   };
 
   workspace.points = [

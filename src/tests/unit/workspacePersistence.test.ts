@@ -1,4 +1,4 @@
-import { createPoint } from '../../domain/models';
+import { createPoint } from '../../domain/factories';
 import { PATH_EDITOR_DB_NAME, putIndexedDbRecord } from '../../io/indexedDb';
 import {
   ACTIVE_WORKSPACE_PERSISTENCE_KEY,
@@ -6,10 +6,10 @@ import {
   loadWorkspacePersistence,
   saveWorkspacePersistence,
 } from '../../io/workspacePersistence';
-import { deserializeWorkspace, serializeWorkspace } from '../../io/workspaceIO';
-import { createInitialDomainState } from '../../store/slices/domainSlice';
+import { createInitialDomainState } from '../../store/slices/pathSlice';
 import { createInitialUiState } from '../../store/slices/uiSlice';
-import type { WorkspacePersistedState } from '../../store/types';
+import type { WorkspaceAutosavePayload } from '../../domain/workspaceContract';
+import { normalizeWorkspaceAutosavePayload } from '../../domain/workspaceNormalization';
 import * as indexedDb from '../../io/indexedDb';
 
 const deleteTestDatabase = async (): Promise<void> => {
@@ -32,7 +32,7 @@ const deleteTestDatabase = async (): Promise<void> => {
 
 const createWorkspaceFixture = (options?: {
   backgroundImageUrl?: string;
-}): WorkspacePersistedState => {
+}): WorkspaceAutosavePayload => {
   const backgroundImageUrl = options?.backgroundImageUrl;
   const hasBackgroundImage = backgroundImageUrl !== undefined;
   const domain = createInitialDomainState();
@@ -82,8 +82,27 @@ const createWorkspaceFixture = (options?: {
   primaryPath.sectionRMin = [0.08];
 
   return {
-    domain,
-    ui: {
+    document: {
+      domain,
+      backgroundImage: hasBackgroundImage
+        ? {
+            url: backgroundImageUrl,
+            width: 4096,
+            height: 2048,
+            x: 12.5,
+            y: -8.25,
+            scale: 0.5,
+            alpha: 0.65,
+          }
+        : ui.backgroundImage,
+      robotSettings: {
+        ...ui.robotSettings,
+        length: 1.2,
+        width: 0.9,
+        maxVelocity: 3.6,
+      },
+    },
+    session: {
       mode: 'path',
       tool: hasBackgroundImage ? 'edit-image' : ui.tool,
       selection: {
@@ -98,24 +117,7 @@ const createWorkspaceFixture = (options?: {
         y: 80,
         k: 48,
       },
-      backgroundImage: hasBackgroundImage
-        ? {
-            url: backgroundImageUrl,
-            width: 4096,
-            height: 2048,
-            x: 12.5,
-            y: -8.25,
-            scale: 0.5,
-            alpha: 0.65,
-          }
-        : ui.backgroundImage,
       robotPreviewEnabled: false,
-      robotSettings: {
-        ...ui.robotSettings,
-        length: 1.2,
-        width: 0.9,
-        maxVelocity: 3.6,
-      },
     },
   };
 };
@@ -132,9 +134,7 @@ describe('workspace persistence', () => {
 
   it('saves and loads a serialized workspace round-trip', async () => {
     const workspace = createWorkspaceFixture();
-    const expectedWorkspace = deserializeWorkspace(
-      serializeWorkspace(workspace),
-    );
+    const expectedWorkspace = normalizeWorkspaceAutosavePayload(workspace);
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1_762_000_000_000);
 
     const saved = await saveWorkspacePersistence(workspace);
@@ -236,9 +236,11 @@ describe('workspace persistence', () => {
       throw new Error('expected persisted workspace to load');
     }
 
-    expect(loaded.workspace.ui.backgroundImage?.url).toBe(largeImagePayload);
-    expect(loaded.workspace.ui.backgroundImage?.width).toBe(4096);
-    expect(loaded.workspace.ui.backgroundImage?.height).toBe(2048);
+    expect(loaded.workspace.document.backgroundImage?.url).toBe(
+      largeImagePayload,
+    );
+    expect(loaded.workspace.document.backgroundImage?.width).toBe(4096);
+    expect(loaded.workspace.document.backgroundImage?.height).toBe(2048);
   });
 
   it('propagates IndexedDB write failures during save', async () => {

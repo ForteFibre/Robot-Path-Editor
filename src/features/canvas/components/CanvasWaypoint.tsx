@@ -2,7 +2,7 @@ import type {
   ResolvedPathModel,
   ResolvedWaypoint,
 } from '../../../domain/pointResolution';
-import type { Workspace } from '../../../domain/models';
+import type { EditorMode } from '../../../domain/models';
 import { type ReactElement } from 'react';
 import { Circle, Group, Line, Text } from 'react-konva';
 import { pointFromHeading, worldToCanvasPoint } from '../../../domain/geometry';
@@ -15,7 +15,7 @@ type CanvasWaypointProps = {
   isSelected: boolean;
   isBreak: boolean;
   isCoordinateLocked: boolean;
-  mode: Workspace['mode'];
+  mode: EditorMode;
   isActive: boolean;
   isPreview?: boolean;
   interpolatedRobotHeading?: number;
@@ -66,7 +66,7 @@ const renderRobotHeadingOverlay = (params: {
   waypointCanvasPoint: { x: number; y: number };
   robotHeadingHandleCanvasPoint: { x: number; y: number };
   robotHeadingLineProps: { dash?: number[] };
-  mode: Workspace['mode'];
+  mode: EditorMode;
   k: number;
 }): ReactElement | null => {
   const {

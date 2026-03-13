@@ -2,7 +2,7 @@ import {
   createLibraryPoint,
   createPoint,
   createWaypoint,
-} from '../../domain/models';
+} from '../../domain/factories';
 import {
   getDefaultWaypointName,
   normalizeOptionalName,
@@ -12,16 +12,15 @@ import type { DomainState } from '../types';
 import {
   appendPoint,
   appendWaypoint,
-  collectLinkedWaypointPointIds,
-  getSelectedWaypoint,
   insertWaypointAt,
-  isLockedPoint,
   nextWaypointName,
-  normalizeDomainState,
   prependWaypoint,
-  resolveWaypointPoint,
   updatePath,
-} from './shared';
+} from './structure';
+import { isLockedPoint } from './locking';
+import { collectLinkedWaypointPointIds, resolveWaypointPoint } from './lookups';
+import { normalizeWorkspaceDomainState as normalizeDomainState } from '../../domain/workspaceNormalization';
+import { getSelectedWaypoint } from './selection';
 
 type LibraryPointMutationResult = {
   domain: DomainState;
@@ -317,6 +316,8 @@ type InsertLibraryWaypointInput = {
   pathId: string;
   x: number;
   y: number;
+  pointId?: string;
+  waypointId?: string;
   libraryPointId?: string;
   linkToLibrary?: boolean;
   coordinateSource?: 'input' | 'library';
@@ -368,6 +369,7 @@ export const insertLibraryWaypoint = (
       ? getDefaultWaypointName(0)
       : nextWaypointName(activePath));
   const point = createPoint({
+    ...(input.pointId === undefined ? {} : { id: input.pointId }),
     x: targetX,
     y: targetY,
     robotHeading: libraryPoint?.robotHeading ?? null,
@@ -375,6 +377,7 @@ export const insertLibraryWaypoint = (
     name: pointName,
   });
   const waypoint = createWaypoint({
+    ...(input.waypointId === undefined ? {} : { id: input.waypointId }),
     pointId: point.id,
     libraryPointId:
       shouldLink && libraryPoint !== undefined ? libraryPoint.id : null,

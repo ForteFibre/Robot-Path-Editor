@@ -1,16 +1,10 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactElement,
-} from 'react';
+import { type ReactElement } from 'react';
 import {
   ChevronDown,
   FolderOpen,
-  Save,
-  FileSpreadsheet,
   FilePlus,
+  FileSpreadsheet,
+  Save,
 } from 'lucide-react';
 import { NumberInput } from '../../../components/common/NumberInput';
 import { Modal } from '../../../components/common/Modal';
@@ -19,91 +13,39 @@ import {
   MIN_CSV_EXPORT_STEP,
   formatMetricValue,
 } from '../../../domain/metricScale';
-import type { CsvTarget } from '../../../io/csv';
+import type { WorkspaceToolbarCommands } from '../../workspace-file/types';
 import styles from './FileMenu.module.css';
+import { useFileMenuController } from './useFileMenuController';
 
 type FileMenuProps = {
-  csvTarget: CsvTarget;
-  csvStep: number;
-  isFileSystemAccessSupported: boolean;
-  linkedFileName: string | null;
-  onCsvTargetChange: (target: CsvTarget) => void;
-  onCsvStepChange: (step: number) => void;
-  onLoadWorkspace: () => Promise<void>;
-  onNewWorkspace: () => Promise<void>;
-  onSaveWorkspace: () => Promise<void>;
-  onSaveWorkspaceAs: () => Promise<void>;
-  onImportJson: (file: File) => Promise<void>;
-  onExportCsv: () => void;
+  workspaceCommands: WorkspaceToolbarCommands;
 };
 
 export const FileMenu = ({
-  csvTarget,
-  csvStep,
-  isFileSystemAccessSupported,
-  linkedFileName,
-  onCsvTargetChange,
-  onCsvStepChange,
-  onLoadWorkspace,
-  onNewWorkspace,
-  onSaveWorkspace,
-  onSaveWorkspaceAs,
-  onImportJson,
-  onExportCsv,
+  workspaceCommands,
 }: FileMenuProps): ReactElement => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const importInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
-      const target = event.target;
-      if (
-        !(target instanceof Node) ||
-        !isOpen ||
-        containerRef.current === null
-      ) {
-        return;
-      }
-
-      if (!containerRef.current.contains(target)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const handleImport = (event: ChangeEvent<HTMLInputElement>): void => {
-    const file = event.target.files?.[0];
-    if (file === undefined) {
-      return;
-    }
-
-    void onImportJson(file);
-    event.target.value = '';
-    setIsOpen(false);
-  };
-
-  const closeMenu = (): void => {
-    setIsOpen(false);
-  };
+  const {
+    closeCsvModal,
+    containerRef,
+    handleExportCsv,
+    handleImport,
+    handleNewWorkspace,
+    handleOpenWorkspace,
+    handleSave,
+    handleSaveAs,
+    importInputRef,
+    isCsvModalOpen,
+    isOpen,
+    openCsvModal,
+    toggleMenu,
+  } = useFileMenuController({ workspaceCommands });
 
   return (
     <div className={styles.container} ref={containerRef}>
       <button
         type="button"
         className={`${styles.trigger} ${isOpen ? styles.isOpen : ''}`}
-        onClick={() => {
-          setIsOpen(!isOpen);
-        }}
+        onClick={toggleMenu}
         aria-expanded={isOpen}
         aria-label="file menu"
       >
@@ -116,18 +58,7 @@ export const FileMenu = ({
           <button
             type="button"
             className={styles.menuItem}
-            onClick={() => {
-              const confirmed =
-                typeof globalThis.confirm === 'function'
-                  ? globalThis.confirm(
-                      '現在のワークスペースを破棄して新規作成しますか？',
-                    )
-                  : true;
-              if (confirmed) {
-                void onNewWorkspace();
-                setIsOpen(false);
-              }
-            }}
+            onClick={handleNewWorkspace}
             aria-label="new workspace"
           >
             <FilePlus size={16} />
@@ -136,23 +67,27 @@ export const FileMenu = ({
 
           <div className={styles.divider} />
 
-          {isFileSystemAccessSupported ? (
+          {workspaceCommands.isFileSystemAccessSupported ? (
             <button
               type="button"
               className={styles.menuItem}
-              onClick={() => {
-                void onLoadWorkspace();
-                closeMenu();
-              }}
+              onClick={handleOpenWorkspace}
               aria-label="Load Workspace"
             >
               <FolderOpen size={16} />
               <span>Load Workspace</span>
             </button>
           ) : (
-            <label className={styles.menuItem} aria-label="load workspace json">
-              <FolderOpen size={16} />
-              <span>Load Workspace</span>
+            <>
+              <button
+                type="button"
+                className={styles.menuItem}
+                onClick={handleOpenWorkspace}
+                aria-label="load workspace json"
+              >
+                <FolderOpen size={16} />
+                <span>Load Workspace</span>
+              </button>
               <input
                 ref={importInputRef}
                 type="file"
@@ -161,16 +96,13 @@ export const FileMenu = ({
                 className="visually-hidden"
                 aria-label="load workspace file"
               />
-            </label>
+            </>
           )}
 
           <button
             type="button"
             className={styles.menuItem}
-            onClick={() => {
-              void onSaveWorkspace();
-              closeMenu();
-            }}
+            onClick={handleSave}
             aria-label="Save Workspace"
           >
             <Save size={16} />
@@ -180,29 +112,23 @@ export const FileMenu = ({
           <button
             type="button"
             className={styles.menuItem}
-            onClick={() => {
-              void onSaveWorkspaceAs();
-              closeMenu();
-            }}
+            onClick={handleSaveAs}
             aria-label="Save Workspace As"
           >
             <Save size={16} />
             <span>Save Workspace As...</span>
           </button>
 
-          {linkedFileName === null ? null : (
+          {workspaceCommands.linkedFileName === null ? null : (
             <div className={styles.linkedFileName} aria-live="polite">
-              linked: {linkedFileName}
+              linked: {workspaceCommands.linkedFileName}
             </div>
           )}
 
           <button
             type="button"
             className={styles.menuItem}
-            onClick={() => {
-              setIsCsvModalOpen(true);
-              setIsOpen(false);
-            }}
+            onClick={openCsvModal}
             aria-label="Export CSV"
           >
             <FileSpreadsheet size={16} />
@@ -211,21 +137,18 @@ export const FileMenu = ({
         </div>
       ) : null}
 
-      <Modal
-        isOpen={isCsvModalOpen}
-        onClose={() => {
-          setIsCsvModalOpen(false);
-        }}
-        title="Export CSV"
-      >
+      <Modal isOpen={isCsvModalOpen} onClose={closeCsvModal} title="Export CSV">
         <div className={styles.csvModalContent}>
           <label className={styles.modalLabel}>
             <span>Target</span>
             <select
               className={styles.modalSelect}
-              value={csvTarget}
+              value={workspaceCommands.csvExport.target}
               onChange={(event) => {
-                onCsvTargetChange(event.target.value as CsvTarget);
+                workspaceCommands.csvExport.setTarget(
+                  event.target
+                    .value as WorkspaceToolbarCommands['csvExport']['target'],
+                );
               }}
             >
               <option value="active">Active Path</option>
@@ -239,10 +162,10 @@ export const FileMenu = ({
                 id="export-step-modal"
                 min={MIN_CSV_EXPORT_STEP}
                 step={MIN_CSV_EXPORT_STEP}
-                value={csvStep}
+                value={workspaceCommands.csvExport.step}
                 onChange={(value) => {
                   if (value !== null) {
-                    onCsvStepChange(Math.max(MIN_CSV_EXPORT_STEP, value));
+                    workspaceCommands.csvExport.setStep(value);
                   }
                 }}
               />
@@ -255,19 +178,14 @@ export const FileMenu = ({
             <button
               type="button"
               className={styles.cancelButton}
-              onClick={() => {
-                setIsCsvModalOpen(false);
-              }}
+              onClick={closeCsvModal}
             >
               Cancel
             </button>
             <button
               type="button"
               className={styles.primaryButton}
-              onClick={() => {
-                onExportCsv();
-                setIsCsvModalOpen(false);
-              }}
+              onClick={handleExportCsv}
             >
               <FileSpreadsheet size={16} />
               Export

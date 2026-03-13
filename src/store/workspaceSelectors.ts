@@ -1,11 +1,19 @@
 import type {
+  BackgroundImage,
+  CanvasTool,
+  EditorMode,
   PathModel,
   Point,
   RobotMotionSettings,
   SelectionState,
-  Workspace,
 } from '../domain/models';
-import type { SnapSettings } from '../domain/snapping';
+import type { CanvasTransform } from '../domain/canvasTransform';
+import type { SnapSettings } from '../domain/snapSettings';
+import type {
+  WorkspaceAutosaveSource,
+  WorkspaceDocumentSource,
+} from './adapters/workspacePersistence';
+import type { CanvasInteractionSnapshot } from './types';
 import { useShallow } from 'zustand/react/shallow';
 import { useWorkspaceStore, type WorkspaceStoreState } from './workspaceStore';
 
@@ -15,34 +23,11 @@ export type PointLibraryView = {
   selectedLibraryPointId: string | null;
 };
 
-export const selectWorkspace = (state: WorkspaceStoreState): Workspace => {
-  return {
-    mode: state.ui.mode,
-    tool: state.ui.tool,
-    paths: state.domain.paths,
-    points: state.domain.points,
-    lockedPointIds: state.domain.lockedPointIds,
-    activePathId: state.domain.activePathId,
-    canvasTransform: state.ui.canvasTransform,
-    selection: state.ui.selection,
-    isDragging: state.ui.isDragging,
-    snapSettings: state.ui.snapSettings,
-    snapPanelOpen: state.ui.snapPanelOpen,
-    backgroundImage: state.ui.backgroundImage,
-    robotPreviewEnabled: state.ui.robotPreviewEnabled,
-    robotSettings: state.ui.robotSettings,
-  };
-};
-
-export const selectEditorMode = (
-  state: WorkspaceStoreState,
-): Workspace['mode'] => {
+export const selectEditorMode = (state: WorkspaceStoreState): EditorMode => {
   return state.ui.mode;
 };
 
-export const selectEditorTool = (
-  state: WorkspaceStoreState,
-): Workspace['tool'] => {
+export const selectEditorTool = (state: WorkspaceStoreState): CanvasTool => {
   return state.ui.tool;
 };
 
@@ -58,13 +43,60 @@ export const selectActivePathId = (state: WorkspaceStoreState): string => {
   return state.domain.activePathId;
 };
 
+export const selectDomainState = (
+  state: WorkspaceStoreState,
+): WorkspaceStoreState['domain'] => {
+  return state.domain;
+};
+
+export const selectWorkspaceDocumentSource = (
+  state: WorkspaceStoreState,
+): WorkspaceDocumentSource => {
+  return {
+    domain: state.domain,
+    backgroundImage: state.ui.backgroundImage,
+    robotSettings: state.ui.robotSettings,
+  };
+};
+
+export const selectWorkspaceAutosaveSource = (
+  state: WorkspaceStoreState,
+): WorkspaceAutosaveSource => {
+  return {
+    domain: state.domain,
+    mode: state.ui.mode,
+    tool: state.ui.tool,
+    selection: state.ui.selection,
+    canvasTransform: state.ui.canvasTransform,
+    backgroundImage: state.ui.backgroundImage,
+    robotPreviewEnabled: state.ui.robotPreviewEnabled,
+    robotSettings: state.ui.robotSettings,
+  };
+};
+
 export const selectPointLibrary = (
   state: WorkspaceStoreState,
 ): PointLibraryView => {
   return {
-    items: state.domain.points,
+    items: selectPoints(state),
+    lockedPointIds: selectLockedPointIds(state),
+    selectedLibraryPointId: selectSelectedLibraryPointId(state),
+  };
+};
+
+export const selectCanvasInteractionSnapshot = (
+  state: WorkspaceStoreState,
+): CanvasInteractionSnapshot => {
+  return {
+    mode: state.ui.mode,
+    tool: state.ui.tool,
+    paths: state.domain.paths,
+    points: state.domain.points,
     lockedPointIds: state.domain.lockedPointIds,
-    selectedLibraryPointId: state.ui.selectedLibraryPointId,
+    activePathId: state.domain.activePathId,
+    canvasTransform: state.ui.canvasTransform,
+    selection: state.ui.selection,
+    backgroundImage: state.ui.backgroundImage,
   };
 };
 
@@ -84,7 +116,7 @@ export const selectLockedPointIds = (state: WorkspaceStoreState): string[] => {
 
 export const selectCanvasTransform = (
   state: WorkspaceStoreState,
-): Workspace['canvasTransform'] => {
+): CanvasTransform => {
   return state.ui.canvasTransform;
 };
 
@@ -100,7 +132,7 @@ export const selectSnapPanelOpen = (state: WorkspaceStoreState): boolean => {
 
 export const selectBackgroundImage = (
   state: WorkspaceStoreState,
-): Workspace['backgroundImage'] => {
+): BackgroundImage | null => {
   return state.ui.backgroundImage;
 };
 
@@ -119,15 +151,16 @@ export const selectRobotPreviewEnabled = (
 export const selectActivePath = (
   state: WorkspaceStoreState,
 ): PathModel | null => {
-  const { paths, activePathId } = state.domain;
+  const paths = selectPaths(state);
+  const activePathId = selectActivePathId(state);
   return paths.find((path) => path.id === activePathId) ?? null;
 };
 
 export const selectSelectedPath = (
   state: WorkspaceStoreState,
 ): PathModel | null => {
-  const { paths } = state.domain;
-  const { selection } = state.ui;
+  const paths = selectPaths(state);
+  const selection = selectSelection(state);
   if (selection.pathId === null) {
     return null;
   }
@@ -168,11 +201,11 @@ export const selectSelectedHeadingKeyframe = (
   );
 };
 
-export const useEditorMode = (): Workspace['mode'] => {
+export const useEditorMode = (): EditorMode => {
   return useWorkspaceStore(selectEditorMode);
 };
 
-export const useEditorTool = (): Workspace['tool'] => {
+export const useEditorTool = (): CanvasTool => {
   return useWorkspaceStore(selectEditorTool);
 };
 
@@ -216,7 +249,7 @@ export const usePointLibrary = (): PointLibraryView => {
   return useWorkspaceStore(useShallow(selectPointLibrary));
 };
 
-export const useCanvasTransform = (): Workspace['canvasTransform'] => {
+export const useCanvasTransform = (): CanvasTransform => {
   return useWorkspaceStore(selectCanvasTransform);
 };
 
@@ -232,7 +265,7 @@ export const useSnapPanelOpen = (): boolean => {
   return useWorkspaceStore(selectSnapPanelOpen);
 };
 
-export const useBackgroundImage = (): Workspace['backgroundImage'] => {
+export const useBackgroundImage = (): BackgroundImage | null => {
   return useWorkspaceStore(selectBackgroundImage);
 };
 

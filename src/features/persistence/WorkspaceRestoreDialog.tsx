@@ -8,7 +8,6 @@ import styles from './WorkspaceRestoreDialog.module.css';
 type WorkspaceRestoreDialogProps = {
   result: WorkspacePersistenceRestoreCandidate | null;
   isBusy: boolean;
-  errorMessage: string | null;
   onStartFresh: () => void;
   onRestoreLastEdit: () => void;
   onRestoreLinkedFile: () => void;
@@ -18,7 +17,6 @@ type WorkspaceRestoreDialogProps = {
 export const WorkspaceRestoreDialog = ({
   result,
   isBusy,
-  errorMessage,
   onStartFresh,
   onRestoreLastEdit,
   onRestoreLinkedFile,
@@ -53,7 +51,9 @@ export const WorkspaceRestoreDialog = ({
           className={styles.restoreChoiceButton}
           onClick={onRestoreLastEdit}
           disabled={isBusy}
-          aria-label={`IndexedDBの自動保存を復元 (${formatAbsoluteDateTime(result.autoSavedAt)})`}
+          aria-label={`IndexedDBの自動保存を復元 (${formatAbsoluteDateTime(
+            result.autoSavedAt,
+          )})`}
         >
           <RotateCcw size={16} />
           <span className={styles.restoreChoiceTitle}>
@@ -72,7 +72,9 @@ export const WorkspaceRestoreDialog = ({
           className={styles.restoreChoiceButton}
           onClick={onRestoreLinkedFile}
           disabled={isBusy}
-          aria-label={`リンクされたJSONファイルを読み込む (${formatAbsoluteDateTime(result.linkedFileModifiedAt)})`}
+          aria-label={`リンクされたJSONファイルを読み込む (${formatAbsoluteDateTime(
+            result.linkedFileModifiedAt,
+          )})`}
         >
           <FileJson2 size={16} />
           <span className={styles.restoreChoiceTitle}>
@@ -149,12 +151,6 @@ export const WorkspaceRestoreDialog = ({
         <p className={styles.lead}>{leadText}</p>
 
         {savedMeta}
-
-        {errorMessage === null ? null : (
-          <p className={styles.error} role="alert">
-            {errorMessage}
-          </p>
-        )}
 
         <div className={styles.actions}>
           {primaryActions}

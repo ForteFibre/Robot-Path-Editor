@@ -3,7 +3,7 @@ import {
   createPath,
   createPoint,
   createWaypoint,
-} from '../../domain/models';
+} from '../../domain/factories';
 import { discretizePathDetailed } from '../../domain/interpolation';
 import {
   createPointIndex,

@@ -1,10 +1,10 @@
 import { useEffect, type RefObject } from 'react';
-import { useWorkspaceActions } from '../../../store/workspaceStore';
+import { useCanvasEditActions } from './useCanvasEditActions';
 
 export const useCanvasWheel = (
   surfaceRef: RefObject<HTMLElement | null>,
 ): void => {
-  const { zoomCanvas } = useWorkspaceActions();
+  const { zoomCanvas } = useCanvasEditActions();
 
   useEffect(() => {
     const surface = surfaceRef.current;

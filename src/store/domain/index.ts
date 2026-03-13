@@ -31,8 +31,5 @@ export {
   updateLibraryPoint,
   updateLibraryPointRobotHeading,
 } from './libraryMutators';
-export {
-  getSelectedHeadingKeyframe,
-  getSelectedWaypoint,
-  normalizeDomainState,
-} from './shared';
+export { normalizeWorkspaceDomainState as normalizeDomainState } from '../../domain/workspaceNormalization';
+export { getSelectedHeadingKeyframe, getSelectedWaypoint } from './selection';

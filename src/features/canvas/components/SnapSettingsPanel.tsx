@@ -1,9 +1,6 @@
 import { type ReactElement } from 'react';
-import {
-  SNAP_SETTING_DEFINITIONS,
-  type SnapSettings,
-  type SnapToggleKey,
-} from '../../../domain/snapping';
+import { SNAP_SETTING_DEFINITIONS } from '../../../domain/snapping';
+import type { SnapSettings, SnapToggleKey } from '../../../domain/snapSettings';
 import styles from './SnapSettingsPanel.module.css';
 
 type SnapSettingsPanelProps = {

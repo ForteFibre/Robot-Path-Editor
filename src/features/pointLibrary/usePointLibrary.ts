@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
 import type { PathModel, Point } from '../../domain/models';
-import { useWorkspaceActions } from '../../store/workspaceStore';
 import {
   useActivePathId,
   useLockedPointIds,
@@ -9,6 +8,7 @@ import {
   useSelectedLibraryPointId,
   useSelectedWaypoint,
 } from '../../store/workspaceSelectors';
+import { usePointLibraryActions } from './usePointLibraryActions';
 
 export type LibraryPointListItem = {
   id: string;
@@ -27,11 +27,25 @@ export type LibraryPointDraft = {
   robotHeading: number | null;
 };
 
+export type DeleteLibraryPointResult =
+  | { kind: 'deleted' }
+  | { kind: 'not-found' }
+  | {
+      kind: 'confirmation-required';
+      pointId: string;
+      pointName: string;
+      usageCount: number;
+    };
+
 const DEFAULT_DRAFT: LibraryPointDraft = {
   name: '',
   x: null,
   y: null,
   robotHeading: null,
+};
+
+const getLibraryPointDisplayName = (name: string): string => {
+  return name.trim().length > 0 ? name : 'Untitled Point';
 };
 
 const listLibraryPoints = (points: Point[]): Point[] => {
@@ -67,7 +81,7 @@ export const usePointLibrary = () => {
     setSelectedLibraryPointId,
     toggleLibraryPointLock,
     updateLibraryPoint,
-  } = useWorkspaceActions();
+  } = usePointLibraryActions();
   const activePathId = useActivePathId();
   const points = usePoints();
   const paths = usePaths();
@@ -141,25 +155,27 @@ export const usePointLibrary = () => {
     insertLibraryWaypointAtEndOfPath(pointId, activePathId);
   };
 
-  const deletePoint = (pointId: string): void => {
+  const deletePoint = (
+    pointId: string,
+    options?: { force?: boolean },
+  ): DeleteLibraryPointResult => {
     const item = items.find((candidate) => candidate.id === pointId);
     if (item === undefined) {
-      return;
+      return { kind: 'not-found' };
     }
 
-    if (item.usageCount > 0) {
-      const confirmed =
-        typeof globalThis.confirm === 'function'
-          ? globalThis.confirm(
-              `${item.name} を削除すると ${item.usageCount} 個の linked waypoint が Library から外れます。続行しますか？`,
-            )
-          : true;
-      if (!confirmed) {
-        return;
-      }
+    if (item.usageCount > 0 && options?.force !== true) {
+      return {
+        kind: 'confirmation-required',
+        pointId: item.id,
+        pointName: getLibraryPointDisplayName(item.name),
+        usageCount: item.usageCount,
+      };
     }
 
     deleteLibraryPoint(pointId);
+
+    return { kind: 'deleted' };
   };
 
   const togglePointLock = (pointId: string): void => {

@@ -1,24 +1,17 @@
 import type {
   BackgroundImage,
   CanvasTool,
-  CanvasTransform,
   EditorMode,
   HeadingKeyframe,
-  PathModel,
-  Point,
   RobotMotionSettings,
   SelectionState,
-  Workspace,
   Waypoint,
 } from '../domain/models';
-import type { SnapSettings, SnapToggleKey } from '../domain/snapping';
+import type { WorkspaceDomainState } from '../domain/workspaceContract';
+import type { CanvasTransform } from '../domain/canvasTransform';
+import type { SnapSettings, SnapToggleKey } from '../domain/snapSettings';
 
-export type DomainState = {
-  paths: PathModel[];
-  points: Point[];
-  lockedPointIds: string[];
-  activePathId: string;
-};
+export type DomainState = WorkspaceDomainState;
 
 export type UiState = {
   mode: EditorMode;
@@ -39,40 +32,25 @@ export type WorkspaceState = {
   ui: UiState;
 };
 
+export type WorkspaceStateUpdater = (
+  state: WorkspaceState,
+) => Partial<WorkspaceState>;
+
 export type WorkspaceSetState = (
-  partial:
-    | Partial<WorkspaceState>
-    | ((state: WorkspaceState) => Partial<WorkspaceState>),
+  partial: Partial<WorkspaceState> | WorkspaceStateUpdater,
 ) => void;
 
-export type WorkspaceSnapshot = Workspace;
+export type CanvasInteractionSnapshot = WorkspaceDomainState &
+  Pick<
+    UiState,
+    'mode' | 'tool' | 'selection' | 'canvasTransform' | 'backgroundImage'
+  >;
 
-export type WorkspacePersistedUiState = Pick<
-  UiState,
-  | 'mode'
-  | 'tool'
-  | 'selection'
-  | 'canvasTransform'
-  | 'backgroundImage'
-  | 'robotSettings'
-> & {
-  robotPreviewEnabled?: boolean;
-};
-
-export type WorkspacePersistedState = {
-  domain: DomainState;
-  ui: WorkspacePersistedUiState;
-};
-
-export type WorkspaceHistoryApi = {
-  undo: (steps?: number) => void;
-  redo: (steps?: number) => void;
-  clear: () => void;
-  canUndo: () => boolean;
-  canRedo: () => boolean;
-  pause: () => void;
-  resume: () => void;
-};
+export type {
+  WorkspaceAutosavePayload,
+  WorkspaceDocument,
+  WorkspaceSession,
+} from '../domain/workspaceContract';
 
 export type WaypointUpdatePatch = Partial<Omit<Waypoint, 'id' | 'pointId'>> & {
   robotHeading?: number | null;

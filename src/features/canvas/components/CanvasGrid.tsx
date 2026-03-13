@@ -7,7 +7,7 @@ import {
   getMetricStepDecimals,
   WORLD_GUIDE_EXTENT,
 } from '../../../domain/metricScale';
-import type { CanvasTransform } from '../../../domain/models';
+import type { CanvasTransform } from '../../../domain/canvasTransform';
 
 const LABEL_SCREEN_PADDING = 12;
 const GRID_LINE_COLOR = '#e5e7eb';

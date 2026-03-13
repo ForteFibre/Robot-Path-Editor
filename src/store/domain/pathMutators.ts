@@ -1,7 +1,8 @@
-import { createPath } from '../../domain/models';
+import { createPath } from '../../domain/factories';
 import { createPointIndex } from '../../domain/pointResolution';
 import type { DomainState } from '../types';
-import { duplicatePathModel, normalizeDomainState, updatePath } from './shared';
+import { normalizeWorkspaceDomainState as normalizeDomainState } from '../../domain/workspaceNormalization';
+import { duplicatePathModel, updatePath } from './structure';
 
 export const addPath = (domain: DomainState): DomainState => {
   const newPath = createPath(domain.paths.length);

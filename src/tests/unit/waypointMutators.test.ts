@@ -1,4 +1,8 @@
-import { createPath, createPoint, createWaypoint } from '../../domain/models';
+import {
+  createPath,
+  createPoint,
+  createWaypoint,
+} from '../../domain/factories';
 import { normalizeDomainState, updateWaypoint } from '../../store/domain';
 import type { DomainState } from '../../store/types';
 

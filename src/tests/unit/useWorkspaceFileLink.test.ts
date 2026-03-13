@@ -45,7 +45,8 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(true)),
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
+        importWorkspaceJsonSource: vi.fn(() => Promise.resolve()),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() =>
           Promise.resolve({
@@ -67,11 +68,12 @@ describe('useWorkspaceFileLink', () => {
       fileName: 'picked-workspace.json',
       lastModified: 1_762_000_000_200,
     });
-    const importWorkspaceJsonSource = vi.fn(() => Promise.resolve(true));
+    const importWorkspaceJsonSource = vi.fn(() => Promise.resolve());
     const saveLinkedFileHandleFn = vi.fn(() => Promise.resolve());
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
         importWorkspaceJsonSource,
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() => Promise.resolve(null)),
@@ -112,7 +114,10 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(false)),
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
+        importWorkspaceJsonSource: vi.fn(() =>
+          Promise.reject(new Error('import failed')),
+        ),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() => Promise.resolve(null)),
         openWorkspaceFileFn: vi.fn(() =>
@@ -127,7 +132,11 @@ describe('useWorkspaceFileLink', () => {
     );
 
     await act(async () => {
-      await result.current.openWithFilePicker();
+      try {
+        await result.current.openWithFilePicker();
+      } catch {
+        // import failure expected
+      }
     });
 
     expect(saveLinkedFileHandleFn).not.toHaveBeenCalled();
@@ -149,7 +158,8 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(true)),
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
+        importWorkspaceJsonSource: vi.fn(() => Promise.resolve()),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() =>
           Promise.resolve({
@@ -159,7 +169,6 @@ describe('useWorkspaceFileLink', () => {
         ),
         overwriteWorkspaceFileFn,
         saveLinkedFileHandleFn,
-        serializeWorkspaceFn: vi.fn(() => '{"workspace":true}'),
       }),
     );
 
@@ -195,12 +204,12 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(true)),
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
+        importWorkspaceJsonSource: vi.fn(() => Promise.resolve()),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() => Promise.resolve(null)),
         saveLinkedFileHandleFn,
         saveWorkspaceFileAsFn,
-        serializeWorkspaceFn: vi.fn(() => '{"workspace":true}'),
       }),
     );
 
@@ -235,7 +244,8 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(true)),
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
+        importWorkspaceJsonSource: vi.fn(() => Promise.resolve()),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() =>
           Promise.resolve({
@@ -245,7 +255,6 @@ describe('useWorkspaceFileLink', () => {
         ),
         overwriteWorkspaceFileFn,
         saveLinkedFileHandleFn,
-        serializeWorkspaceFn: vi.fn(() => '{"workspace":true}'),
       }),
     );
 
@@ -285,11 +294,12 @@ describe('useWorkspaceFileLink', () => {
       fileText: '{"workspace":"latest"}',
       lastModified: 1_762_000_001_000,
     });
-    const importWorkspaceJsonSource = vi.fn(() => Promise.resolve(true));
+    const importWorkspaceJsonSource = vi.fn(() => Promise.resolve());
     const saveLinkedFileHandleFn = vi.fn(() => Promise.resolve());
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
         importWorkspaceJsonSource,
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() =>
@@ -325,8 +335,9 @@ describe('useWorkspaceFileLink', () => {
 
     const { result } = renderHook(() =>
       useWorkspaceFileLink({
+        getSerializedWorkspace: vi.fn(() => '{"workspace":true}'),
         deleteLinkedFileHandleFn,
-        importWorkspaceJsonSource: vi.fn(() => Promise.resolve(true)),
+        importWorkspaceJsonSource: vi.fn(() => Promise.resolve()),
         isFileSystemAccessSupportedFn: () => true,
         loadLinkedFileHandleFn: vi.fn(() =>
           Promise.resolve({

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   isFileSystemAccessSupported,
   openWorkspaceFile,
@@ -10,18 +10,19 @@ import {
   loadLinkedFileHandle,
   saveLinkedFileHandle,
 } from '../../io/workspaceFileLinkPersistence';
-import { serializeWorkspace } from '../../io/workspaceIO';
-import { getWorkspacePersistedState } from '../../store/workspaceStore';
 import type { ConflictState } from './types';
+import { useLinkedFileConflict } from './useLinkedFileConflict';
+import { useLinkedFileRecord } from './useLinkedFileRecord';
 
 type ImportWorkspaceJsonSource = (
   source: string,
   options?: {
     closeRestoreDialog?: boolean;
   },
-) => Promise<boolean>;
+) => Promise<void>;
 
 type UseWorkspaceFileLinkOptions = {
+  getSerializedWorkspace: () => string;
   importWorkspaceJsonSource: ImportWorkspaceJsonSource;
   deleteLinkedFileHandleFn?: typeof deleteLinkedFileHandle;
   isFileSystemAccessSupportedFn?: typeof isFileSystemAccessSupported;
@@ -30,7 +31,6 @@ type UseWorkspaceFileLinkOptions = {
   overwriteWorkspaceFileFn?: typeof overwriteWorkspaceFile;
   saveLinkedFileHandleFn?: typeof saveLinkedFileHandle;
   saveWorkspaceFileAsFn?: typeof saveWorkspaceFileAs;
-  serializeWorkspaceFn?: () => string;
 };
 
 type UseWorkspaceFileLinkResult = {
@@ -47,11 +47,8 @@ type UseWorkspaceFileLinkResult = {
   saveAs: () => Promise<FileSystemFileHandle | null>;
 };
 
-const defaultSerializeWorkspace = (): string => {
-  return serializeWorkspace(getWorkspacePersistedState());
-};
-
 export const useWorkspaceFileLink = ({
+  getSerializedWorkspace,
   importWorkspaceJsonSource,
   deleteLinkedFileHandleFn = deleteLinkedFileHandle,
   isFileSystemAccessSupportedFn = isFileSystemAccessSupported,
@@ -60,136 +57,54 @@ export const useWorkspaceFileLink = ({
   overwriteWorkspaceFileFn = overwriteWorkspaceFile,
   saveLinkedFileHandleFn = saveLinkedFileHandle,
   saveWorkspaceFileAsFn = saveWorkspaceFileAs,
-  serializeWorkspaceFn = defaultSerializeWorkspace,
 }: UseWorkspaceFileLinkOptions): UseWorkspaceFileLinkResult => {
-  const [linkedFileHandle, setLinkedFileHandle] =
-    useState<FileSystemFileHandle | null>(null);
-  const [linkedFileName, setLinkedFileName] = useState<string | null>(null);
-  const [lastKnownModifiedAt, setLastKnownModifiedAt] = useState<number | null>(
-    null,
-  );
-  const [pendingSaveConflict, setPendingSaveConflict] =
-    useState<ConflictState | null>(null);
-  const latestMutationIdRef = useRef(0);
-  const initialLoadMutationIdRef = useRef(latestMutationIdRef.current);
   const isSupported = isFileSystemAccessSupportedFn();
-
-  const applyLinkedFileState = useCallback(
-    (record: Awaited<ReturnType<typeof loadLinkedFileHandleFn>>): void => {
-      setLinkedFileHandle(record?.handle ?? null);
-      setLinkedFileName(record?.handle.name ?? null);
-      setLastKnownModifiedAt(record?.lastKnownModifiedAt ?? null);
-
-      if (record === null) {
-        setPendingSaveConflict(null);
-      }
-    },
-    [],
-  );
-
-  const setLinkedFileState = useCallback(
-    (record: Awaited<ReturnType<typeof loadLinkedFileHandleFn>>): void => {
-      latestMutationIdRef.current += 1;
-      applyLinkedFileState(record);
-    },
-    [applyLinkedFileState],
-  );
+  const {
+    clearLinkedFileRecord,
+    linkedFileHandle,
+    linkedFileName,
+    persistLinkedFileRecord,
+    resolveLinkedFileRecord,
+  } = useLinkedFileRecord({
+    isSupported,
+    deleteLinkedFileHandleFn,
+    loadLinkedFileHandleFn,
+    saveLinkedFileHandleFn,
+  });
+  const {
+    cancelSaveConflict,
+    clearSaveConflict,
+    detectSaveConflict,
+    pendingSaveConflict,
+  } = useLinkedFileConflict();
 
   useEffect(() => {
-    if (!isSupported) {
-      setLinkedFileState(null);
+    if (linkedFileHandle !== null) {
       return;
     }
 
-    let isCancelled = false;
-
-    void loadLinkedFileHandleFn()
-      .then((handle) => {
-        if (
-          isCancelled ||
-          latestMutationIdRef.current !== initialLoadMutationIdRef.current
-        ) {
-          return;
-        }
-
-        applyLinkedFileState(handle);
-      })
-      .catch(() => {
-        if (
-          isCancelled ||
-          latestMutationIdRef.current !== initialLoadMutationIdRef.current
-        ) {
-          return;
-        }
-
-        applyLinkedFileState(null);
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [
-    applyLinkedFileState,
-    isSupported,
-    loadLinkedFileHandleFn,
-    setLinkedFileState,
-  ]);
-
-  const persistLinkedHandle = useCallback(
-    async (
-      record: NonNullable<Awaited<ReturnType<typeof loadLinkedFileHandleFn>>>,
-    ): Promise<void> => {
-      setPendingSaveConflict(null);
-      setLinkedFileState(record);
-      await saveLinkedFileHandleFn(record);
-    },
-    [saveLinkedFileHandleFn, setLinkedFileState],
-  );
-
-  const clearLink = useCallback(async (): Promise<void> => {
-    setLinkedFileState(null);
-    await deleteLinkedFileHandleFn();
-  }, [deleteLinkedFileHandleFn, setLinkedFileState]);
-
-  const resolveLinkedRecord = useCallback(async () => {
-    if (linkedFileHandle !== null) {
-      return {
-        handle: linkedFileHandle,
-        lastKnownModifiedAt,
-      };
-    }
-
-    const restoredRecord = await loadLinkedFileHandleFn();
-
-    if (restoredRecord !== null) {
-      setLinkedFileState(restoredRecord);
-    }
-
-    return restoredRecord;
-  }, [
-    lastKnownModifiedAt,
-    linkedFileHandle,
-    loadLinkedFileHandleFn,
-    setLinkedFileState,
-  ]);
+    clearSaveConflict();
+  }, [clearSaveConflict, linkedFileHandle]);
 
   const saveAs = useCallback(async (): Promise<FileSystemFileHandle | null> => {
     if (!isSupported) {
       return null;
     }
 
-    const savedFile = await saveWorkspaceFileAsFn(serializeWorkspaceFn());
-    await persistLinkedHandle({
+    const savedFile = await saveWorkspaceFileAsFn(getSerializedWorkspace());
+    clearSaveConflict();
+    await persistLinkedFileRecord({
       handle: savedFile.handle,
       lastKnownModifiedAt: savedFile.lastModified,
     });
 
     return savedFile.handle;
   }, [
+    getSerializedWorkspace,
     isSupported,
-    persistLinkedHandle,
+    clearSaveConflict,
+    persistLinkedFileRecord,
     saveWorkspaceFileAsFn,
-    serializeWorkspaceFn,
   ]);
 
   const save = useCallback(async (): Promise<FileSystemFileHandle | null> => {
@@ -197,42 +112,36 @@ export const useWorkspaceFileLink = ({
       return null;
     }
 
-    const linkedRecord = await resolveLinkedRecord();
+    const linkedRecord = await resolveLinkedFileRecord();
 
     if (linkedRecord === null) {
       return await saveAs();
     }
 
-    const currentFile = await linkedRecord.handle.getFile();
-    const knownModifiedAt =
-      linkedRecord.lastKnownModifiedAt ?? currentFile.lastModified;
-
-    if (currentFile.lastModified !== knownModifiedAt) {
-      setPendingSaveConflict({
-        fileName: linkedRecord.handle.name,
-        lastKnownModifiedAt: knownModifiedAt,
-        linkedFileModifiedAt: currentFile.lastModified,
-      });
+    if (await detectSaveConflict(linkedRecord)) {
       return null;
     }
 
     const savedFile = await overwriteWorkspaceFileFn(
       linkedRecord.handle,
-      serializeWorkspaceFn(),
+      getSerializedWorkspace(),
     );
-    await persistLinkedHandle({
+    clearSaveConflict();
+    await persistLinkedFileRecord({
       handle: savedFile.handle,
       lastKnownModifiedAt: savedFile.lastModified,
     });
 
     return savedFile.handle;
   }, [
+    clearSaveConflict,
+    detectSaveConflict,
+    getSerializedWorkspace,
     isSupported,
     overwriteWorkspaceFileFn,
-    persistLinkedHandle,
-    resolveLinkedRecord,
+    persistLinkedFileRecord,
+    resolveLinkedFileRecord,
     saveAs,
-    serializeWorkspaceFn,
   ]);
 
   const confirmOverwrite =
@@ -241,27 +150,29 @@ export const useWorkspaceFileLink = ({
         return null;
       }
 
-      const linkedRecord = await resolveLinkedRecord();
+      const linkedRecord = await resolveLinkedFileRecord();
       if (linkedRecord === null) {
         return null;
       }
 
       const savedFile = await overwriteWorkspaceFileFn(
         linkedRecord.handle,
-        serializeWorkspaceFn(),
+        getSerializedWorkspace(),
       );
-      await persistLinkedHandle({
+      clearSaveConflict();
+      await persistLinkedFileRecord({
         handle: savedFile.handle,
         lastKnownModifiedAt: savedFile.lastModified,
       });
 
       return savedFile.handle;
     }, [
+      getSerializedWorkspace,
       isSupported,
       overwriteWorkspaceFileFn,
-      persistLinkedHandle,
-      resolveLinkedRecord,
-      serializeWorkspaceFn,
+      persistLinkedFileRecord,
+      resolveLinkedFileRecord,
+      clearSaveConflict,
     ]);
 
   const loadLatestFromLinkedFile = useCallback(async (): Promise<boolean> => {
@@ -269,21 +180,18 @@ export const useWorkspaceFileLink = ({
       return false;
     }
 
-    const linkedRecord = await resolveLinkedRecord();
+    const linkedRecord = await resolveLinkedFileRecord();
     if (linkedRecord === null) {
       return false;
     }
 
     const latestFile = await linkedRecord.handle.getFile();
-    const imported = await importWorkspaceJsonSource(await latestFile.text(), {
+    await importWorkspaceJsonSource(await latestFile.text(), {
       closeRestoreDialog: true,
     });
 
-    if (!imported) {
-      return false;
-    }
-
-    await persistLinkedHandle({
+    clearSaveConflict();
+    await persistLinkedFileRecord({
       handle: linkedRecord.handle,
       lastKnownModifiedAt: latestFile.lastModified,
     });
@@ -292,13 +200,10 @@ export const useWorkspaceFileLink = ({
   }, [
     importWorkspaceJsonSource,
     isSupported,
-    persistLinkedHandle,
-    resolveLinkedRecord,
+    persistLinkedFileRecord,
+    resolveLinkedFileRecord,
+    clearSaveConflict,
   ]);
-
-  const cancelSaveConflict = useCallback((): void => {
-    setPendingSaveConflict(null);
-  }, []);
 
   const openWithFilePicker =
     useCallback(async (): Promise<FileSystemFileHandle | null> => {
@@ -311,12 +216,10 @@ export const useWorkspaceFileLink = ({
         return null;
       }
 
-      const imported = await importWorkspaceJsonSource(openedFile.text);
-      if (!imported) {
-        return null;
-      }
+      await importWorkspaceJsonSource(openedFile.text);
 
-      await persistLinkedHandle({
+      clearSaveConflict();
+      await persistLinkedFileRecord({
         handle: openedFile.handle,
         lastKnownModifiedAt: openedFile.lastModified,
       });
@@ -326,8 +229,14 @@ export const useWorkspaceFileLink = ({
       importWorkspaceJsonSource,
       isSupported,
       openWorkspaceFileFn,
-      persistLinkedHandle,
+      persistLinkedFileRecord,
+      clearSaveConflict,
     ]);
+
+  const clearLink = useCallback(async (): Promise<void> => {
+    clearSaveConflict();
+    await clearLinkedFileRecord();
+  }, [clearLinkedFileRecord, clearSaveConflict]);
 
   return {
     clearLink,

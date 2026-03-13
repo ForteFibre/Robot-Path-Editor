@@ -2,7 +2,7 @@ import { type ReactElement } from 'react';
 import { Circle, Group, Line, Text } from 'react-konva';
 import { pointFromHeading, worldToCanvasPoint } from '../../../domain/geometry';
 import { getHeadingHandleDistance } from '../../../domain/canvas';
-import type { Workspace } from '../../../domain/models';
+import type { EditorMode } from '../../../domain/models';
 import type {
   ResolvedHeadingKeyframe,
   ResolvedPathModel,
@@ -13,7 +13,7 @@ type CanvasHeadingKeyframeProps = {
   headingKeyframe: ResolvedHeadingKeyframe;
   k: number;
   isSelected: boolean;
-  mode: Workspace['mode'];
+  mode: EditorMode;
   isActive: boolean;
   isPreview?: boolean;
 };

@@ -5,7 +5,7 @@ import {
   MIN_CSV_EXPORT_STEP,
   formatMetricValue,
 } from '../domain/metricScale';
-import type { DomainState } from '../store/types';
+import type { CsvWorkspaceSource } from '../domain/workspaceContract';
 
 export const csvHeader = 'x,y,theta';
 
@@ -56,7 +56,7 @@ const createPathFilename = (
 };
 
 export const generateWorkspaceCsvFiles = (
-  domain: DomainState,
+  domain: CsvWorkspaceSource,
   options?: CsvExportOptions,
 ): CsvExportFile[] => {
   const step = Math.max(

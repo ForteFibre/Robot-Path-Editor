@@ -1,4 +1,4 @@
-import type { CanvasTransform } from './models';
+import type { CanvasTransform } from './canvasTransform';
 
 export type Point = {
   x: number;

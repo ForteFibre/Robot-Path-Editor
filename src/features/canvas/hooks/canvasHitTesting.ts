@@ -1,6 +1,7 @@
 import type Konva from 'konva';
 import { getHeadingHandleDistance } from '../../../domain/canvas';
 import type { Point as GeometryPoint } from '../../../domain/geometry';
+import type { CanvasTransform as ViewTransform } from '../../../domain/canvasTransform';
 import {
   distance,
   pointFromHeading,
@@ -8,14 +9,11 @@ import {
 } from '../../../domain/geometry';
 import { resolveDiscretizedHeadingKeyframes } from '../../../domain/headingKeyframes';
 import type { DiscretizedPath } from '../../../domain/interpolation';
-import type {
-  BackgroundImage,
-  CanvasTransform as ViewTransform,
-  Workspace,
-} from '../../../domain/models';
+import type { BackgroundImage } from '../../../domain/models';
 import { projectPointToSectionSamples } from '../../../domain/pathSampling';
 import type { ResolvedPathModel } from '../../../domain/pointResolution';
-import type { RMinDragTarget } from '../components/CanvasRMinDrag';
+import type { CanvasInteractionSnapshot } from '../../../store/types';
+import type { RMinDragTarget } from '../types/rMinDragTarget';
 import { resolveWaypointRobotHeadingHandleAngle } from '../waypointHeading';
 
 export type HitTarget =
@@ -39,7 +37,7 @@ export type HitTarget =
   | { kind: 'canvas' };
 
 type ResolveStageHitParams = {
-  workspace: Workspace;
+  workspace: CanvasInteractionSnapshot;
   stage: Konva.Stage;
   resolvedPaths: ResolvedPathModel[];
   discretizedByPath: Map<string, DiscretizedPath>;
@@ -126,7 +124,7 @@ const isPointInsideBackgroundImage = (
 };
 
 const resolveActivePathContext = (
-  workspace: Workspace,
+  workspace: CanvasInteractionSnapshot,
   resolvedPaths: ResolvedPathModel[],
   discretizedByPath: Map<string, DiscretizedPath>,
 ): {
@@ -152,7 +150,7 @@ const resolveHeadingKeyframeHit = (params: {
   activePath: ResolvedPathModel;
   detail: DiscretizedPath | undefined;
   pointerWorld: GeometryPoint;
-  workspace: Workspace;
+  workspace: CanvasInteractionSnapshot;
 }): HitTarget | null => {
   if (params.detail === undefined) {
     return null;
@@ -206,7 +204,7 @@ const resolveWaypointHit = (params: {
   activePath: ResolvedPathModel;
   detail: DiscretizedPath | undefined;
   pointerWorld: GeometryPoint;
-  workspace: Workspace;
+  workspace: CanvasInteractionSnapshot;
 }): HitTarget | null => {
   const headingHandleDistance = getHeadingHandleDistance(
     params.workspace.canvasTransform.k,
@@ -275,7 +273,7 @@ const resolveWaypointHit = (params: {
 
 const resolveRMinHit = (params: {
   pointerWorld: GeometryPoint;
-  workspace: Workspace;
+  workspace: CanvasInteractionSnapshot;
   rMinDragTargets: RMinDragTarget[];
 }): HitTarget | null => {
   const hits: CandidateHit[] = [];
@@ -302,7 +300,7 @@ const resolveSectionHit = (params: {
   activePath: ResolvedPathModel;
   detail: DiscretizedPath | undefined;
   pointerWorld: GeometryPoint;
-  workspace: Workspace;
+  workspace: CanvasInteractionSnapshot;
 }): HitTarget | null => {
   if (params.detail === undefined) {
     return null;

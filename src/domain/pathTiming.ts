@@ -1,9 +1,5 @@
-import {
-  normalizeRobotMotionSettings,
-  type PathModel,
-  type Point,
-  type RobotMotionSettings,
-} from './models';
+import { type PathModel, type Point, type RobotMotionSettings } from './models';
+import { normalizeRobotMotionSettings } from './modelNormalization';
 import {
   buildSegmentMotionProfile,
   getSegmentDistanceAtTime,

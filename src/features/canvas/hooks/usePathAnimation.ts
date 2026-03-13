@@ -9,7 +9,7 @@ import {
 const START_WAIT_SECONDS = 1;
 const END_WAIT_SECONDS = 1;
 
-type PathAnimationState = {
+export type PathAnimationState = {
   currentTime: number;
   totalTime: number;
   progress: number;

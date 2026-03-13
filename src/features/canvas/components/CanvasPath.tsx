@@ -2,7 +2,7 @@ import type { ResolvedPathModel } from '../../../domain/pointResolution';
 import { worldToCanvasPoint, type Point } from '../../../domain/geometry';
 import type { HeadingSample } from '../../../domain/interpolation';
 import type { PathGeometrySegment } from '../../../domain/pathTimingSegments';
-import type { Workspace } from '../../../domain/models';
+import type { EditorMode } from '../../../domain/models';
 import { type ReactElement } from 'react';
 import { Line, Shape } from 'react-konva';
 
@@ -53,7 +53,7 @@ type CanvasPathProps = {
   discretizedSamples: HeadingSample[];
   k: number;
   isActive: boolean;
-  mode: Workspace['mode'];
+  mode: EditorMode;
 };
 
 const buildHeadingLines = (params: {
@@ -61,7 +61,7 @@ const buildHeadingLines = (params: {
   discretizedSamples: HeadingSample[];
   k: number;
   isActive: boolean;
-  mode: Workspace['mode'];
+  mode: EditorMode;
 }): ReactElement[] => {
   const { path, discretizedSamples, k, isActive, mode } = params;
   if (mode !== 'heading' || discretizedSamples.length < 2) {
