@@ -199,7 +199,7 @@ describe('CanvasPathVelocityOverlay', () => {
       'data-stroke',
       pathVelocitySegmentsModule.getVelocityColor(0.1875),
     );
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
     expect(lines[0]).toHaveAttribute('data-opacity', '0.55');
     expect(lines[0]).toHaveAttribute('data-line-cap', 'round');
@@ -244,7 +244,7 @@ describe('CanvasPathVelocityOverlay', () => {
       'data-stroke',
       pathVelocitySegmentsModule.getVelocityColor(1),
     );
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
 
     rerender(<CanvasPathVelocityOverlay timing={timing} k={4} />);
@@ -258,7 +258,7 @@ describe('CanvasPathVelocityOverlay', () => {
       'data-stroke',
       pathVelocitySegmentsModule.getVelocityColor(1),
     );
-    expect(lines[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(lines[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
   });
 
@@ -390,7 +390,7 @@ describe('CanvasPathVelocityOverlay', () => {
 
     const shapes = screen.getAllByTestId('konva-shape');
     expect(shapes).toHaveLength(1);
-    expect(shapes[0]).toHaveAttribute('data-stroke-width', '2.6');
+    expect(shapes[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(shapes[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
     expect(shapes[0]).toHaveAttribute('data-opacity', '0.55');
     expect(shapes[0]).toHaveAttribute('data-line-cap', 'round');

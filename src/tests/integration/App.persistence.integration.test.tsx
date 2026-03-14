@@ -206,12 +206,12 @@ describe('App persistence integration', () => {
 
     expect(directoryExport.getFileHandle).toHaveBeenNthCalledWith(
       1,
-      'path-1.csv',
+      'Path 1.csv',
       { create: true },
     );
     expect(directoryExport.getFileHandle).toHaveBeenNthCalledWith(
       2,
-      'path-2.csv',
+      'Path 2.csv',
       { create: true },
     );
     const firstWrittenBlob = directoryExport.write.mock.calls[0]?.[0];
@@ -394,13 +394,13 @@ describe('App persistence integration', () => {
 
     expect(downloadSpy).toHaveBeenNthCalledWith(
       1,
-      'path-1.csv',
+      'Path 1.csv',
       expect.stringContaining('x,y,theta'),
       'text/csv;charset=utf-8',
     );
     expect(downloadSpy).toHaveBeenNthCalledWith(
       2,
-      'path-2.csv',
+      'Path 2.csv',
       expect.stringContaining('x,y,theta'),
       'text/csv;charset=utf-8',
     );

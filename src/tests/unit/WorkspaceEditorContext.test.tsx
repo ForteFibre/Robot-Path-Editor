@@ -160,7 +160,7 @@ describe('WorkspaceEditorContext', () => {
   it('throws when the consumer hook is used without the provider', () => {
     expect(() => {
       render(<OrphanConsumer />);
-    }).toThrowError(
+    }).toThrow(
       'useWorkspaceEditorDerived must be used within WorkspaceEditorProvider.',
     );
   });

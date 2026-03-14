@@ -76,7 +76,7 @@ describe('throwAppError', () => {
   it('throws an AppErrorInstance', () => {
     expect(() => {
       throwAppError({ kind: 'workspace-restore', reason: 'read-failed' });
-    }).toThrowError(AppErrorInstance);
+    }).toThrow(AppErrorInstance);
   });
 
   it('thrown error carries the correct AppError payload', () => {

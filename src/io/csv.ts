@@ -31,26 +31,61 @@ const formatNumber = (value: number | null): string => {
   return formatMetricValue(value);
 };
 
-const slugifyPathName = (pathName: string): string => {
-  const slug = pathName
-    .normalize('NFKD')
-    .toLowerCase()
-    .trim()
-    .replaceAll(/\s+/g, '-')
-    .replaceAll(/[^a-z0-9-]/g, '')
-    .replaceAll(/-+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
+const INVALID_FILENAME_CHARS = new Set([
+  '<',
+  '>',
+  ':',
+  '"',
+  '/',
+  '\\',
+  '|',
+  '?',
+  '*',
+]);
+const TRAILING_DOTS_OR_SPACES = /[. ]+$/g;
 
-  return slug.length > 0 ? slug : 'path';
+const replaceInvalidFilenameChars = (value: string): string => {
+  return Array.from(value, (character) => {
+    const charCode = character.codePointAt(0) ?? -1;
+    if (charCode >= 0 && charCode < 0x20) {
+      return '-';
+    }
+
+    return INVALID_FILENAME_CHARS.has(character) ? '-' : character;
+  }).join('');
+};
+
+const sanitizePathFilename = (pathName: string): string => {
+  const sanitized = pathName
+    .normalize('NFC')
+    .trim()
+    .replaceAll('\t', ' ')
+    .replaceAll('\n', ' ')
+    .replaceAll('\r', ' ')
+    .replaceAll('\f', ' ')
+    .replaceAll('\v', ' ');
+
+  const normalized = replaceInvalidFilenameChars(sanitized)
+    .replaceAll(/\s+/g, ' ')
+    .replaceAll(/-+/g, '-')
+    .replaceAll(TRAILING_DOTS_OR_SPACES, '')
+    .trim();
+
+  if (normalized.length === 0 || normalized === '.' || normalized === '..') {
+    return 'path';
+  }
+
+  return normalized;
 };
 
 const createPathFilename = (
   pathName: string,
   filenameCounts: Map<string, number>,
 ): string => {
-  const baseName = slugifyPathName(pathName);
-  const nextCount = (filenameCounts.get(baseName) ?? 0) + 1;
-  filenameCounts.set(baseName, nextCount);
+  const baseName = sanitizePathFilename(pathName);
+  const dedupeKey = baseName.toLocaleLowerCase();
+  const nextCount = (filenameCounts.get(dedupeKey) ?? 0) + 1;
+  filenameCounts.set(dedupeKey, nextCount);
 
   return nextCount === 1 ? `${baseName}.csv` : `${baseName}-${nextCount}.csv`;
 };

@@ -247,7 +247,7 @@ describe('interpolation and csv', () => {
     expect(file).toMatchObject({
       pathId: hiddenPath.id,
       pathName: hiddenPath.name,
-      filename: 'hidden-path.csv',
+      filename: 'Hidden Path.csv',
     });
   });
 
@@ -307,7 +307,7 @@ describe('interpolation and csv', () => {
     expect(activeFiles[0]).toMatchObject({
       pathId: basePath.id,
       pathName: basePath.name,
-      filename: 'path-1.csv',
+      filename: 'Path 1.csv',
     });
     expect(denseFiles[0]?.content.trim().split('\n').length).toBeGreaterThan(
       activeFiles[0]?.content.trim().split('\n').length ?? 0,
@@ -400,9 +400,67 @@ describe('interpolation and csv', () => {
 
     expect(files).toHaveLength(3);
     expect(files.map((file) => file.filename)).toEqual([
-      'path-1.csv',
-      'path-1-2.csv',
-      'path.csv',
+      'Path 1.csv',
+      'Path 1-2.csv',
+      '!!!.csv',
+    ]);
+  });
+
+  it('keeps readable path names and only sanitizes filesystem-invalid characters', () => {
+    const japanesePath: PathModel = {
+      ...basePath,
+      id: 'path-jp',
+      name: '経路 A/B',
+      waypoints: [
+        {
+          id: 'wj1',
+          pointId: 'p1',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+        {
+          id: 'wj2',
+          pointId: 'p2',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+      ],
+    };
+
+    const punctPath: PathModel = {
+      ...basePath,
+      id: 'path-punct',
+      name: '  !!!  ',
+      waypoints: [
+        {
+          id: 'wp1',
+          pointId: 'p2',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+        {
+          id: 'wp2',
+          pointId: 'p3',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+      ],
+    };
+
+    const domain: CsvWorkspaceSource = {
+      paths: [japanesePath, punctPath],
+      points,
+      activePathId: japanesePath.id,
+    };
+
+    const files = generateWorkspaceCsvFiles(domain, {
+      target: 'all',
+      step: 0.5,
+    });
+
+    expect(files.map((file) => file.filename)).toEqual([
+      '経路 A-B.csv',
+      '!!!.csv',
     ]);
   });
 
