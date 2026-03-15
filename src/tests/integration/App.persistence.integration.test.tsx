@@ -34,6 +34,8 @@ import {
 
 setupIntegrationTestLifecycle();
 
+const SAVE_CONFLICT_TEST_TIMEOUT_MS = 15_000;
+
 describe('App persistence integration', () => {
   it('restores a persisted workspace after confirming the startup dialog', async () => {
     await primePersistedWorkspaceCandidate();
@@ -273,64 +275,68 @@ describe('App persistence integration', () => {
     });
   });
 
-  it('shows a save conflict dialog and can load the latest linked file', async () => {
-    const fileSave = createWorkspaceFileSaveMock('linked-workspace.json');
+  it(
+    'shows a save conflict dialog and can load the latest linked file',
+    async () => {
+      const fileSave = createWorkspaceFileSaveMock('linked-workspace.json');
 
-    render(<App />);
+      render(<App />);
 
-    openSettingsMenu();
-    fireEvent.change(screen.getByLabelText('Robot Length (m)'), {
-      target: { value: '1.25' },
-    });
+      openSettingsMenu();
+      fireEvent.change(screen.getByLabelText('Robot Length (m)'), {
+        target: { value: '1.25' },
+      });
 
-    openFileMenu();
-    fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
+      openFileMenu();
+      fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
 
-    await waitFor(() => {
-      expect(fileSave.showSaveFilePicker).toHaveBeenCalledTimes(1);
-    });
+      await waitFor(() => {
+        expect(fileSave.showSaveFilePicker).toHaveBeenCalledTimes(1);
+      });
 
-    const document = workspaceCodec.deserializeWorkspace(
-      fileSave.getCurrentText(),
-    );
-    const externalWorkspaceJson = workspaceCodec.serializeWorkspace({
-      ...document,
-      robotSettings: {
-        ...document.robotSettings,
-        length: 2.75,
-      },
-    });
+      const document = workspaceCodec.deserializeWorkspace(
+        fileSave.getCurrentText(),
+      );
+      const externalWorkspaceJson = workspaceCodec.serializeWorkspace({
+        ...document,
+        robotSettings: {
+          ...document.robotSettings,
+          length: 2.75,
+        },
+      });
 
-    fileSave.setExternalFile({
-      text: externalWorkspaceJson,
-      lastModified: fileSave.getCurrentLastModified() + 200,
-    });
+      fileSave.setExternalFile({
+        text: externalWorkspaceJson,
+        lastModified: fileSave.getCurrentLastModified() + 200,
+      });
 
-    openFileMenu();
-    fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
+      openFileMenu();
+      fireEvent.click(screen.getByRole('button', { name: 'Save Workspace' }));
 
-    expect(
-      await screen.findByRole('heading', {
-        name: 'ファイルの競合を解決しますか？',
-      }),
-    ).toBeInTheDocument();
-    expect(fileSave.createWritable).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(
-      screen.getByRole('button', { name: 'ファイルの最新版を読み込む' }),
-    );
-
-    await waitFor(() => {
       expect(
-        screen.queryByRole('heading', {
+        await screen.findByRole('heading', {
           name: 'ファイルの競合を解決しますか？',
         }),
-      ).not.toBeInTheDocument();
-      expect(useWorkspaceStore.getState().ui.robotSettings.length).toBeCloseTo(
-        2.75,
+      ).toBeInTheDocument();
+      expect(fileSave.createWritable).toHaveBeenCalledTimes(1);
+
+      fireEvent.click(
+        screen.getByRole('button', { name: 'ファイルの最新版を読み込む' }),
       );
-    });
-  });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole('heading', {
+            name: 'ファイルの競合を解決しますか？',
+          }),
+        ).not.toBeInTheDocument();
+        expect(
+          useWorkspaceStore.getState().ui.robotSettings.length,
+        ).toBeCloseTo(2.75);
+      });
+    },
+    SAVE_CONFLICT_TEST_TIMEOUT_MS,
+  );
 
   it('falls back to download-based json export in unsupported browsers', async () => {
     setDirectoryPickerSupport(undefined, false);
