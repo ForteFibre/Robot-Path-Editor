@@ -35,6 +35,7 @@ import {
 setupIntegrationTestLifecycle();
 
 const SAVE_CONFLICT_TEST_TIMEOUT_MS = 15_000;
+const CONFLICT_DIALOG_WAIT_TIMEOUT_MS = 10_000;
 
 describe('App persistence integration', () => {
   it('restores a persisted workspace after confirming the startup dialog', async () => {
@@ -324,16 +325,21 @@ describe('App persistence integration', () => {
         screen.getByRole('button', { name: 'ファイルの最新版を読み込む' }),
       );
 
-      await waitFor(() => {
-        expect(
-          screen.queryByRole('heading', {
-            name: 'ファイルの競合を解決しますか？',
-          }),
-        ).not.toBeInTheDocument();
-        expect(
-          useWorkspaceStore.getState().ui.robotSettings.length,
-        ).toBeCloseTo(2.75);
-      });
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByRole('heading', {
+              name: 'ファイルの競合を解決しますか？',
+            }),
+          ).not.toBeInTheDocument();
+          expect(
+            useWorkspaceStore.getState().ui.robotSettings.length,
+          ).toBeCloseTo(2.75);
+        },
+        {
+          timeout: CONFLICT_DIALOG_WAIT_TIMEOUT_MS,
+        },
+      );
     },
     SAVE_CONFLICT_TEST_TIMEOUT_MS,
   );
