@@ -3,7 +3,6 @@ import { toRadians } from '../domain/geometry';
 import {
   DEFAULT_CSV_EXPORT_STEP,
   MIN_CSV_EXPORT_STEP,
-  formatMetricValue,
 } from '../domain/metricScale';
 import type { CsvWorkspaceSource } from '../domain/workspaceContract';
 
@@ -28,7 +27,11 @@ const formatNumber = (value: number | null): string => {
     return '';
   }
 
-  return formatMetricValue(value);
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  return value.toString();
 };
 
 const INVALID_FILENAME_CHARS = new Set([

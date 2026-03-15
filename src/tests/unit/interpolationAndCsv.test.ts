@@ -225,6 +225,83 @@ describe('interpolation and csv', () => {
     expect(lastTheta).toBeCloseTo(Math.PI, 3);
   });
 
+  it('exports csv values without fixed decimal rounding', () => {
+    const precisePoints: Point[] = [
+      {
+        id: 'pp1',
+        x: 0.1234567,
+        y: -0.9876543,
+        robotHeading: 12.3456789,
+        isLibrary: false,
+        name: 'PP 1',
+      },
+      {
+        id: 'pp2',
+        x: 1.1234567,
+        y: -0.8876543,
+        robotHeading: 12.3456789,
+        isLibrary: false,
+        name: 'PP 2',
+      },
+    ];
+
+    const precisePath: PathModel = {
+      ...basePath,
+      id: 'path-precise',
+      name: 'Precise Path',
+      waypoints: [
+        {
+          id: 'pw1',
+          pointId: 'pp1',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+        {
+          id: 'pw2',
+          pointId: 'pp2',
+          libraryPointId: null,
+          pathHeading: 0,
+        },
+      ],
+      headingKeyframes: [
+        {
+          id: 'precise-start',
+          sectionIndex: 0,
+          sectionRatio: 0,
+          robotHeading: 12.3456789,
+          name: 'Start H',
+        },
+        {
+          id: 'precise-end',
+          sectionIndex: 0,
+          sectionRatio: 1,
+          robotHeading: 12.3456789,
+          name: 'End H',
+        },
+      ],
+      sectionRMin: [null],
+    };
+
+    const domain: CsvWorkspaceSource = {
+      paths: [precisePath],
+      points: precisePoints,
+      activePathId: precisePath.id,
+    };
+
+    const [file] = generateWorkspaceCsvFiles(domain, {
+      target: 'all',
+      step: 1,
+    });
+    const firstRow = file?.content.trim().split('\n')[1];
+    const [x, y, theta] = firstRow?.split(',') ?? [];
+
+    expect(x).toBe('0.1234567');
+    expect(y).toBe('-0.9876543');
+    expect(theta).toBeDefined();
+    expect(theta?.split('.')[1]?.length ?? 0).toBeGreaterThan(3);
+    expect(Number(theta)).toBeCloseTo((12.3456789 * Math.PI) / 180, 12);
+  });
+
   it('exports hidden paths when they have waypoints', () => {
     const hiddenPath: PathModel = {
       ...basePath,
