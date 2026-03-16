@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom/vitest';
 import { beforeEach, vi } from 'vitest';
 import { resetCanvasThemeCache } from '../features/canvas/canvasTheme';
+import { resetVelocityColorScaleCache } from '../features/canvas/components/pathVelocitySegments';
 import { deleteLinkedFileHandle } from '../io/workspaceFileLinkPersistence';
 import { deleteWorkspacePersistence } from '../io/workspacePersistence';
 import { resetWorkspaceStore } from '../store/workspaceStore';
@@ -48,6 +49,7 @@ const applyCanvasThemeTestTokens = (): void => {
 
 beforeEach(async () => {
   resetCanvasThemeCache();
+  resetVelocityColorScaleCache();
   applyCanvasThemeTestTokens();
   resetWorkspaceStore();
   await deleteLinkedFileHandle();

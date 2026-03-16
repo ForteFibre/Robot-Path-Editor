@@ -202,7 +202,7 @@ describe('CanvasPathVelocityOverlay', () => {
     expect(lines[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(lines[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
     expect(lines[0]).toHaveAttribute('data-opacity', '0.55');
-    expect(lines[0]).toHaveAttribute('data-line-cap', 'round');
+    expect(lines[0]).toHaveAttribute('data-line-cap', 'butt');
     expect(lines[0]).toHaveAttribute('data-line-join', 'round');
   });
 
@@ -286,11 +286,11 @@ describe('CanvasPathVelocityOverlay', () => {
       <CanvasPathVelocityOverlay timing={timing} k={1} />,
     );
 
-    expect(screen.getAllByTestId('konva-line')).toHaveLength(10);
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(1);
 
     rerender(<CanvasPathVelocityOverlay timing={timing} k={4} />);
 
-    expect(screen.getAllByTestId('konva-line')).toHaveLength(40);
+    expect(screen.getAllByTestId('konva-line')).toHaveLength(2);
   });
 
   it('passes zoom-dependent binning and sampling arguments to buildVelocityPolylines', () => {
@@ -308,7 +308,7 @@ describe('CanvasPathVelocityOverlay', () => {
       timing.segments,
       timing.maxVelocity,
       24,
-      0.1,
+      2,
     );
 
     rerender(<CanvasPathVelocityOverlay timing={timing} k={4} />);
@@ -318,7 +318,38 @@ describe('CanvasPathVelocityOverlay', () => {
       timing.segments,
       timing.maxVelocity,
       96,
-      0.025,
+      0.9,
+    );
+
+    buildVelocityPolylinesSpy.mockRestore();
+  });
+
+  it('clamps zoom-dependent binning and sampling at extreme zoom levels', () => {
+    const timing = createTiming();
+    const buildVelocityPolylinesSpy = vi
+      .spyOn(pathVelocitySegmentsModule, 'buildVelocityPolylines')
+      .mockReturnValue([]);
+
+    const { rerender } = render(
+      <CanvasPathVelocityOverlay timing={timing} k={0.001} />,
+    );
+
+    expect(buildVelocityPolylinesSpy).toHaveBeenNthCalledWith(
+      1,
+      timing.segments,
+      timing.maxVelocity,
+      24,
+      2,
+    );
+
+    rerender(<CanvasPathVelocityOverlay timing={timing} k={1_000_000} />);
+
+    expect(buildVelocityPolylinesSpy).toHaveBeenNthCalledWith(
+      2,
+      timing.segments,
+      timing.maxVelocity,
+      96,
+      0.01,
     );
 
     buildVelocityPolylinesSpy.mockRestore();
@@ -393,7 +424,7 @@ describe('CanvasPathVelocityOverlay', () => {
     expect(shapes[0]).toHaveAttribute('data-stroke-width', '3.6');
     expect(shapes[0]).toHaveAttribute('data-stroke-scale-enabled', 'false');
     expect(shapes[0]).toHaveAttribute('data-opacity', '0.55');
-    expect(shapes[0]).toHaveAttribute('data-line-cap', 'round');
+    expect(shapes[0]).toHaveAttribute('data-line-cap', 'butt');
     expect(shapes[0]).toHaveAttribute('data-line-join', 'round');
 
     const shapeProps = readKonvaShapeMockProps(recordedShapeProps[0]);

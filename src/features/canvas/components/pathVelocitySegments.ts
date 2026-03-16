@@ -160,6 +160,10 @@ type VelocityColorScale = {
 
 let cachedVelocityColorScale: VelocityColorScale | null = null;
 
+export const resetVelocityColorScaleCache = (): void => {
+  cachedVelocityColorScale = null;
+};
+
 const getVelocityColorScale = (): VelocityColorScale => {
   if (cachedVelocityColorScale !== null) {
     return cachedVelocityColorScale;

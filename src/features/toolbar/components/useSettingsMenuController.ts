@@ -7,6 +7,8 @@ import {
   useRobotSettings,
 } from '../../../store/workspaceSelectors';
 import { useAppNotification } from '../../app-shell/AppNotificationContext';
+import { useThemePreference } from '../../theme/ThemePreferenceContext';
+import type { ThemePreference } from '../../theme/themePreference';
 import { loadBackgroundImageFile } from '../backgroundImageFile';
 import { useSettingsMenuActions } from './useSettingsMenuActions';
 
@@ -20,6 +22,8 @@ export const useSettingsMenuController = () => {
   } = useSettingsMenuActions();
   const { setNotification } = useAppNotification();
   const backgroundImage = useBackgroundImage();
+  const { preference: themePreference, setPreference: setThemePreference } =
+    useThemePreference();
   const tool = useEditorTool();
   const isRobotPreviewEnabled = useRobotPreviewEnabled();
   const robotSettings = useRobotSettings();
@@ -176,6 +180,13 @@ export const useSettingsMenuController = () => {
     [setRobotSettings],
   );
 
+  const handleThemePreferenceChange = useCallback(
+    (preference: ThemePreference): void => {
+      setThemePreference(preference);
+    },
+    [setThemePreference],
+  );
+
   return {
     backgroundImage,
     closeMenu,
@@ -193,10 +204,12 @@ export const useSettingsMenuController = () => {
     handleRobotWidthChange,
     handleToggleImageLock,
     handleToggleRobotPreview,
+    handleThemePreferenceChange,
     isOpen,
     isRobotPreviewEnabled,
     openMenu,
     robotSettings,
+    themePreference,
     tool,
   };
 };

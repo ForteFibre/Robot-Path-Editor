@@ -1,11 +1,27 @@
 import { type ReactElement } from 'react';
-import { Bot, Image as ImageIcon, Settings, Trash2 } from 'lucide-react';
+import {
+  Bot,
+  Image as ImageIcon,
+  Settings,
+  SunMoon,
+  Trash2,
+} from 'lucide-react';
 import { NumberInput } from '../../../components/common/NumberInput';
 import { Modal } from '../../../components/common/Modal';
 import { FormField } from '../../../components/common/FormField';
 import styles from './SettingsMenu.module.css';
 import { useSettingsMenuController } from './useSettingsMenuController';
 import { Button } from '../../../components/common/Button';
+import type { ThemePreference } from '../../theme/themePreference';
+
+const APPEARANCE_OPTIONS: readonly {
+  value: ThemePreference;
+  label: string;
+}[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
+];
 
 export const SettingsMenu = (): ReactElement => {
   const {
@@ -25,10 +41,12 @@ export const SettingsMenu = (): ReactElement => {
     handleRobotWidthChange,
     handleToggleImageLock,
     handleToggleRobotPreview,
+    handleThemePreferenceChange,
     isOpen,
     isRobotPreviewEnabled,
     openMenu,
     robotSettings,
+    themePreference,
     tool,
   } = useSettingsMenuController();
 
@@ -47,6 +65,49 @@ export const SettingsMenu = (): ReactElement => {
 
       <Modal isOpen={isOpen} onClose={closeMenu} title="Settings">
         <div className={styles.modalContent} aria-label="settings menu content">
+          <div
+            className={styles.settingsSection}
+            aria-label="appearance settings"
+          >
+            <h3 className={styles.sectionTitle}>
+              <SunMoon size={16} />
+              Appearance
+            </h3>
+
+            <div
+              className={styles.appearanceOptions}
+              role="radiogroup"
+              aria-label="Theme"
+            >
+              {APPEARANCE_OPTIONS.map((option) => (
+                <label
+                  key={option.value}
+                  className={`${styles.appearanceOption} ${
+                    themePreference === option.value
+                      ? styles.appearanceOptionActive
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="theme-preference"
+                    value={option.value}
+                    checked={themePreference === option.value}
+                    onChange={() => {
+                      handleThemePreferenceChange(option.value);
+                    }}
+                    aria-label={option.label}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <p className={styles.appearanceHint}>
+              System はOSの配色設定に追従します。
+            </p>
+          </div>
+
           {/* Robot Settings Section */}
           <div className={styles.settingsSection} aria-label="robot settings">
             <h3 className={styles.sectionTitle}>

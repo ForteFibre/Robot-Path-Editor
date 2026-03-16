@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import App from '../../App';
 import * as interpolation from '../../domain/interpolation';
 import * as pwaController from '../../pwa/usePwaController';
+import { THEME_PREFERENCE_STORAGE_KEY } from '../../features/theme/themePreference';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import {
   addLibraryPointToPath,
@@ -25,6 +26,54 @@ import {
 } from './helpers';
 
 setupIntegrationTestLifecycle();
+
+type ThemeMatchMediaListener = (event: MediaQueryListEvent) => void;
+
+const createThemeMatchMediaController = (initialMatches = false) => {
+  let matches = initialMatches;
+  const listeners = new Set<ThemeMatchMediaListener>();
+
+  const mediaQueryList = {
+    media: '(prefers-color-scheme: dark)',
+    get matches() {
+      return matches;
+    },
+    onchange: null,
+    addEventListener: vi.fn(
+      (_eventName: 'change', listener: ThemeMatchMediaListener) => {
+        listeners.add(listener);
+      },
+    ),
+    removeEventListener: vi.fn(
+      (_eventName: 'change', listener: ThemeMatchMediaListener) => {
+        listeners.delete(listener);
+      },
+    ),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  } as unknown as MediaQueryList;
+
+  Object.defineProperty(globalThis.window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn(() => mediaQueryList),
+  });
+
+  return {
+    setMatches(nextMatches: boolean): void {
+      matches = nextMatches;
+      const event = {
+        matches: nextMatches,
+        media: mediaQueryList.media,
+      } as MediaQueryListEvent;
+
+      for (const listener of listeners) {
+        listener(event);
+      }
+    },
+  };
+};
 
 describe('App editor integration', () => {
   it('renders main layout sections', () => {
@@ -490,6 +539,101 @@ describe('App editor integration', () => {
     await waitFor(() => {
       expect(useWorkspaceStore.getState().ui.robotPreviewEnabled).toBe(true);
       expect(screen.getByLabelText('animated robot')).toBeInTheDocument();
+    });
+  });
+
+  it('switches appearance preference from settings and persists it', async () => {
+    const matchMediaMock = vi.fn().mockImplementation((query: string) => {
+      return {
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      } as MediaQueryList;
+    });
+
+    Object.defineProperty(globalThis.window, 'matchMedia', {
+      configurable: true,
+      value: matchMediaMock,
+    });
+
+    window.localStorage.removeItem(THEME_PREFERENCE_STORAGE_KEY);
+
+    render(<App />);
+
+    openSettingsMenu();
+    fireEvent.click(screen.getByLabelText('Dark'));
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe('dark');
+      expect(document.documentElement.style.colorScheme).toBe('dark');
+      expect(window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY)).toBe(
+        'dark',
+      );
+    });
+
+    fireEvent.click(screen.getByLabelText('System'));
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe('light');
+      expect(document.documentElement.style.colorScheme).toBe('light');
+      expect(window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY)).toBe(
+        'system',
+      );
+    });
+  });
+
+  it('follows OS theme changes only while System appearance is selected', async () => {
+    const matchMediaController = createThemeMatchMediaController(true);
+
+    window.localStorage.removeItem(THEME_PREFERENCE_STORAGE_KEY);
+
+    render(<App />);
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe('dark');
+      expect(document.documentElement.style.colorScheme).toBe('dark');
+    });
+
+    openSettingsMenu();
+    fireEvent.click(screen.getByLabelText('Dark'));
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY)).toBe(
+        'dark',
+      );
+    });
+
+    act(() => {
+      matchMediaController.setMatches(false);
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe('dark');
+      expect(document.documentElement.style.colorScheme).toBe('dark');
+    });
+
+    fireEvent.click(screen.getByLabelText('System'));
+
+    await waitFor(() => {
+      expect(window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY)).toBe(
+        'system',
+      );
+      expect(document.documentElement.dataset.theme).toBe('light');
+      expect(document.documentElement.style.colorScheme).toBe('light');
+    });
+
+    act(() => {
+      matchMediaController.setMatches(true);
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe('dark');
+      expect(document.documentElement.style.colorScheme).toBe('dark');
     });
   });
 

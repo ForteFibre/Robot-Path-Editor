@@ -5,6 +5,37 @@
     <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.svg" />
+    <script>
+      (() => {
+        const STORAGE_KEY = 'app.themePreference';
+        const SYSTEM_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+        const root = document.documentElement;
+
+        try {
+          const storedPreference = window.localStorage.getItem(STORAGE_KEY);
+          const preference =
+            storedPreference === 'light' ||
+            storedPreference === 'dark' ||
+            storedPreference === 'system'
+              ? storedPreference
+              : 'system';
+
+          const systemTheme =
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia(SYSTEM_DARK_MEDIA_QUERY).matches
+              ? 'dark'
+              : 'light';
+          const resolvedTheme =
+            preference === 'system' ? systemTheme : preference;
+
+          root.dataset.theme = resolvedTheme;
+          root.style.colorScheme = resolvedTheme;
+        } catch {
+          root.dataset.theme = 'light';
+          root.style.colorScheme = 'light';
+        }
+      })();
+    </script>
     <meta name="theme-color" content="#3b82f6" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Robot Path Editor</title>

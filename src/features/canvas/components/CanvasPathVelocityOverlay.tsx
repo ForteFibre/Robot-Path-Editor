@@ -10,13 +10,40 @@ type CanvasPathVelocityOverlayProps = {
 };
 
 const VELOCITY_OVERLAY_STROKE_WIDTH = 3.6;
+const VELOCITY_OVERLAY_BASE_BIN_COUNT = 24;
+const VELOCITY_OVERLAY_MAX_BIN_COUNT = 96;
+const VELOCITY_OVERLAY_TARGET_SAMPLE_STEP_PX = VELOCITY_OVERLAY_STROKE_WIDTH;
+const VELOCITY_OVERLAY_MIN_WORLD_STEP_LENGTH = 0.01;
+const VELOCITY_OVERLAY_MAX_WORLD_STEP_LENGTH = 2;
+
+const clamp = (value: number, min: number, max: number): number => {
+  return Math.min(max, Math.max(min, value));
+};
+
+const resolveVelocityOverlayBinCount = (k: number): number => {
+  const safeZoom = Math.max(1, k);
+  return Math.min(
+    VELOCITY_OVERLAY_MAX_BIN_COUNT,
+    Math.ceil(VELOCITY_OVERLAY_BASE_BIN_COUNT * safeZoom),
+  );
+};
+
+const resolveVelocityOverlayMaxWorldStepLength = (k: number): number => {
+  const safeZoom = Math.max(1, k);
+
+  return clamp(
+    VELOCITY_OVERLAY_TARGET_SAMPLE_STEP_PX / safeZoom,
+    VELOCITY_OVERLAY_MIN_WORLD_STEP_LENGTH,
+    VELOCITY_OVERLAY_MAX_WORLD_STEP_LENGTH,
+  );
+};
 
 export const CanvasPathVelocityOverlay = ({
   timing,
   k,
 }: CanvasPathVelocityOverlayProps): ReactElement | null => {
-  const numBins = Math.ceil(24 * Math.max(1, k));
-  const maxWorldStepLength = 0.1 / Math.max(1, k);
+  const numBins = resolveVelocityOverlayBinCount(k);
+  const maxWorldStepLength = resolveVelocityOverlayMaxWorldStepLength(k);
 
   const segments = useMemo(
     () =>
@@ -55,7 +82,7 @@ export const CanvasPathVelocityOverlay = ({
               stroke={segment.color}
               strokeWidth={VELOCITY_OVERLAY_STROKE_WIDTH}
               strokeScaleEnabled={false}
-              lineCap="round"
+              lineCap="butt"
               lineJoin="round"
               opacity={0.55}
               listening={false}
@@ -94,7 +121,7 @@ export const CanvasPathVelocityOverlay = ({
             stroke={segment.color}
             strokeWidth={VELOCITY_OVERLAY_STROKE_WIDTH}
             strokeScaleEnabled={false}
-            lineCap="round"
+            lineCap="butt"
             lineJoin="round"
             opacity={0.55}
             listening={false}

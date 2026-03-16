@@ -10,6 +10,8 @@ import {
   AppNotificationProvider,
   useAppNotification,
 } from '../../features/app-shell/AppNotificationContext';
+import { ThemePreferenceProvider } from '../../features/theme/ThemePreferenceContext';
+import { THEME_PREFERENCE_STORAGE_KEY } from '../../features/theme/themePreference';
 import { loadBackgroundImageFile } from '../../features/toolbar/backgroundImageFile';
 import { useSettingsMenuController } from '../../features/toolbar/components/useSettingsMenuController';
 
@@ -29,7 +31,11 @@ type SettingsMenuControllerRenderResult = RenderHookResult<
 >;
 
 const wrapper = ({ children }: { children: ReactNode }) => {
-  return createElement(AppNotificationProvider, null, children);
+  return createElement(
+    ThemePreferenceProvider,
+    null,
+    createElement(AppNotificationProvider, null, children),
+  );
 };
 
 const renderSettingsMenuController = (): SettingsMenuControllerRenderResult => {
@@ -45,6 +51,7 @@ const renderSettingsMenuController = (): SettingsMenuControllerRenderResult => {
 describe('useSettingsMenuController', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.removeItem(THEME_PREFERENCE_STORAGE_KEY);
   });
 
   it('loads a background image successfully and clears notifications', async () => {

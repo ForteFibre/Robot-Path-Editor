@@ -23,6 +23,7 @@ import { useCsvExportCommand } from './features/workspace-file/useCsvExportComma
 import { useWorkspaceConflictDialogController } from './features/workspace-file/useWorkspaceConflictDialogController';
 import { useWorkspaceFileCommands } from './features/workspace-file/useWorkspaceFileCommands';
 import { usePwaController } from './pwa/usePwaController';
+import { ThemePreferenceProvider } from './features/theme/ThemePreferenceContext';
 
 const EditorApp = (): ReactElement => {
   const { notification, setNotification, clearNotification } =
@@ -88,11 +89,13 @@ const EditorApp = (): ReactElement => {
 
 const App = (): ReactElement => {
   return (
-    <AppNotificationProvider>
-      <AppConfirmationProvider>
-        <EditorApp />
-      </AppConfirmationProvider>
-    </AppNotificationProvider>
+    <ThemePreferenceProvider>
+      <AppNotificationProvider>
+        <AppConfirmationProvider>
+          <EditorApp />
+        </AppConfirmationProvider>
+      </AppNotificationProvider>
+    </ThemePreferenceProvider>
   );
 };
 
