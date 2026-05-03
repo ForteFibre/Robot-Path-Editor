@@ -3,3 +3,4 @@ node_modules/
 coverage/
 package-lock.json
 .tmp-vitest-*.json
+pnpm-lock.yaml
