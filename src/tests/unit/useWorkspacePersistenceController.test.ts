@@ -156,13 +156,9 @@ describe('useWorkspacePersistenceController', () => {
     };
     autosave = createMockAutosave();
 
-    mockedUseWorkspacePersistenceStoreActions.mockReturnValue(
-      storeActions as ReturnType<typeof useWorkspacePersistenceStoreActions>,
-    );
+    mockedUseWorkspacePersistenceStoreActions.mockReturnValue(storeActions);
 
-    mockedUseWorkspaceAutosave.mockReturnValue(
-      autosave as ReturnType<typeof useWorkspaceAutosave>,
-    );
+    mockedUseWorkspaceAutosave.mockReturnValue(autosave);
   });
 
   it.each([

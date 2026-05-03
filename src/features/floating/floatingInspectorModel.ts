@@ -57,7 +57,7 @@ const resolveSelectedDetail = (
     return null;
   }
 
-  return discretizePathDetailed(selectedPathInput as PathModel, points, 0.1);
+  return discretizePathDetailed(selectedPathInput, points, 0.1);
 };
 
 const resolveWaypointSampleIndex = (

@@ -68,7 +68,7 @@ const createServiceWorkerContainer = (): MockServiceWorkerContainer => {
       Promise.resolve({
         waiting: null,
       } as ServiceWorkerRegistration),
-    ) as ServiceWorkerContainer['register'],
+    ),
     removeEventListener: vi.fn(
       (_eventName: 'controllerchange', listener: EventListener) => {
         listeners.delete(listener);

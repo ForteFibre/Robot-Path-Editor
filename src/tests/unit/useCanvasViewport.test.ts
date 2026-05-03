@@ -45,7 +45,7 @@ const setElementDimensions = (
     bottom: rectHeight,
     right: rectWidth,
     toJSON: () => ({}),
-  } as DOMRect);
+  });
 };
 
 const ViewportProbe = ({

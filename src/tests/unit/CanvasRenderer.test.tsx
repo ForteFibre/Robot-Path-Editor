@@ -20,7 +20,7 @@ type CanvasResolvedPathLayerMockProps = {
 };
 
 const readKonvaContainerProps = (props: unknown): KonvaContainerMockProps => {
-  return (props ?? {}) as KonvaContainerMockProps;
+  return props ?? {};
 };
 
 const readCanvasResolvedPathLayerMockProps = (

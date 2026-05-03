@@ -107,7 +107,7 @@ const createNativeDragEvent = (
     value: {
       dropEffect: 'none',
       getData: (key: string) => data[key] ?? '',
-    } as DataTransfer,
+    },
   });
 
   return event;

@@ -42,7 +42,7 @@ export const resolveContinuousDragStateOnMove = <
     return null;
   }
 
-  return { ...state, hasMoved: true } as State;
+  return { ...state, hasMoved: true };
 };
 
 export const shouldStartPan = (params: {

@@ -58,15 +58,11 @@ describe('useWorkspaceDocumentSerialization', () => {
     >(() => useWorkspaceDocumentSerialization());
 
     const readWorkspaceDocument = (): WorkspaceDocument => {
-      return (
-        result.current as unknown as WorkspaceDocumentSerializationResult
-      ).getWorkspaceDocument();
+      return result.current.getWorkspaceDocument();
     };
 
     const readSerializedWorkspace = (): string => {
-      return (
-        result.current as unknown as WorkspaceDocumentSerializationResult
-      ).getSerializedWorkspace();
+      return result.current.getSerializedWorkspace();
     };
 
     let workspaceDocument = readWorkspaceDocument();

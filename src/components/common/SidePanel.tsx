@@ -4,7 +4,6 @@ import {
   type LiHTMLAttributes,
   type ReactElement,
   type ReactNode,
-  type Ref,
 } from 'react';
 import styles from './SidePanel.module.css';
 
@@ -24,7 +23,7 @@ export const SidePanel = forwardRef<HTMLElement, SidePanelProps>(
       .filter(Boolean)
       .join(' ');
     return (
-      <aside ref={ref as Ref<HTMLElement>} className={cls} {...rest}>
+      <aside ref={ref} className={cls} {...rest}>
         {children}
       </aside>
     );

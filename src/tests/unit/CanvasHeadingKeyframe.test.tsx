@@ -16,7 +16,7 @@ type KonvaTextMockProps = {
 };
 
 const readKonvaTextMockProps = (props: unknown): KonvaTextMockProps => {
-  return (props ?? {}) as KonvaTextMockProps;
+  return props ?? {};
 };
 
 vi.mock('react-konva', async () => {

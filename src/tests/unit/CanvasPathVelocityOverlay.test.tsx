@@ -26,11 +26,11 @@ type KonvaShapeMockProps = {
 };
 
 const readKonvaLineMockProps = (props: unknown): KonvaLineMockProps => {
-  return (props ?? {}) as KonvaLineMockProps;
+  return props ?? {};
 };
 
 const readKonvaShapeMockProps = (props: unknown): KonvaShapeMockProps => {
-  return (props ?? {}) as KonvaShapeMockProps;
+  return props ?? {};
 };
 
 const recordedShapeProps: unknown[] = [];

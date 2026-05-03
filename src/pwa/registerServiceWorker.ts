@@ -87,21 +87,13 @@ export const registerServiceWorker = async (
   options: RegisterServiceWorkerOptions = {},
 ): Promise<ServiceWorkerRegistration | undefined> => {
   const isProduction = options.isProduction ?? import.meta.env.PROD;
-  const navigatorObject =
-    options.navigatorObject ??
-    (globalThis.navigator as ServiceWorkerNavigator | undefined);
-  const windowObject =
-    options.windowObject ?? (globalThis.window as object | undefined);
+  const navigatorObject = options.navigatorObject ?? globalThis.navigator;
   const serviceWorkerUrl = options.serviceWorkerUrl ?? '/sw.js';
   const onError = options.onError ?? noop;
   const onUpdateReady = options.onUpdateReady ?? noopOnUpdateReady;
-  const serviceWorker = navigatorObject?.serviceWorker;
+  const serviceWorker = navigatorObject.serviceWorker;
 
-  if (
-    !isProduction ||
-    windowObject === undefined ||
-    serviceWorker === undefined
-  ) {
+  if (!isProduction || serviceWorker === undefined) {
     return undefined;
   }
 

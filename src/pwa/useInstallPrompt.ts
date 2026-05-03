@@ -78,23 +78,17 @@ export const useInstallPrompt = (): UseInstallPromptResult => {
 
     globalThis.window.addEventListener(
       'beforeinstallprompt',
-      handleBeforeInstallPrompt as EventListener,
+      handleBeforeInstallPrompt,
     );
-    globalThis.window.addEventListener(
-      'appinstalled',
-      handleAppInstalled as EventListener,
-    );
+    globalThis.window.addEventListener('appinstalled', handleAppInstalled);
     mediaQuery?.addEventListener('change', handleDisplayModeChange);
 
     return () => {
       globalThis.window.removeEventListener(
         'beforeinstallprompt',
-        handleBeforeInstallPrompt as EventListener,
+        handleBeforeInstallPrompt,
       );
-      globalThis.window.removeEventListener(
-        'appinstalled',
-        handleAppInstalled as EventListener,
-      );
+      globalThis.window.removeEventListener('appinstalled', handleAppInstalled);
       mediaQuery?.removeEventListener('change', handleDisplayModeChange);
     };
   }, []);

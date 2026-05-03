@@ -15,11 +15,11 @@ type KonvaTextMockProps = {
 };
 
 const readKonvaCircleMockProps = (props: unknown): KonvaCircleMockProps => {
-  return (props ?? {}) as KonvaCircleMockProps;
+  return props ?? {};
 };
 
 const readKonvaTextMockProps = (props: unknown): KonvaTextMockProps => {
-  return (props ?? {}) as KonvaTextMockProps;
+  return props ?? {};
 };
 
 vi.mock('react-konva', async () => {
