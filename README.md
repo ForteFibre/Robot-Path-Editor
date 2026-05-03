@@ -3,7 +3,7 @@
 ロボットの移動経路をGUIで設計するためのWebベースのパスエディタです。  
 ウェイポイントの配置・Dubins曲線による滑らかな経路生成・ロボットのヘディング（向き）制御までを直感的に行えます。
 
-公開URL: <http://www.fortefibre.net/Robot-Path-Editor/>
+公開URL: <https://fibril-path-editor.fortefibre.net/>
 
 ---
 
