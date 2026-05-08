@@ -20,6 +20,7 @@ import { Sidebar } from './features/sidebar/Sidebar';
 import { Toolbar } from './features/toolbar/Toolbar';
 import { WorkspaceFileConflictDialog } from './features/workspace-file/WorkspaceFileConflictDialog';
 import { useCsvExportCommand } from './features/workspace-file/useCsvExportCommand';
+import { usePathSetExportCommand } from './features/workspace-file/usePathSetExportCommand';
 import { useWorkspaceConflictDialogController } from './features/workspace-file/useWorkspaceConflictDialogController';
 import { useWorkspaceFileCommands } from './features/workspace-file/useWorkspaceFileCommands';
 import { usePwaController } from './pwa/usePwaController';
@@ -44,12 +45,16 @@ const EditorApp = (): ReactElement => {
   const csvExportCommand = useCsvExportCommand({
     setNotification,
   });
+  const pathSetExportCommand = usePathSetExportCommand({
+    setNotification,
+  });
   const toolbarCommands = useMemo(
     () => ({
       ...workspaceCommands,
       ...csvExportCommand,
+      ...pathSetExportCommand,
     }),
-    [csvExportCommand, workspaceCommands],
+    [csvExportCommand, pathSetExportCommand, workspaceCommands],
   );
 
   return (
