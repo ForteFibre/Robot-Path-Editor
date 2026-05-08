@@ -16,6 +16,7 @@ const createWorkspaceCommands = (): WorkspaceToolbarCommands => ({
   isFileSystemAccessSupported: true,
   linkedFileName: null,
   exportCsv: vi.fn(() => Promise.resolve()),
+  exportPathSetV1: vi.fn(() => Promise.resolve()),
   importJson: vi.fn(() => Promise.resolve()),
   newWorkspace: vi.fn(() => Promise.resolve()),
   openWorkspace: vi.fn(() => Promise.resolve()),
@@ -55,6 +56,9 @@ describe('FileMenu', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Export CSV' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Export Path Set' }),
     ).toBeInTheDocument();
     expect(screen.getByText('linked: demo.path')).toBeInTheDocument();
   });

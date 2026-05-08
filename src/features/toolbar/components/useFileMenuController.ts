@@ -121,11 +121,17 @@ export const useFileMenuController = ({
     closeCsvModal();
   }, [closeCsvModal, runCommand, workspaceCommands]);
 
+  const handleExportPathSetV1 = useCallback((): void => {
+    runCommand(workspaceCommands.exportPathSetV1);
+    closeMenu();
+  }, [closeMenu, runCommand, workspaceCommands]);
+
   return {
     closeCsvModal,
     closeMenu,
     containerRef,
     handleExportCsv,
+    handleExportPathSetV1,
     handleImport,
     handleNewWorkspace,
     handleOpenWorkspace,

@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode } from 'react';
 import {
   ChevronDown,
+  FileJson,
   FolderOpen,
   FilePlus,
   FileSpreadsheet,
@@ -86,6 +87,7 @@ export const FileMenu = ({
     closeCsvModal,
     containerRef,
     handleExportCsv,
+    handleExportPathSetV1,
     handleImport,
     handleNewWorkspace,
     handleOpenWorkspace,
@@ -152,6 +154,14 @@ export const FileMenu = ({
       label: 'Export CSV...',
       icon: FileSpreadsheet,
       onClick: openCsvModal,
+    },
+    {
+      kind: 'action',
+      key: 'export-path-set-v1',
+      ariaLabel: 'Export Path Set',
+      label: 'Export Path Set...',
+      icon: FileJson,
+      onClick: handleExportPathSetV1,
     },
   ];
 

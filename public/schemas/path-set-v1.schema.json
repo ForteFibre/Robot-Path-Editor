@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fibril-path-editor.fortefibre.net/schemas/path-set-v1.schema.json",
+  "title": "Path Set v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "points", "paths"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length", "angle"],
+      "properties": {
+        "length": {
+          "type": "string",
+          "const": "m"
+        },
+        "angle": {
+          "type": "string",
+          "const": "rad"
+        }
+      }
+    },
+    "points": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/point"
+      }
+    },
+    "paths": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/name"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/path"
+      }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "number": {
+      "type": "number"
+    },
+    "point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "robot_heading"],
+      "properties": {
+        "x": {
+          "$ref": "#/$defs/number"
+        },
+        "y": {
+          "$ref": "#/$defs/number"
+        },
+        "robot_heading": {
+          "$ref": "#/$defs/number"
+        }
+      }
+    },
+    "path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sections"],
+      "properties": {
+        "sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/section"
+          }
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "path_heading_start", "motion"],
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/name"
+        },
+        "to": {
+          "$ref": "#/$defs/name"
+        },
+        "path_heading_start": {
+          "$ref": "#/$defs/number"
+        },
+        "motion": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/motion_command"
+          }
+        },
+        "robot_heading": {
+          "$ref": "#/$defs/robot_heading_profile"
+        }
+      }
+    },
+    "motion_command": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/line_command"
+        },
+        {
+          "$ref": "#/$defs/arc_command"
+        }
+      ]
+    },
+    "line_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "distance"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "line"
+        },
+        "distance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "arc_command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "radius", "turn_angle"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "arc"
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "turn_angle": {
+          "type": "number",
+          "not": {
+            "const": 0
+          }
+        }
+      }
+    },
+    "robot_heading_profile": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/robot_heading_keyframe"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "required": ["progress"],
+            "properties": {
+              "progress": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "contains": {
+            "type": "object",
+            "required": ["progress"],
+            "properties": {
+              "progress": {
+                "const": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "robot_heading_keyframe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["progress", "heading"],
+      "properties": {
+        "progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "heading": {
+          "$ref": "#/$defs/number"
+        }
+      }
+    }
+  }
+}

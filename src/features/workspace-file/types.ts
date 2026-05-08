@@ -12,6 +12,10 @@ export type CsvExportCommands = {
   exportCsv: () => Promise<void>;
 };
 
+export type PathSetExportCommands = {
+  exportPathSetV1: () => Promise<void>;
+};
+
 export type WorkspaceFileCommands = {
   isFileSystemAccessSupported: boolean;
   linkedFileName: string | null;
@@ -23,4 +27,5 @@ export type WorkspaceFileCommands = {
 };
 
 export type WorkspaceToolbarCommands = WorkspaceFileCommands &
-  CsvExportCommands;
+  CsvExportCommands &
+  PathSetExportCommands;
