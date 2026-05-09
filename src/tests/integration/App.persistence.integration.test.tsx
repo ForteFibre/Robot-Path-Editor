@@ -418,6 +418,76 @@ describe('App persistence integration', () => {
     );
   });
 
+  it('exports the path set into a user-selected json file', async () => {
+    const fileSave = createWorkspaceFileSaveMock('picked-path-set.json');
+
+    render(<App />);
+
+    openFileMenu();
+    fireEvent.click(screen.getByRole('button', { name: 'Export Path Set' }));
+
+    await waitFor(() => {
+      expect(fileSave.showSaveFilePicker).toHaveBeenCalledWith({
+        excludeAcceptAllOption: true,
+        suggestedName: 'path-set.json',
+        types: [
+          {
+            accept: {
+              'application/json': ['.json'],
+            },
+            description: 'Path Set JSON',
+          },
+        ],
+      });
+    });
+
+    const writtenBlob = fileSave.write.mock.calls[0]?.[0];
+    expect(writtenBlob).toBeInstanceOf(Blob);
+
+    if (!(writtenBlob instanceof Blob)) {
+      throw new TypeError('expected path set json blob');
+    }
+
+    await expect(writtenBlob.text()).resolves.toContain('"schema_version": 1');
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('JSONを「picked-path-set.json」に保存しました。'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('falls back to download-based path set export in unsupported browsers', async () => {
+    delete (globalThis.window as Window & { showSaveFilePicker?: unknown })
+      .showSaveFilePicker;
+    delete (globalThis.window as Window & { showOpenFilePicker?: unknown })
+      .showOpenFilePicker;
+    Object.defineProperty(globalThis.window, 'isSecureContext', {
+      value: false,
+      configurable: true,
+    });
+    const downloadSpy = vi
+      .spyOn(workspaceIO, 'downloadText')
+      .mockImplementation(() => undefined);
+
+    render(<App />);
+
+    openFileMenu();
+    fireEvent.click(screen.getByRole('button', { name: 'Export Path Set' }));
+
+    await waitFor(() => {
+      expect(downloadSpy).toHaveBeenCalledWith(
+        'path-set.json',
+        expect.stringContaining('"schema_version": 1'),
+        'application/json',
+      );
+    });
+
+    expect(
+      screen.getByText('path-set.json をダウンロードしました。'),
+    ).toBeInTheDocument();
+  });
+
   it('does not show a csv error banner when directory picking is cancelled', async () => {
     const showDirectoryPicker = vi.fn(() =>
       Promise.reject(

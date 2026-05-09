@@ -4,6 +4,7 @@ import {
   isFileSystemAccessSupported,
   openWorkspaceFile,
   overwriteWorkspaceFile,
+  saveJsonFileAs,
   saveWorkspaceFileAs,
 } from '../../io/workspaceFileAccess';
 
@@ -207,6 +208,45 @@ describe('workspaceFileAccess', () => {
 
     await expect(writtenBlob.text()).resolves.toBe('{"workspace":true}');
     expect(fileHandle.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves generic json through the save file picker with caller options', async () => {
+    const fileHandle = createFileHandleMock({ fileName: 'path-set.json' });
+    const showSaveFilePicker = vi.fn(() => Promise.resolve(fileHandle.handle));
+
+    Object.defineProperty(globalThis.window, 'showOpenFilePicker', {
+      value: vi.fn(() => Promise.resolve([])),
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(globalThis.window, 'showSaveFilePicker', {
+      value: showSaveFilePicker,
+      configurable: true,
+      writable: true,
+    });
+    setSecureContext(true);
+
+    await expect(
+      saveJsonFileAs('{"paths":{}}', {
+        description: 'Path Set JSON',
+        suggestedName: 'path-set.json',
+      }),
+    ).resolves.toEqual({
+      handle: fileHandle.handle,
+      lastModified: 1_762_000_000_001,
+    });
+    expect(showSaveFilePicker).toHaveBeenCalledWith({
+      excludeAcceptAllOption: true,
+      suggestedName: 'path-set.json',
+      types: [
+        {
+          accept: {
+            'application/json': ['.json'],
+          },
+          description: 'Path Set JSON',
+        },
+      ],
+    });
   });
 
   it('requests permission before overwriting a linked file handle', async () => {
