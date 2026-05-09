@@ -40,6 +40,24 @@ export const toWorkspaceSaveSuccessNotification = (
   };
 };
 
+export const toJsonFileSavedSuccessNotification = (
+  fileName: string,
+): AppNotification => {
+  return {
+    kind: 'success',
+    message: toJsonSavedMessage(fileName),
+  };
+};
+
+export const toJsonFileDownloadedSuccessNotification = (
+  fileName: string,
+): AppNotification => {
+  return {
+    kind: 'success',
+    message: toJsonDownloadedMessage(fileName),
+  };
+};
+
 export const toWorkspaceLoadSuccessNotification = (
   result: WorkspaceFileActionResult,
 ): AppNotification => {

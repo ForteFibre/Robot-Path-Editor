@@ -17,6 +17,16 @@ type FilePickerWindow = Window & {
   }) => Promise<FileSystemFileHandle>;
 };
 
+type JsonFileType = {
+  accept: Record<string, string[]>;
+  description: string;
+};
+
+export type SaveJsonFileAsOptions = {
+  description: string;
+  suggestedName: string;
+};
+
 export type OpenedWorkspaceFile = {
   handle: FileSystemFileHandle;
   lastModified: number;
@@ -37,17 +47,18 @@ type PermissionCapableFileHandle = FileSystemFileHandle & {
   }) => Promise<PermissionState>;
 };
 
-const WORKSPACE_FILE_TYPES: {
-  accept: Record<string, string[]>;
-  description: string;
-}[] = [
-  {
-    description: 'Workspace JSON',
-    accept: {
-      'application/json': ['.json'],
+const toJsonFileTypes = (description: string): JsonFileType[] => {
+  return [
+    {
+      description,
+      accept: {
+        'application/json': ['.json'],
+      },
     },
-  },
-];
+  ];
+};
+
+const WORKSPACE_FILE_TYPES = toJsonFileTypes('Workspace JSON');
 
 const getBrowserWindow = (): FilePickerWindow | null => {
   const browserWindow = (
@@ -186,6 +197,16 @@ export const openWorkspaceFile =
 export const saveWorkspaceFileAs = async (
   json: string,
 ): Promise<SavedWorkspaceFile> => {
+  return await saveJsonFileAs(json, {
+    description: 'Workspace JSON',
+    suggestedName: 'workspace.json',
+  });
+};
+
+export const saveJsonFileAs = async (
+  json: string,
+  options: SaveJsonFileAsOptions,
+): Promise<SavedWorkspaceFile> => {
   const saveFilePicker = getSaveFilePicker();
   if (saveFilePicker === null || !isFileSystemAccessSupported()) {
     throw new Error('File System Access API is not supported in this browser.');
@@ -193,8 +214,8 @@ export const saveWorkspaceFileAs = async (
 
   const handle = await saveFilePicker({
     excludeAcceptAllOption: true,
-    suggestedName: 'workspace.json',
-    types: [...WORKSPACE_FILE_TYPES],
+    suggestedName: options.suggestedName,
+    types: toJsonFileTypes(options.description),
   });
 
   await writeJsonToHandle(handle, json);
