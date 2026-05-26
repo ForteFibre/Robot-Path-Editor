@@ -48,6 +48,13 @@ const getLibraryPointDisplayName = (name: string): string => {
   return name.trim().length > 0 ? name : 'Untitled Point';
 };
 
+const compareLibraryPointNames = (left: string, right: string): number => {
+  return getLibraryPointDisplayName(left).localeCompare(
+    getLibraryPointDisplayName(right),
+    'ja',
+  );
+};
+
 const listLibraryPoints = (points: Point[]): Point[] => {
   return points.filter((point) => point.isLibrary);
 };
@@ -92,15 +99,17 @@ export const usePointLibrary = () => {
   const items = useMemo<LibraryPointListItem[]>(() => {
     const usageCounts = countLibraryPointUsages(paths);
 
-    return listLibraryPoints(points).map((point) => ({
-      id: point.id,
-      name: point.name,
-      x: point.x,
-      y: point.y,
-      robotHeading: point.robotHeading,
-      usageCount: usageCounts.get(point.id) ?? 0,
-      isLocked: lockedPointIds.includes(point.id),
-    }));
+    return listLibraryPoints(points)
+      .map((point) => ({
+        id: point.id,
+        name: point.name,
+        x: point.x,
+        y: point.y,
+        robotHeading: point.robotHeading,
+        usageCount: usageCounts.get(point.id) ?? 0,
+        isLocked: lockedPointIds.includes(point.id),
+      }))
+      .sort((left, right) => compareLibraryPointNames(left.name, right.name));
   }, [lockedPointIds, paths, points]);
 
   const highlightedLibraryPointId = selectedWaypoint?.libraryPointId ?? null;
