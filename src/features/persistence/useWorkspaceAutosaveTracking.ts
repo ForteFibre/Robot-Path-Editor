@@ -87,6 +87,20 @@ export const useWorkspaceAutosaveTracking =
     const snapshotRef = useRef<WorkspaceAutosaveSource>(
       selectWorkspaceAutosaveSource(useWorkspaceStore.getState()),
     );
+    const readCurrentTrackedSource =
+      useCallback((): WorkspaceAutosaveSource => {
+        const currentSource = selectWorkspaceAutosaveSource(
+          useWorkspaceStore.getState(),
+        );
+
+        if (
+          hasPersistedWorkspaceSliceChanged(snapshotRef.current, currentSource)
+        ) {
+          snapshotRef.current = currentSource;
+        }
+
+        return snapshotRef.current;
+      }, []);
     const subscribe = useCallback((callback: () => void): (() => void) => {
       return useWorkspaceStore.subscribe((state, previousState) => {
         const nextSource = selectWorkspaceAutosaveSource(state);
@@ -98,13 +112,10 @@ export const useWorkspaceAutosaveTracking =
         }
       });
     }, []);
-    const getSnapshot = useCallback((): WorkspaceAutosaveSource => {
-      return snapshotRef.current;
-    }, []);
     const trackedSource = useSyncExternalStore(
       subscribe,
-      getSnapshot,
-      getSnapshot,
+      readCurrentTrackedSource,
+      readCurrentTrackedSource,
     );
     const trackedSliceRef = useRef<WorkspaceAutosaveSource>(trackedSource);
     const latestTrackedSliceRef =

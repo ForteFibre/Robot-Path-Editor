@@ -36,7 +36,7 @@ import { InteractiveList } from '../../components/common/InteractiveList';
 type PathItemCardProps = {
   item: PathItem;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: (item: PathItem) => void;
   dragHandle: ReactElement;
 };
 
@@ -56,7 +56,9 @@ const PathItemCard = ({
         type="button"
         className={styles.itemButton}
         data-ui-focus="input-accent"
-        onClick={onSelect}
+        onClick={() => {
+          onSelect(item);
+        }}
         aria-pressed={isActive}
         aria-label={`Select ${isWaypoint ? 'waypoint' : 'heading keyframe'} ${itemLabel}`}
       >
@@ -93,7 +95,7 @@ const MemoizedPathItemCard = memo(PathItemCard);
 type SortableWaypointRowProps = {
   item: Extract<PathItem, { type: 'waypoint' }>;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: (item: PathItem) => void;
 };
 
 const SortableWaypointRowComponent = ({
@@ -163,7 +165,7 @@ const SortableWaypointRow = memo(SortableWaypointRowComponent);
 type StaticPathItemRowProps = {
   item: Extract<PathItem, { type: 'headingKeyframe' }>;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: (item: PathItem) => void;
 };
 
 const StaticPathItemRowComponent = ({
@@ -246,21 +248,17 @@ export const PathDetailsPanelPresenter = ({
         (item.type === 'headingKeyframe' &&
           selectionHeadingKeyframeId === item.id);
 
-      const handleSelect = (): void => {
-        onSelectItem(item);
-      };
-
       return item.type === 'waypoint' ? (
         <SortableWaypointRow
           item={item}
           isActive={isActive}
-          onSelect={handleSelect}
+          onSelect={onSelectItem}
         />
       ) : (
         <StaticPathItemRow
           item={item}
           isActive={isActive}
-          onSelect={handleSelect}
+          onSelect={onSelectItem}
         />
       );
     },
