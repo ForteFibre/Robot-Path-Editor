@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import type { WorkspaceAutosaveSource } from '../../store/adapters/workspacePersistence';
 import { selectWorkspaceAutosaveSource } from '../../store/workspaceSelectors';
 import { useWorkspaceStore } from '../../store/workspaceStore';
@@ -60,7 +59,7 @@ const hasRobotSettingsChanged = (
   );
 };
 
-const hasPersistedWorkspaceSliceChanged = (
+export const hasPersistedWorkspaceSliceChanged = (
   left: WorkspaceAutosaveSource,
   right: WorkspaceAutosaveSource,
 ): boolean => {
@@ -85,8 +84,27 @@ type UseWorkspaceAutosaveTrackingResult = {
 
 export const useWorkspaceAutosaveTracking =
   (): UseWorkspaceAutosaveTrackingResult => {
-    const trackedSource = useWorkspaceStore(
-      useShallow(selectWorkspaceAutosaveSource),
+    const snapshotRef = useRef<WorkspaceAutosaveSource>(
+      selectWorkspaceAutosaveSource(useWorkspaceStore.getState()),
+    );
+    const subscribe = useCallback((callback: () => void): (() => void) => {
+      return useWorkspaceStore.subscribe((state, previousState) => {
+        const nextSource = selectWorkspaceAutosaveSource(state);
+        const previousSource = selectWorkspaceAutosaveSource(previousState);
+
+        if (hasPersistedWorkspaceSliceChanged(previousSource, nextSource)) {
+          snapshotRef.current = nextSource;
+          callback();
+        }
+      });
+    }, []);
+    const getSnapshot = useCallback((): WorkspaceAutosaveSource => {
+      return snapshotRef.current;
+    }, []);
+    const trackedSource = useSyncExternalStore(
+      subscribe,
+      getSnapshot,
+      getSnapshot,
     );
     const trackedSliceRef = useRef<WorkspaceAutosaveSource>(trackedSource);
     const latestTrackedSliceRef =

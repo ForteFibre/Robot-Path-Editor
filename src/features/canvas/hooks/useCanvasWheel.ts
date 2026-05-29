@@ -1,16 +1,38 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect, useRef, type RefObject } from 'react';
 import { useCanvasEditActions } from './useCanvasEditActions';
 
 export const useCanvasWheel = (
   surfaceRef: RefObject<HTMLElement | null>,
 ): void => {
   const { zoomCanvas } = useCanvasEditActions();
+  const pendingWheelRef = useRef<{
+    centerX: number;
+    centerY: number;
+    delta: number;
+  } | null>(null);
+  const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const surface = surfaceRef.current;
     if (surface === null) {
       return;
     }
+
+    const flushPendingWheel = (): void => {
+      frameRef.current = null;
+      const pendingWheel = pendingWheelRef.current;
+      pendingWheelRef.current = null;
+
+      if (pendingWheel === null) {
+        return;
+      }
+
+      zoomCanvas(
+        pendingWheel.centerX,
+        pendingWheel.centerY,
+        pendingWheel.delta,
+      );
+    };
 
     const onWheel = (event: WheelEvent): void => {
       event.preventDefault();
@@ -28,12 +50,36 @@ export const useCanvasWheel = (
       const centerX = event.clientX - rect.left;
       const centerY = event.clientY - rect.top;
 
-      zoomCanvas(centerX, centerY, event.deltaY);
+      const pendingWheel = pendingWheelRef.current;
+      pendingWheelRef.current =
+        pendingWheel === null
+          ? {
+              centerX,
+              centerY,
+              delta: event.deltaY,
+            }
+          : {
+              centerX,
+              centerY,
+              delta: pendingWheel.delta + event.deltaY,
+            };
+
+      if (frameRef.current !== null) {
+        return;
+      }
+
+      frameRef.current = globalThis.requestAnimationFrame(flushPendingWheel);
     };
 
     surface.addEventListener('wheel', onWheel, { passive: false });
 
     return () => {
+      if (frameRef.current !== null) {
+        globalThis.cancelAnimationFrame(frameRef.current);
+      }
+
+      frameRef.current = null;
+      pendingWheelRef.current = null;
       surface.removeEventListener('wheel', onWheel);
     };
   }, [surfaceRef, zoomCanvas]);

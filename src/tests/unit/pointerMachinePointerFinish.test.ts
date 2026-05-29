@@ -15,18 +15,21 @@ describe('pointerMachine pointerFinish reducer helper', () => {
         startScreenX: 240,
         startScreenY: 170,
         hasMoved: false,
+        previewPoint: null,
       },
       createSnapshot(),
+      'pointer-up',
     );
 
     expect(transition.nextState).toEqual({ kind: 'idle' });
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-snap-guide',
       'local.set-add-point-preview',
+      'local.set-drag-preview',
       'path.select-waypoint',
       'local.release-pointer',
     ]);
-    expect(transition.effects[2]).toMatchObject({
+    expect(transition.effects[3]).toMatchObject({
       kind: 'path.select-waypoint',
       pathId: 'path-1',
       waypointId: 'waypoint-1',
@@ -43,24 +46,27 @@ describe('pointerMachine pointerFinish reducer helper', () => {
         startScreenY: 170,
         hasMoved: false,
         origin: 'add-point',
+        previewHeading: null,
       },
       createSnapshot(),
+      'pointer-up',
     );
 
     expect(transition.nextState).toEqual({ kind: 'idle' });
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-snap-guide',
       'local.set-add-point-preview',
+      'local.set-drag-preview',
       'path.select-waypoint',
       'command.complete-add-waypoint-mode',
       'local.release-pointer',
     ]);
-    expect(transition.effects[2]).toMatchObject({
+    expect(transition.effects[3]).toMatchObject({
       kind: 'path.select-waypoint',
       pathId: 'path-1',
       waypointId: 'waypoint-new',
     });
-    expect(transition.effects[3]).toEqual({
+    expect(transition.effects[4]).toEqual({
       kind: 'command.complete-add-waypoint-mode',
     });
   });
@@ -80,24 +86,27 @@ describe('pointerMachine pointerFinish reducer helper', () => {
         startDistance: 5,
         initialRMin: 4,
         hasMoved: true,
+        previewRMin: 7,
       },
       createSnapshot({ world: { x: 8, y: 0 } }),
+      'pointer-up',
     );
 
     expect(transition.nextState).toEqual({ kind: 'idle' });
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-snap-guide',
       'local.set-add-point-preview',
+      'local.set-drag-preview',
       'rmin.update-section-rmin',
       'local.release-pointer',
     ]);
-    expect(transition.effects[2]).toEqual({
+    expect(transition.effects[3]).toEqual({
       kind: 'rmin.update-section-rmin',
       pathId: 'path-1',
       sectionIndex: 0,
       rMin: 7,
     });
-    expect(transition.effects[3]).toEqual({
+    expect(transition.effects[4]).toEqual({
       kind: 'local.release-pointer',
       pointerId: 1,
     });

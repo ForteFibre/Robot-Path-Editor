@@ -90,6 +90,7 @@ export const reduceCanvasPathPointerDown = (
       startScreenY: snapshot.clientY,
       hasMoved: false,
       origin: 'add-point',
+      previewHeading: null,
     },
     [
       { kind: 'local.set-snap-guide', guide: preview.guide },
@@ -122,6 +123,7 @@ export const reduceWaypointPointerDown = (
         startScreenX: snapshot.clientX,
         startScreenY: snapshot.clientY,
         hasMoved: false,
+        previewPoint: null,
       },
       [capturePointerEffect(snapshot)],
     );
@@ -153,6 +155,7 @@ export const reducePathHeadingPointerDown = (
       startScreenY: snapshot.clientY,
       hasMoved: false,
       origin: 'existing',
+      previewHeading: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -205,16 +208,25 @@ export const reduceWaypointMove = (
     altKey: snapshot.altKey,
   });
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
-    { kind: 'local.set-snap-guide', guide: snapped.guide },
+  return result(
     {
-      kind: 'path.update-waypoint-position',
-      pathId: state.pathId,
-      waypointId: state.waypointId,
-      point: snapped.point,
+      ...movedState,
+      previewPoint: snapped.point,
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      { kind: 'local.set-snap-guide', guide: snapped.guide },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'waypoint-position',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          point: snapped.point,
+        },
+      },
+    ],
+  );
 };
 
 export const reducePathHeadingMove = (
@@ -251,14 +263,23 @@ export const reducePathHeadingMove = (
     altKey: snapshot.altKey,
   });
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
-    { kind: 'local.set-snap-guide', guide: heading.guide },
+  return result(
     {
-      kind: 'path.update-waypoint-path-heading',
-      pathId: state.pathId,
-      waypointId: state.waypointId,
-      pathHeading: heading.angle,
+      ...movedState,
+      previewHeading: heading.angle,
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      { kind: 'local.set-snap-guide', guide: heading.guide },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'waypoint-path-heading',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          pathHeading: heading.angle,
+        },
+      },
+    ],
+  );
 };

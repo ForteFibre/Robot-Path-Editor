@@ -7,7 +7,6 @@ import { EMPTY_SNAP_GUIDE } from '../../domain/geometry';
 import type { RobotMotionSettings, SelectionState } from '../../domain/models';
 import type { PathTiming } from '../../domain/pathTiming';
 import type { CanvasSceneRenderModel } from '../../features/canvas/hooks/canvasScene/types';
-import type { PathAnimationState } from '../../features/canvas/hooks/usePathAnimation';
 import type { CanvasViewportSize } from '../../features/canvas/hooks/useCanvasViewport';
 import { CanvasRenderer } from '../../features/canvas/components/CanvasRenderer';
 
@@ -103,9 +102,9 @@ vi.mock('../../features/canvas/components/CanvasPreviewOverlay', () => {
   };
 });
 
-vi.mock('../../features/canvas/components/CanvasRobotLayer', () => {
+vi.mock('../../features/canvas/components/CanvasRobotAnimationLayer', () => {
   return {
-    CanvasRobotLayer: () => null,
+    CanvasRobotAnimationLayer: () => null,
   };
 });
 
@@ -180,13 +179,6 @@ const canvasTransform: CanvasTransform = {
   k: 1,
 };
 
-const robotAnimation: PathAnimationState = {
-  currentTime: 0,
-  totalTime: 0,
-  progress: 0,
-  pose: null,
-};
-
 const robotSettings: RobotMotionSettings = {
   length: 0.8,
   width: 0.7,
@@ -210,7 +202,6 @@ describe('CanvasRenderer', () => {
         rMinDragTargets={[]}
         backgroundImageElement={null}
         backgroundImageOpacity={1}
-        robotAnimation={robotAnimation}
         isRobotAnimationEnabled={false}
         robotSettings={robotSettings}
         snapGuide={EMPTY_SNAP_GUIDE}
@@ -236,7 +227,6 @@ describe('CanvasRenderer', () => {
         rMinDragTargets={[]}
         backgroundImageElement={null}
         backgroundImageOpacity={1}
-        robotAnimation={robotAnimation}
         isRobotAnimationEnabled={false}
         robotSettings={robotSettings}
         snapGuide={EMPTY_SNAP_GUIDE}

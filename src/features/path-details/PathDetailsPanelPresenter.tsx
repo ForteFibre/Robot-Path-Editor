@@ -15,7 +15,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { type CSSProperties, type ReactElement } from 'react';
+import {
+  memo,
+  useCallback,
+  useMemo,
+  type CSSProperties,
+  type ReactElement,
+} from 'react';
 import { GripVertical, Route, MapPin, Navigation, Info } from 'lucide-react';
 import {
   formatSeconds,
@@ -82,13 +88,15 @@ const PathItemCard = ({
   );
 };
 
+const MemoizedPathItemCard = memo(PathItemCard);
+
 type SortableWaypointRowProps = {
   item: Extract<PathItem, { type: 'waypoint' }>;
   isActive: boolean;
   onSelect: () => void;
 };
 
-const SortableWaypointRow = ({
+const SortableWaypointRowComponent = ({
   item,
   isActive,
   onSelect,
@@ -105,12 +113,31 @@ const SortableWaypointRow = ({
     id: item.id,
   });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.45 : 1,
-    zIndex: isDragging ? 2 : 1,
-  } satisfies CSSProperties;
+  const style = useMemo(() => {
+    return {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.45 : 1,
+      zIndex: isDragging ? 2 : 1,
+    } satisfies CSSProperties;
+  }, [isDragging, transform, transition]);
+
+  const dragHandle = useMemo(() => {
+    return (
+      <button
+        type="button"
+        className={styles.dragHandle}
+        data-ui-focus="input-accent"
+        data-ui-hover="drag-handle"
+        {...attributes}
+        {...listeners}
+        aria-label={`Reorder waypoint ${itemLabel}`}
+        title={`Reorder waypoint ${itemLabel}`}
+      >
+        <GripVertical size={16} />
+      </button>
+    );
+  }, [attributes, itemLabel, listeners]);
 
   return (
     <SidePanelCard
@@ -121,28 +148,17 @@ const SortableWaypointRow = ({
         .filter(Boolean)
         .join(' ')}
     >
-      <PathItemCard
+      <MemoizedPathItemCard
         item={item}
         isActive={isActive}
         onSelect={onSelect}
-        dragHandle={
-          <button
-            type="button"
-            className={styles.dragHandle}
-            data-ui-focus="input-accent"
-            data-ui-hover="drag-handle"
-            {...attributes}
-            {...listeners}
-            aria-label={`Reorder waypoint ${itemLabel}`}
-            title={`Reorder waypoint ${itemLabel}`}
-          >
-            <GripVertical size={16} />
-          </button>
-        }
+        dragHandle={dragHandle}
       />
     </SidePanelCard>
   );
 };
+
+const SortableWaypointRow = memo(SortableWaypointRowComponent);
 
 type StaticPathItemRowProps = {
   item: Extract<PathItem, { type: 'headingKeyframe' }>;
@@ -150,7 +166,7 @@ type StaticPathItemRowProps = {
   onSelect: () => void;
 };
 
-const StaticPathItemRow = ({
+const StaticPathItemRowComponent = ({
   item,
   isActive,
   onSelect,
@@ -162,7 +178,7 @@ const StaticPathItemRow = ({
         .filter(Boolean)
         .join(' ')}
     >
-      <PathItemCard
+      <MemoizedPathItemCard
         item={item}
         isActive={isActive}
         onSelect={onSelect}
@@ -177,10 +193,13 @@ const StaticPathItemRow = ({
   );
 };
 
+const StaticPathItemRow = memo(StaticPathItemRowComponent);
+
 export type PathDetailsPanelPresenterProps = {
   pathName: string;
   totalTime: number;
   sequentialItems: PathItem[];
+  waypointIds: string[];
   selectionWaypointId: string | null;
   selectionHeadingKeyframeId: string | null;
   onSelectItem: (item: PathItem) => void;
@@ -191,6 +210,7 @@ export const PathDetailsPanelPresenter = ({
   pathName,
   totalTime,
   sequentialItems,
+  waypointIds,
   selectionWaypointId,
   selectionHeadingKeyframeId,
   onSelectItem,
@@ -207,17 +227,45 @@ export const PathDetailsPanelPresenter = ({
     }),
   );
 
-  const waypointIds = sequentialItems
-    .filter((item) => item.type === 'waypoint')
-    .map((item) => item.id);
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent): void => {
+      if (over === null || active.id === over.id) {
+        return;
+      }
 
-  const handleDragEnd = ({ active, over }: DragEndEvent): void => {
-    if (over === null || active.id === over.id) {
-      return;
-    }
+      onDragEnd(String(active.id), String(over.id));
+    },
+    [onDragEnd],
+  );
 
-    onDragEnd(String(active.id), String(over.id));
-  };
+  const getKey = useCallback((item: PathItem): string => item.id, []);
+  const renderItem = useCallback(
+    (item: PathItem): ReactElement => {
+      const isActive =
+        (item.type === 'waypoint' && selectionWaypointId === item.id) ||
+        (item.type === 'headingKeyframe' &&
+          selectionHeadingKeyframeId === item.id);
+
+      const handleSelect = (): void => {
+        onSelectItem(item);
+      };
+
+      return item.type === 'waypoint' ? (
+        <SortableWaypointRow
+          item={item}
+          isActive={isActive}
+          onSelect={handleSelect}
+        />
+      ) : (
+        <StaticPathItemRow
+          item={item}
+          isActive={isActive}
+          onSelect={handleSelect}
+        />
+      );
+    },
+    [onSelectItem, selectionHeadingKeyframeId, selectionWaypointId],
+  );
 
   return (
     <SidePanel side="right" aria-label="path details sidebar">
@@ -263,34 +311,10 @@ export const PathDetailsPanelPresenter = ({
               <InteractiveList
                 as="ol"
                 items={sequentialItems}
-                getKey={(item) => item.id}
+                getKey={getKey}
                 className={styles.pathItemsList}
                 aria-label="Path elements"
-                renderItem={(item) => {
-                  const isActive =
-                    (item.type === 'waypoint' &&
-                      selectionWaypointId === item.id) ||
-                    (item.type === 'headingKeyframe' &&
-                      selectionHeadingKeyframeId === item.id);
-
-                  const handleSelect = (): void => {
-                    onSelectItem(item);
-                  };
-
-                  return item.type === 'waypoint' ? (
-                    <SortableWaypointRow
-                      item={item}
-                      isActive={isActive}
-                      onSelect={handleSelect}
-                    />
-                  ) : (
-                    <StaticPathItemRow
-                      item={item}
-                      isActive={isActive}
-                      onSelect={handleSelect}
-                    />
-                  );
-                }}
+                renderItem={renderItem}
               />
             </SortableContext>
           </DndContext>

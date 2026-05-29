@@ -4,7 +4,6 @@ import { Group, Image as KonvaImage, Layer, Stage } from 'react-konva';
 import type { CanvasTransform } from '../../../domain/canvasTransform';
 import type { SnapGuide } from '../../../domain/geometry';
 import type { EditorMode, RobotMotionSettings } from '../../../domain/models';
-import type { PathAnimationState } from '../hooks/usePathAnimation';
 import type { AddPointPreviewState } from '../hooks/useCanvasPointerMachine';
 import type { CanvasSceneRenderModel } from '../hooks/canvasScene/types';
 import type { RMinDragTarget } from '../types/rMinDragTarget';
@@ -14,7 +13,7 @@ import { CanvasGuides } from './CanvasGuides';
 import { CanvasPathVelocityOverlay } from './CanvasPathVelocityOverlay';
 import { CanvasPreviewOverlay } from './CanvasPreviewOverlay';
 import { CanvasResolvedPathLayer } from './CanvasResolvedPathLayer';
-import { CanvasRobotLayer } from './CanvasRobotLayer';
+import { CanvasRobotAnimationLayer } from './CanvasRobotAnimationLayer';
 
 type CanvasRendererProps = {
   stageRef: RefObject<Konva.Stage | null>;
@@ -25,7 +24,6 @@ type CanvasRendererProps = {
   rMinDragTargets: RMinDragTarget[];
   backgroundImageElement: HTMLImageElement | null;
   backgroundImageOpacity: number;
-  robotAnimation: PathAnimationState;
   isRobotAnimationEnabled: boolean;
   robotSettings: RobotMotionSettings;
   snapGuide: SnapGuide;
@@ -41,7 +39,6 @@ export const CanvasRenderer = ({
   rMinDragTargets,
   backgroundImageElement,
   backgroundImageOpacity,
-  robotAnimation,
   isRobotAnimationEnabled,
   robotSettings,
   snapGuide,
@@ -129,24 +126,14 @@ export const CanvasRenderer = ({
         </Group>
       </Layer>
 
-      <Layer listening={false}>
-        <Group
-          x={canvasTransform.x}
-          y={canvasTransform.y}
-          scaleX={k}
-          scaleY={k}
-          listening={false}
-        >
-          <CanvasRobotLayer
-            timing={scene.activePathTiming}
-            pose={robotAnimation.pose}
-            robotSettings={robotSettings}
-            color={scene.activePathAnimationColor}
-            k={k}
-            enabled={isRobotAnimationEnabled}
-          />
-        </Group>
-      </Layer>
+      <CanvasRobotAnimationLayer
+        timing={scene.activePathTiming}
+        enabled={isRobotAnimationEnabled}
+        robotSettings={robotSettings}
+        color={scene.activePathAnimationColor}
+        k={k}
+        canvasTransform={canvasTransform}
+      />
     </Stage>
   );
 };

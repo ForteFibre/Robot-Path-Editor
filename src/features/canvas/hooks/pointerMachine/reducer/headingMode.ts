@@ -63,6 +63,7 @@ export const reduceSectionPointerDown = (
       startScreenY: snapshot.clientY,
       hasMoved: false,
       origin: 'add-point',
+      previewHeading: null,
     },
     [
       {
@@ -107,6 +108,7 @@ export const reduceRobotHeadingPointerDown = (
       startScreenX: snapshot.clientX,
       startScreenY: snapshot.clientY,
       hasMoved: false,
+      previewHeading: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -128,6 +130,7 @@ export const reduceHeadingKeyframePointerDown = (
       startScreenX: snapshot.clientX,
       startScreenY: snapshot.clientY,
       hasMoved: false,
+      previewPosition: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -161,6 +164,7 @@ export const reduceHeadingKeyframeHeadingPointerDown = (
       startScreenY: snapshot.clientY,
       hasMoved: false,
       origin: 'existing',
+      previewHeading: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -191,16 +195,25 @@ export const reduceRobotHeadingMove = (
     altKey: snapshot.altKey,
   });
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
-    { kind: 'local.set-snap-guide', guide: heading.guide },
+  return result(
     {
-      kind: 'heading.update-waypoint-robot-heading',
-      pathId: state.pathId,
-      waypointId: state.waypointId,
-      robotHeading: heading.angle,
+      ...movedState,
+      previewHeading: heading.angle,
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      { kind: 'local.set-snap-guide', guide: heading.guide },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'waypoint-robot-heading',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          robotHeading: heading.angle,
+        },
+      },
+    ],
+  );
 };
 
 export const reduceHeadingKeyframeMove = (
@@ -222,17 +235,29 @@ export const reduceHeadingKeyframeMove = (
     return result(state);
   }
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
-    { kind: 'local.set-snap-guide', guide: EMPTY_GUIDE },
+  return result(
     {
-      kind: 'heading.update-heading-keyframe-position',
-      pathId: state.pathId,
-      headingKeyframeId: state.headingKeyframeId,
-      sectionIndex: projected.sectionIndex,
-      sectionRatio: projected.sectionRatio,
+      ...movedState,
+      previewPosition: {
+        sectionIndex: projected.sectionIndex,
+        sectionRatio: projected.sectionRatio,
+      },
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      { kind: 'local.set-snap-guide', guide: EMPTY_GUIDE },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'heading-keyframe-position',
+          pathId: state.pathId,
+          headingKeyframeId: state.headingKeyframeId,
+          sectionIndex: projected.sectionIndex,
+          sectionRatio: projected.sectionRatio,
+        },
+      },
+    ],
+  );
 };
 
 export const reduceHeadingKeyframeHeadingMove = (
@@ -273,14 +298,23 @@ export const reduceHeadingKeyframeHeadingMove = (
     altKey: snapshot.altKey,
   });
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
-    { kind: 'local.set-snap-guide', guide: heading.guide },
+  return result(
     {
-      kind: 'heading.update-heading-keyframe-heading',
-      pathId: state.pathId,
-      headingKeyframeId: state.headingKeyframeId,
-      robotHeading: heading.angle,
+      ...movedState,
+      previewHeading: heading.angle,
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      { kind: 'local.set-snap-guide', guide: heading.guide },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'heading-keyframe-heading',
+          pathId: state.pathId,
+          headingKeyframeId: state.headingKeyframeId,
+          robotHeading: heading.angle,
+        },
+      },
+    ],
+  );
 };

@@ -27,6 +27,7 @@ describe('reducePointerMachine', () => {
       startScreenX: 240,
       startScreenY: 170,
       hasMoved: false,
+      previewPoint: null,
     });
     expect(transition.effects).toEqual([
       { kind: 'local.capture-pointer', pointerId: 1 },
@@ -137,6 +138,7 @@ describe('reducePointerMachine', () => {
       startDistance: 10,
       initialRMin: 4,
       hasMoved: false,
+      previewRMin: null,
     });
   });
 
@@ -162,6 +164,7 @@ describe('reducePointerMachine', () => {
         startImgX: 1,
         startImgY: 2,
         hasMoved: false,
+        preview: null,
       },
       { type: 'pointer-move' },
       createSnapshot({
@@ -172,10 +175,13 @@ describe('reducePointerMachine', () => {
     );
 
     expect(transition.effects).toContainEqual({
-      kind: 'pan.update-background-image',
-      updates: {
-        x: 2,
-        y: 0,
+      kind: 'local.set-drag-preview',
+      preview: {
+        kind: 'background-image',
+        updates: {
+          x: 2,
+          y: 0,
+        },
       },
     });
   });
@@ -190,6 +196,7 @@ describe('reducePointerMachine', () => {
         startScreenY: 170,
         hasMoved: false,
         origin: 'add-point',
+        previewHeading: null,
       },
       { type: 'pointer-finish', reason: 'pointer-up' },
       createSnapshot(),
@@ -199,6 +206,7 @@ describe('reducePointerMachine', () => {
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-snap-guide',
       'local.set-add-point-preview',
+      'local.set-drag-preview',
       'path.select-waypoint',
       'command.complete-add-waypoint-mode',
       'local.release-pointer',
@@ -260,6 +268,7 @@ describe('reducePointerMachine', () => {
         startScreenX: 0,
         startScreenY: 0,
         hasMoved: false,
+        previewHeading: null,
       }),
     ).toMatchObject({
       isDraggingInteraction: true,
@@ -300,6 +309,7 @@ describe('reducePointerMachine', () => {
         startScreenX: 240,
         startScreenY: 170,
         hasMoved: false,
+        previewPoint: null,
       },
       { type: 'pointer-move' },
       createSnapshot({

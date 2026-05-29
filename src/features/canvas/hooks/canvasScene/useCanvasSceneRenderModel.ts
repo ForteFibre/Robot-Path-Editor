@@ -64,21 +64,26 @@ export const useCanvasSceneRenderModel = ({
   }, [activePath]);
 
   const renderStep = getCanvasRenderStep(canvasTransform.k);
-  const deferredPathsForDiscretize = useDeferredValue(paths);
+  const deferredRenderStep = useDeferredValue(renderStep);
+  const deferredActivePath = useDeferredValue(activePath);
   const deferredPointsForDiscretize = useDeferredValue(points);
 
   const discretizedByPath = useMemo(() => {
     const byPath = new Map<string, ReturnType<typeof discretizePathDetailed>>();
 
-    for (const path of deferredPathsForDiscretize) {
+    if (deferredActivePath !== null) {
       byPath.set(
-        path.id,
-        discretizePathDetailed(path, deferredPointsForDiscretize, renderStep),
+        deferredActivePath.id,
+        discretizePathDetailed(
+          deferredActivePath,
+          deferredPointsForDiscretize,
+          deferredRenderStep,
+        ),
       );
     }
 
     return byPath;
-  }, [deferredPathsForDiscretize, deferredPointsForDiscretize, renderStep]);
+  }, [deferredActivePath, deferredPointsForDiscretize, deferredRenderStep]);
 
   const geometryByPath = useMemo(() => {
     const byPath = new Map<
@@ -97,14 +102,16 @@ export const useCanvasSceneRenderModel = ({
     return byPath;
   }, [paths, points]);
 
-  const backgroundImageRenderState =
-    backgroundImage === null
+  const backgroundImageRenderState = useMemo(() => {
+    return backgroundImage === null
       ? null
       : toBackgroundImageCanvasRenderState(backgroundImage);
-  const backgroundImageCanvasOrigin =
-    backgroundImage === null
+  }, [backgroundImage]);
+  const backgroundImageCanvasOrigin = useMemo(() => {
+    return backgroundImage === null
       ? null
       : toBackgroundImageCanvasOrigin(backgroundImage);
+  }, [backgroundImage]);
 
   const addPointPreviewWaypoint = useMemo(() => {
     if (
@@ -172,14 +179,25 @@ export const useCanvasSceneRenderModel = ({
     ],
   );
 
-  return {
-    visiblePaths,
-    activePathTiming: visibleActivePathTiming,
+  return useMemo(() => {
+    return {
+      visiblePaths,
+      activePathTiming: visibleActivePathTiming,
+      activePathAnimationColor,
+      backgroundImageRenderState,
+      backgroundImageCanvasOrigin,
+      addPointPreviewPath,
+      addPointPreviewWaypoint,
+      addPointPreviewHeadingKeyframe,
+    };
+  }, [
     activePathAnimationColor,
-    backgroundImageRenderState,
-    backgroundImageCanvasOrigin,
+    addPointPreviewHeadingKeyframe,
     addPointPreviewPath,
     addPointPreviewWaypoint,
-    addPointPreviewHeadingKeyframe,
-  };
+    backgroundImageCanvasOrigin,
+    backgroundImageRenderState,
+    visibleActivePathTiming,
+    visiblePaths,
+  ]);
 };

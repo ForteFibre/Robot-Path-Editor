@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from 'react';
 import { Check, Lock, LockOpen, Pencil, Plus, Trash2, X } from 'lucide-react';
 import styles from './PointLibraryPanel.module.css';
 import { Button } from '../../components/common/Button';
@@ -37,7 +45,7 @@ type PointLibraryItemProps = {
   onToggleLock: (pointId: string) => void;
 };
 
-export const PointLibraryItem = ({
+const PointLibraryItemComponent = ({
   frameClassName,
   item,
   isSelected,
@@ -79,7 +87,7 @@ export const PointLibraryItem = ({
     nameInputRef.current?.select();
   }, [isEditing]);
 
-  const handleSave = (): void => {
+  const handleSave = useCallback((): void => {
     onSave(item.id, {
       name: draft.name,
       x: draft.x ?? item.x,
@@ -87,11 +95,54 @@ export const PointLibraryItem = ({
       robotHeading: draft.robotHeading,
     });
     setIsEditing(false);
-  };
+  }, [draft, item.id, item.x, item.y, onSave]);
+
+  const handleSelect = useCallback((): void => {
+    onSelect(item.id);
+  }, [item.id, onSelect]);
+
+  const handleInsert = useCallback((): void => {
+    onSelect(item.id);
+    onInsert(item.id);
+  }, [item.id, onInsert, onSelect]);
+
+  const handleStartEdit = useCallback((): void => {
+    onSelect(item.id);
+    setIsEditing(true);
+  }, [item.id, onSelect]);
+
+  const handleToggleLock = useCallback((): void => {
+    onToggleLock(item.id);
+  }, [item.id, onToggleLock]);
+
+  const handleDelete = useCallback((): void => {
+    onDelete(item.id);
+  }, [item.id, onDelete]);
+
+  const handleDraftChange = useCallback(
+    (patch: Partial<LibraryPointDraft>): void => {
+      setDraft((current) => ({
+        ...current,
+        ...patch,
+      }));
+    },
+    [],
+  );
+
+  const handleCancelEdit = useCallback((): void => {
+    setIsEditing(false);
+    setDraft({
+      name: item.name,
+      x: item.x,
+      y: item.y,
+      robotHeading: item.robotHeading,
+    });
+  }, [item.name, item.robotHeading, item.x, item.y]);
 
   const usageText = item.usageCount > 0 ? `${item.usageCount}` : '0';
-  const displayName =
-    item.name.trim().length > 0 ? item.name : 'Untitled Point';
+  const displayName = useMemo(() => {
+    return item.name.trim().length > 0 ? item.name : 'Untitled Point';
+  }, [item.name]);
 
   return (
     <li
@@ -112,9 +163,7 @@ export const PointLibraryItem = ({
             type="button"
             className={styles.titleButton}
             data-ui-focus="primary"
-            onClick={() => {
-              onSelect(item.id);
-            }}
+            onClick={handleSelect}
             aria-label={`select library point ${displayName}`}
           >
             <span className={styles.itemName}>{displayName}</span>
@@ -138,10 +187,7 @@ export const PointLibraryItem = ({
             type="button"
             className={styles.addButton}
             data-ui-focus="primary"
-            onClick={() => {
-              onSelect(item.id);
-              onInsert(item.id);
-            }}
+            onClick={handleInsert}
             aria-label={`insert ${displayName} into path`}
             title="Add to Canvas"
           >
@@ -154,9 +200,7 @@ export const PointLibraryItem = ({
             type="button"
             className={styles.coordButton}
             data-ui-focus="primary"
-            onClick={() => {
-              onSelect(item.id);
-            }}
+            onClick={handleSelect}
             aria-label={`select library point ${displayName}`}
           >
             <span className={styles.coord}>
@@ -180,10 +224,7 @@ export const PointLibraryItem = ({
               type="button"
               className={styles.iconActionButton}
               data-ui-focus="primary"
-              onClick={() => {
-                onSelect(item.id);
-                setIsEditing(true);
-              }}
+              onClick={handleStartEdit}
               aria-label={`edit ${displayName}`}
               title="Edit"
             >
@@ -193,9 +234,7 @@ export const PointLibraryItem = ({
               type="button"
               className={styles.iconActionButton}
               data-ui-focus="primary"
-              onClick={() => {
-                onToggleLock(item.id);
-              }}
+              onClick={handleToggleLock}
               aria-label={
                 item.isLocked
                   ? `unlock library point ${displayName}`
@@ -209,9 +248,7 @@ export const PointLibraryItem = ({
               type="button"
               className={`${styles.iconActionButton} ${styles.dangerActionButton}`}
               data-ui-focus="primary"
-              onClick={() => {
-                onDelete(item.id);
-              }}
+              onClick={handleDelete}
               aria-label={`delete ${displayName}`}
               title="Delete"
             >
@@ -234,12 +271,7 @@ export const PointLibraryItem = ({
             nameInputRef={nameInputRef}
             disabledCoordinates={item.isLocked}
             disabledRobotHeading={item.isLocked}
-            onChange={(patch) => {
-              setDraft((current) => ({
-                ...current,
-                ...patch,
-              }));
-            }}
+            onChange={handleDraftChange}
             nameAriaLabel="library point name"
             xAriaLabel="library point x"
             yAriaLabel="library point y"
@@ -257,15 +289,7 @@ export const PointLibraryItem = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setDraft({
-                      name: item.name,
-                      x: item.x,
-                      y: item.y,
-                      robotHeading: item.robotHeading,
-                    });
-                  }}
+                  onClick={handleCancelEdit}
                   aria-label="cancel library point edit"
                 >
                   <X size={14} /> Cancel
@@ -278,3 +302,5 @@ export const PointLibraryItem = ({
     </li>
   );
 };
+
+export const PointLibraryItem = memo(PointLibraryItemComponent);

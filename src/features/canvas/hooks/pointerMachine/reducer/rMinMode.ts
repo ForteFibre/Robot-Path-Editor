@@ -39,6 +39,7 @@ export const reduceRMinPointerDown = (
       startDistance: distance(target.waypointPoint, snapshot.world),
       initialRMin: target.rMin,
       hasMoved: false,
+      previewRMin: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -56,13 +57,22 @@ export const reduceRMinMove = (
   const currentDistance = distance(state.target.waypointPoint, snapshot.world);
   const distanceOffset = currentDistance - state.startDistance;
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
+  return result(
     {
-      kind: 'rmin.update-section-rmin',
-      pathId: state.target.pathId,
-      sectionIndex: state.target.sectionIndex,
-      rMin: Math.max(0, state.initialRMin + distanceOffset),
+      ...movedState,
+      previewRMin: Math.max(0, state.initialRMin + distanceOffset),
     },
-  ]);
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'section-rmin',
+          pathId: state.target.pathId,
+          sectionIndex: state.target.sectionIndex,
+          rMin: Math.max(0, state.initialRMin + distanceOffset),
+        },
+      },
+    ],
+  );
 };

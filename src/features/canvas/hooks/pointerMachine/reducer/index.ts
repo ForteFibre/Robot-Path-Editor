@@ -20,7 +20,7 @@ export const reducePointerMachine = (
     case 'pointer-move':
       return reducePointerMove(state, snapshot);
     case 'pointer-finish':
-      return reducePointerFinish(state, snapshot);
+      return reducePointerFinish(state, snapshot, event.reason);
     case 'double-click':
       return reduceDoubleClick(state, snapshot);
   }
