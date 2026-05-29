@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react';
+import { useCallback, useMemo, type ReactElement } from 'react';
 import { useWorkspaceEditorDerived } from '../app-shell/WorkspaceEditorContext';
 import { useSelection } from '../../store/workspaceSelectors';
 import { buildSequentialItems } from './pathDetailsModel';
@@ -25,40 +25,52 @@ export const PathDetailsPanel = (): ReactElement | null => {
     return null;
   }
 
-  const sequentialItems = buildSequentialItems(activePath, waypointTimingsById);
+  const sequentialItems = useMemo(() => {
+    return buildSequentialItems(activePath, waypointTimingsById);
+  }, [activePath, waypointTimingsById]);
 
-  const handleSelectItem = (item: PathItem): void => {
-    setSelection({
-      pathId: activePath.id,
-      waypointId: item.type === 'waypoint' ? item.id : null,
-      headingKeyframeId: item.type === 'headingKeyframe' ? item.id : null,
-      sectionIndex: null,
-    });
-  };
+  const handleSelectItem = useCallback(
+    (item: PathItem): void => {
+      setSelection({
+        pathId: activePath.id,
+        waypointId: item.type === 'waypoint' ? item.id : null,
+        headingKeyframeId: item.type === 'headingKeyframe' ? item.id : null,
+        sectionIndex: null,
+      });
+    },
+    [activePath.id, setSelection],
+  );
 
-  const handleDragEnd = (activeId: string, overId: string): void => {
-    const waypointIds = activePath.waypoints.map((waypoint) => waypoint.id);
-    const oldIndex = waypointIds.indexOf(activeId);
-    const newIndex = waypointIds.indexOf(overId);
+  const waypointIds = useMemo(() => {
+    return activePath.waypoints.map((waypoint) => waypoint.id);
+  }, [activePath.waypoints]);
 
-    if (oldIndex === -1 || newIndex === -1) {
-      return;
-    }
+  const handleDragEnd = useCallback(
+    (activeId: string, overId: string): void => {
+      const oldIndex = waypointIds.indexOf(activeId);
+      const newIndex = waypointIds.indexOf(overId);
 
-    reorderWaypoint(activePath.id, activeId, newIndex);
-    setSelection({
-      pathId: activePath.id,
-      waypointId: activeId,
-      headingKeyframeId: null,
-      sectionIndex: null,
-    });
-  };
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
+
+      reorderWaypoint(activePath.id, activeId, newIndex);
+      setSelection({
+        pathId: activePath.id,
+        waypointId: activeId,
+        headingKeyframeId: null,
+        sectionIndex: null,
+      });
+    },
+    [activePath.id, reorderWaypoint, setSelection, waypointIds],
+  );
 
   return (
     <PathDetailsPanelPresenter
       pathName={activePath.name}
       totalTime={pathTiming?.totalTime ?? 0}
       sequentialItems={sequentialItems}
+      waypointIds={waypointIds}
       selectionWaypointId={selection.waypointId}
       selectionHeadingKeyframeId={selection.headingKeyframeId}
       onSelectItem={handleSelectItem}

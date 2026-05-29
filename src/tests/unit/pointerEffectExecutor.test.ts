@@ -20,6 +20,7 @@ const createExecutorDeps = (): PointerEffectExecutorDeps & {
     },
     setSnapGuide: vi.fn(),
     setAddPointPreview: vi.fn(),
+    setDragPreview: vi.fn(),
     notify: vi.fn(),
     canvasEditingCommands: {
       executeAddWaypoint: vi.fn(),
@@ -59,6 +60,7 @@ describe('createPointerEffectExecutor', () => {
 
     executeEffect({ kind: 'local.set-snap-guide', guide: EMPTY_SNAP_GUIDE });
     executeEffect({ kind: 'local.set-add-point-preview', preview });
+    executeEffect({ kind: 'local.set-drag-preview', preview: null });
     executeEffect({ kind: 'local.capture-pointer', pointerId: 12 });
     expect(() => {
       executeEffect({ kind: 'local.release-pointer', pointerId: 12 });
@@ -73,6 +75,7 @@ describe('createPointerEffectExecutor', () => {
 
     expect(deps.setSnapGuide).toHaveBeenCalledWith(EMPTY_SNAP_GUIDE);
     expect(deps.setAddPointPreview).toHaveBeenCalledWith(preview);
+    expect(deps.setDragPreview).toHaveBeenCalledWith(null);
     expect(deps.pointerSurface.setPointerCapture).toHaveBeenCalledWith(12);
     expect(deps.pointerSurface.releasePointerCapture).toHaveBeenCalledWith(12);
     expect(deps.notify).toHaveBeenCalledWith({

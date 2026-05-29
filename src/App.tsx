@@ -16,6 +16,7 @@ import { PathDetailsPanel } from './features/path-details/PathDetailsPanel';
 import { WorkspaceRestoreDialog } from './features/persistence/WorkspaceRestoreDialog';
 import { useWorkspacePersistence } from './features/persistence/useWorkspacePersistence';
 import { WorkspaceEditorProvider } from './features/app-shell/WorkspaceEditorContext';
+import { CanvasDragPreviewProvider } from './features/canvas/CanvasDragPreviewContext';
 import { Sidebar } from './features/sidebar/Sidebar';
 import { Toolbar } from './features/toolbar/Toolbar';
 import { WorkspaceFileConflictDialog } from './features/workspace-file/WorkspaceFileConflictDialog';
@@ -25,6 +26,7 @@ import { useWorkspaceConflictDialogController } from './features/workspace-file/
 import { useWorkspaceFileCommands } from './features/workspace-file/useWorkspaceFileCommands';
 import { usePwaController } from './pwa/usePwaController';
 import { ThemePreferenceProvider } from './features/theme/ThemePreferenceContext';
+import { BenchmarkProfiler } from './bench/reactPerf';
 
 const EditorApp = (): ReactElement => {
   const { notification, setNotification, clearNotification } =
@@ -75,11 +77,24 @@ const EditorApp = (): ReactElement => {
       />
 
       <div className={appShellStyles.appBody} ref={appBodyRef}>
-        <WorkspaceEditorProvider>
+        <BenchmarkProfiler id="sidebar">
           <Sidebar hostRef={sidebarRef} />
-          <PathCanvas />
-          <PathDetailsPanel />
-          <FloatingInspector layout={layout} />
+        </BenchmarkProfiler>
+
+        <WorkspaceEditorProvider>
+          <CanvasDragPreviewProvider>
+            <BenchmarkProfiler id="canvas-shell">
+              <PathCanvas />
+            </BenchmarkProfiler>
+
+            <BenchmarkProfiler id="path-details">
+              <PathDetailsPanel />
+            </BenchmarkProfiler>
+
+            <BenchmarkProfiler id="floating-inspector">
+              <FloatingInspector layout={layout} />
+            </BenchmarkProfiler>
+          </CanvasDragPreviewProvider>
         </WorkspaceEditorProvider>
       </div>
 

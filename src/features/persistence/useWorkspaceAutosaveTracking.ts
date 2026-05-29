@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import type { WorkspaceAutosaveSource } from '../../store/adapters/workspacePersistence';
 import { selectWorkspaceAutosaveSource } from '../../store/workspaceSelectors';
 import { useWorkspaceStore } from '../../store/workspaceStore';
@@ -60,7 +59,7 @@ const hasRobotSettingsChanged = (
   );
 };
 
-const hasPersistedWorkspaceSliceChanged = (
+export const hasPersistedWorkspaceSliceChanged = (
   left: WorkspaceAutosaveSource,
   right: WorkspaceAutosaveSource,
 ): boolean => {
@@ -85,8 +84,38 @@ type UseWorkspaceAutosaveTrackingResult = {
 
 export const useWorkspaceAutosaveTracking =
   (): UseWorkspaceAutosaveTrackingResult => {
-    const trackedSource = useWorkspaceStore(
-      useShallow(selectWorkspaceAutosaveSource),
+    const snapshotRef = useRef<WorkspaceAutosaveSource>(
+      selectWorkspaceAutosaveSource(useWorkspaceStore.getState()),
+    );
+    const readCurrentTrackedSource =
+      useCallback((): WorkspaceAutosaveSource => {
+        const currentSource = selectWorkspaceAutosaveSource(
+          useWorkspaceStore.getState(),
+        );
+
+        if (
+          hasPersistedWorkspaceSliceChanged(snapshotRef.current, currentSource)
+        ) {
+          snapshotRef.current = currentSource;
+        }
+
+        return snapshotRef.current;
+      }, []);
+    const subscribe = useCallback((callback: () => void): (() => void) => {
+      return useWorkspaceStore.subscribe((state, previousState) => {
+        const nextSource = selectWorkspaceAutosaveSource(state);
+        const previousSource = selectWorkspaceAutosaveSource(previousState);
+
+        if (hasPersistedWorkspaceSliceChanged(previousSource, nextSource)) {
+          snapshotRef.current = nextSource;
+          callback();
+        }
+      });
+    }, []);
+    const trackedSource = useSyncExternalStore(
+      subscribe,
+      readCurrentTrackedSource,
+      readCurrentTrackedSource,
     );
     const trackedSliceRef = useRef<WorkspaceAutosaveSource>(trackedSource);
     const latestTrackedSliceRef =

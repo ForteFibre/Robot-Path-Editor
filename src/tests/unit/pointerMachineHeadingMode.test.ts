@@ -108,6 +108,7 @@ describe('pointerMachine headingMode reducer helpers', () => {
       startScreenX: 240,
       startScreenY: 170,
       hasMoved: true,
+      previewHeading: null,
     };
 
     const transition = reduceRobotHeadingMove(
@@ -128,6 +129,7 @@ describe('pointerMachine headingMode reducer helpers', () => {
       startScreenX: 240,
       startScreenY: 170,
       hasMoved: false,
+      previewHeading: null,
     };
 
     const transition = reduceRobotHeadingMove(
@@ -139,17 +141,24 @@ describe('pointerMachine headingMode reducer helpers', () => {
       }),
     );
 
-    expect(transition.nextState).toEqual({ ...state, hasMoved: true });
+    expect(transition.nextState).toEqual({
+      ...state,
+      hasMoved: true,
+      previewHeading: 0,
+    });
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-add-point-preview',
       'local.set-snap-guide',
-      'heading.update-waypoint-robot-heading',
+      'local.set-drag-preview',
     ]);
     expect(transition.effects[2]).toMatchObject({
-      kind: 'heading.update-waypoint-robot-heading',
-      pathId: 'path-1',
-      waypointId: 'waypoint-1',
-      robotHeading: 0,
+      kind: 'local.set-drag-preview',
+      preview: {
+        kind: 'waypoint-robot-heading',
+        pathId: 'path-1',
+        waypointId: 'waypoint-1',
+        robotHeading: 0,
+      },
     });
   });
 
@@ -161,6 +170,7 @@ describe('pointerMachine headingMode reducer helpers', () => {
       startScreenX: 240,
       startScreenY: 170,
       hasMoved: false,
+      previewPosition: null,
     };
 
     const transition = reduceHeadingKeyframeMove(
@@ -172,18 +182,28 @@ describe('pointerMachine headingMode reducer helpers', () => {
       }),
     );
 
-    expect(transition.nextState).toEqual({ ...state, hasMoved: true });
+    expect(transition.nextState).toEqual({
+      ...state,
+      hasMoved: true,
+      previewPosition: {
+        sectionIndex: 0,
+        sectionRatio: 0.5,
+      },
+    });
     expect(transition.effects.map((effect) => effect.kind)).toEqual([
       'local.set-add-point-preview',
       'local.set-snap-guide',
-      'heading.update-heading-keyframe-position',
+      'local.set-drag-preview',
     ]);
     expect(transition.effects[2]).toMatchObject({
-      kind: 'heading.update-heading-keyframe-position',
-      pathId: 'path-1',
-      headingKeyframeId: 'heading-1',
-      sectionIndex: 0,
-      sectionRatio: 0.5,
+      kind: 'local.set-drag-preview',
+      preview: {
+        kind: 'heading-keyframe-position',
+        pathId: 'path-1',
+        headingKeyframeId: 'heading-1',
+        sectionIndex: 0,
+        sectionRatio: 0.5,
+      },
     });
   });
 
@@ -195,6 +215,7 @@ describe('pointerMachine headingMode reducer helpers', () => {
       startScreenX: 240,
       startScreenY: 170,
       hasMoved: true,
+      previewPosition: null,
     };
 
     const transition = reduceHeadingKeyframeMove(

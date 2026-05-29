@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from 'react';
 import type Konva from 'konva';
 import { EMPTY_SNAP_GUIDE, type SnapGuide } from '../../domain/geometry';
 import { useAppNotification } from '../app-shell/AppNotificationContext';
@@ -17,7 +24,11 @@ import {
   useSnapPanelOpen,
   useSnapSettings,
 } from '../../store/workspaceSelectors';
-import { useWorkspaceEditorDerived } from '../app-shell/WorkspaceEditorContext';
+import {
+  useCanvasDragPreview,
+  useCanvasDragPreviewActions,
+} from './CanvasDragPreviewContext';
+import { applyCanvasDragPreview } from './canvasDragPreview';
 import { CanvasRenderer } from './components/CanvasRenderer';
 import { SnapSettingsPanel } from './components/SnapSettingsPanel';
 import {
@@ -30,7 +41,11 @@ import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { useCanvasWheel } from './hooks/useCanvasWheel';
 import { useLibraryPointDrop } from './hooks/useLibraryPointDrop';
 import { useLoadedImage } from './hooks/useLoadedImage';
-import { usePathAnimation } from './hooks/usePathAnimation';
+import {
+  computeActivePathTiming,
+  computeActiveResolvedPath,
+  computeResolvedPaths,
+} from '../../store/workspaceDerivedSelectors';
 import styles from './PathCanvas.module.css';
 
 export const PathCanvas = (): ReactElement => {
@@ -49,8 +64,9 @@ export const PathCanvas = (): ReactElement => {
   const backgroundImage = useBackgroundImage();
   const isRobotPreviewEnabled = useRobotPreviewEnabled();
   const robotSettings = useRobotSettings();
-  const derived = useWorkspaceEditorDerived();
   const { setNotification } = useAppNotification();
+  const dragPreview = useCanvasDragPreview();
+  const { setPreview: setDragPreview } = useCanvasDragPreviewActions();
 
   const { canvasHostRef, viewportSize } = useCanvasViewport();
   const stageRef = useRef<Konva.Stage | null>(null);
@@ -65,19 +81,62 @@ export const PathCanvas = (): ReactElement => {
     }
   }, [mode, tool]);
 
+  const previewWorkspace = useMemo(
+    () =>
+      applyCanvasDragPreview({
+        preview: dragPreview,
+        paths,
+        points,
+        lockedPointIds,
+        activePathId: activePath?.id ?? '',
+        backgroundImage,
+      }),
+    [
+      activePath?.id,
+      backgroundImage,
+      dragPreview,
+      lockedPointIds,
+      paths,
+      points,
+    ],
+  );
+  const previewResolvedPaths = useMemo(
+    () => computeResolvedPaths(previewWorkspace.paths, previewWorkspace.points),
+    [previewWorkspace.paths, previewWorkspace.points],
+  );
+  const previewActiveResolvedPath = useMemo(
+    () =>
+      computeActiveResolvedPath(activePath?.id ?? null, previewResolvedPaths),
+    [activePath?.id, previewResolvedPaths],
+  );
+  const previewActivePathTiming = useMemo(
+    () =>
+      computeActivePathTiming(
+        previewActiveResolvedPath,
+        previewWorkspace.points,
+        robotSettings,
+      ),
+    [previewActiveResolvedPath, previewWorkspace.points, robotSettings],
+  );
+
   const sceneModel = useCanvasSceneModel({
     mode,
     tool,
-    paths,
-    points,
+    paths: previewWorkspace.paths,
+    points: previewWorkspace.points,
     lockedPointIds,
-    activePath,
+    activePath:
+      previewWorkspace.paths.find((path) => path.id === activePath?.id) ?? null,
     selection,
     canvasTransform,
-    backgroundImage,
+    backgroundImage: previewWorkspace.backgroundImage,
     robotSettings,
     addPointPreview,
-    derived,
+    derived: {
+      resolvedPaths: previewResolvedPaths,
+      activeResolvedPath: previewActiveResolvedPath,
+      activePathTiming: previewActivePathTiming,
+    },
   });
 
   useCanvasWheel(canvasHostRef);
@@ -92,17 +151,30 @@ export const PathCanvas = (): ReactElement => {
     rMinDragTargets: sceneModel.interaction.baseRMinDragTargets,
     setSnapGuide,
     setAddPointPreview,
+    setDragPreview,
     notify: setNotification,
     addPointPreview,
+    dragPreview,
   });
 
   const { draggingWaypointId, draggingPathId, isRobotAnimationSuppressed } =
     pointerHandlers;
 
-  const rMinDragTargets = sceneModel.resolveRMinDragTargets({
-    draggingWaypointId,
+  const rMinDragTargets = useMemo(() => {
+    if (draggingWaypointId === null && draggingPathId === null) {
+      return sceneModel.interaction.baseRMinDragTargets;
+    }
+
+    return sceneModel.resolveRMinDragTargets({
+      draggingWaypointId,
+      draggingPathId,
+    });
+  }, [
     draggingPathId,
-  });
+    draggingWaypointId,
+    sceneModel.interaction.baseRMinDragTargets,
+    sceneModel.resolveRMinDragTargets,
+  ]);
 
   const { libraryDropPreview } = useLibraryPointDrop({
     canvasHostRef,
@@ -118,11 +190,12 @@ export const PathCanvas = (): ReactElement => {
 
   const isRobotAnimationEnabled =
     !isRobotAnimationSuppressed && isRobotPreviewEnabled;
-  const robotAnimation = usePathAnimation(
-    sceneModel.render.activePathTiming,
-    isRobotAnimationEnabled,
+  const backgroundImageElement = useLoadedImage(
+    previewWorkspace.backgroundImage?.url ?? null,
   );
-  const backgroundImageElement = useLoadedImage(backgroundImage?.url ?? null);
+  const handleToggleSnapPanelOpen = useCallback(() => {
+    setSnapPanelOpen(!snapPanelOpen);
+  }, [setSnapPanelOpen, snapPanelOpen]);
 
   return (
     <main className={`canvas-shell ${styles.shell}`} aria-label="main canvas">
@@ -158,8 +231,7 @@ export const PathCanvas = (): ReactElement => {
           scene={sceneModel.render}
           rMinDragTargets={rMinDragTargets}
           backgroundImageElement={backgroundImageElement}
-          backgroundImageOpacity={backgroundImage?.alpha ?? 1}
-          robotAnimation={robotAnimation}
+          backgroundImageOpacity={previewWorkspace.backgroundImage?.alpha ?? 1}
           isRobotAnimationEnabled={isRobotAnimationEnabled}
           robotSettings={robotSettings}
           snapGuide={snapGuide}
@@ -181,8 +253,7 @@ export const PathCanvas = (): ReactElement => {
         )}
 
         {sceneModel.render.activePathTiming === null ||
-        !isRobotAnimationEnabled ||
-        robotAnimation.pose === null ? null : (
+        !isRobotAnimationEnabled ? null : (
           <span
             className={styles.accessibilityOnly}
             aria-label="animated robot"
@@ -201,9 +272,7 @@ export const PathCanvas = (): ReactElement => {
         settings={snapSettings}
         isOpen={snapPanelOpen}
         onToggleSetting={toggleSnapSetting}
-        onToggleOpen={() => {
-          setSnapPanelOpen(!snapPanelOpen);
-        }}
+        onToggleOpen={handleToggleSnapPanelOpen}
       />
     </main>
   );

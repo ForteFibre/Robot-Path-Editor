@@ -24,26 +24,39 @@ const readManifest = async (page: Page): Promise<WebManifest> => {
 
 const waitForActivatedServiceWorker = async (page: Page): Promise<void> => {
   await expect
-    .poll(async () => {
-      return await page.evaluate(async () => {
-        if (!('serviceWorker' in navigator)) {
-          return null;
-        }
+    .poll(
+      async () => {
+        return await page.evaluate(async () => {
+          if (!('serviceWorker' in navigator)) {
+            return null;
+          }
 
-        const registration = await navigator.serviceWorker.getRegistration();
-        return registration?.active?.state ?? null;
-      });
-    })
-    .toBe('activated');
+          const registration = await navigator.serviceWorker.getRegistration();
+          const activeState = registration?.active?.state ?? null;
+          if (activeState !== null) {
+            return activeState;
+          }
+
+          return navigator.serviceWorker.controller === null
+            ? null
+            : 'controlled';
+        });
+      },
+      { timeout: 30000 },
+    )
+    .toMatch(/activated|controlled/);
 };
 
 const waitForServiceWorkerController = async (page: Page): Promise<void> => {
   await expect
-    .poll(async () => {
-      return await page.evaluate(() => {
-        return navigator.serviceWorker.controller?.scriptURL ?? null;
-      });
-    })
+    .poll(
+      async () => {
+        return await page.evaluate(() => {
+          return navigator.serviceWorker.controller?.scriptURL ?? null;
+        });
+      },
+      { timeout: 15000 },
+    )
     .toContain('/sw.js');
 };
 

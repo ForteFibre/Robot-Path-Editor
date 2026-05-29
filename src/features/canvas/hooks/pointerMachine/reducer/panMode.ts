@@ -23,6 +23,7 @@ export const reduceBackgroundImagePointerDown = (
       startImgX: snapshot.workspace.backgroundImage.x,
       startImgY: snapshot.workspace.backgroundImage.y,
       hasMoved: false,
+      preview: null,
     },
     [capturePointerEffect(snapshot)],
   );
@@ -54,21 +55,32 @@ export const reduceBackgroundImageMove = (
     return result(state);
   }
 
-  return result(movedState, [
-    { kind: 'local.set-add-point-preview', preview: null },
+  const updates = moveBackgroundImageAnchorByScreenDelta(
     {
-      kind: 'pan.update-background-image',
-      updates: moveBackgroundImageAnchorByScreenDelta(
-        {
-          x: state.startImgX,
-          y: state.startImgY,
-        },
-        {
-          x: snapshot.clientX - state.startScreenX,
-          y: snapshot.clientY - state.startScreenY,
-        },
-        snapshot.workspace.canvasTransform.k,
-      ),
+      x: state.startImgX,
+      y: state.startImgY,
     },
-  ]);
+    {
+      x: snapshot.clientX - state.startScreenX,
+      y: snapshot.clientY - state.startScreenY,
+    },
+    snapshot.workspace.canvasTransform.k,
+  );
+
+  return result(
+    {
+      ...movedState,
+      preview: updates,
+    },
+    [
+      { kind: 'local.set-add-point-preview', preview: null },
+      {
+        kind: 'local.set-drag-preview',
+        preview: {
+          kind: 'background-image',
+          updates,
+        },
+      },
+    ],
+  );
 };

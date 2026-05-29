@@ -17,6 +17,7 @@ export type BuildPointerSnapshotParams = {
   discretizedByPath: Map<string, DiscretizedPath>;
   snapSettings: SnapSettings;
   rMinDragTargets: RMinDragTarget[];
+  hitTest?: boolean;
 };
 
 export const buildPointerSnapshot = ({
@@ -28,6 +29,7 @@ export const buildPointerSnapshot = ({
   discretizedByPath,
   snapSettings,
   rMinDragTargets,
+  hitTest = true,
 }: BuildPointerSnapshotParams): PointerSnapshot => {
   return {
     pointerId: 'pointerId' in event ? event.pointerId : -1,
@@ -38,7 +40,7 @@ export const buildPointerSnapshot = ({
     altKey: event.altKey,
     workspace,
     hit:
-      stage === null
+      !hitTest || stage === null
         ? { kind: 'canvas' }
         : resolveStageHit({
             workspace,

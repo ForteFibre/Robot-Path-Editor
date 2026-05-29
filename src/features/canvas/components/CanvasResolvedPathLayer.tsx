@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import { memo, useMemo, type ReactElement } from 'react';
 import { Group, Line } from 'react-konva';
 import {
   buildHeadingKeyframeRanges,
@@ -31,7 +31,7 @@ type CanvasResolvedPathLayerProps = {
   isVelocityOverlayVisible: boolean;
 };
 
-export const CanvasResolvedPathLayer = ({
+const CanvasResolvedPathLayerComponent = ({
   visiblePath,
   mode,
   k,
@@ -46,11 +46,40 @@ export const CanvasResolvedPathLayer = ({
     lockedPointIds,
     isActive,
   } = visiblePath;
-  const resolvedHeadingKeyframes =
-    detail === undefined
+  const resolvedHeadingKeyframes = useMemo(() => {
+    return detail === undefined
       ? []
       : resolveDiscretizedHeadingKeyframes(path, detail);
-  const headingRanges = buildHeadingKeyframeRanges(resolvedHeadingKeyframes);
+  }, [detail, path]);
+  const headingRanges = useMemo(() => {
+    return buildHeadingKeyframeRanges(resolvedHeadingKeyframes);
+  }, [resolvedHeadingKeyframes]);
+  const headingRangeLines = useMemo(() => {
+    if (detail === undefined) {
+      return [];
+    }
+
+    return headingRanges.flatMap((range, index) => {
+      const rangePolyline = getHeadingKeyframeRangePolyline(detail, range);
+      if (rangePolyline.length < 2) {
+        return [];
+      }
+
+      return [
+        {
+          key: `${path.id}-heading-keyframe-range-${index}`,
+          points: toCanvasPointNumbers(rangePolyline),
+        },
+      ];
+    });
+  }, [detail, headingRanges, path.id]);
+  const pathRMinDragTargets = useMemo(() => {
+    if (!isActive) {
+      return [];
+    }
+
+    return rMinDragTargets.filter((target) => target.pathId === path.id);
+  }, [isActive, path.id, rMinDragTargets]);
 
   return (
     <Group listening={false}>
@@ -88,20 +117,11 @@ export const CanvasResolvedPathLayer = ({
         />
       ))}
 
-      {headingRanges.map((range, index) => {
-        if (detail === undefined) {
-          return null;
-        }
-
-        const rangePolyline = getHeadingKeyframeRangePolyline(detail, range);
-        if (rangePolyline.length < 2) {
-          return null;
-        }
-
+      {headingRangeLines.map((line) => {
         return (
           <Line
-            key={`${path.id}-heading-keyframe-range-${index}`}
-            points={toCanvasPointNumbers(rangePolyline)}
+            key={line.key}
+            points={line.points}
             stroke={canvasTheme.resolvedPath.headingRangeStroke}
             strokeWidth={1.5 / k}
             dash={[4 / k, 2 / k]}
@@ -128,15 +148,15 @@ export const CanvasResolvedPathLayer = ({
         />
       ))}
 
-      {rMinDragTargets
-        .filter((target) => target.pathId === path.id && isActive)
-        .map((target, index) => (
-          <CanvasRMinDrag
-            key={`rmin-${target.pathId}-${target.sectionIndex}-${index}`}
-            rMinDragTarget={target}
-            k={k}
-          />
-        ))}
+      {pathRMinDragTargets.map((target, index) => (
+        <CanvasRMinDrag
+          key={`rmin-${target.pathId}-${target.sectionIndex}-${index}`}
+          rMinDragTarget={target}
+          k={k}
+        />
+      ))}
     </Group>
   );
 };
+
+export const CanvasResolvedPathLayer = memo(CanvasResolvedPathLayerComponent);

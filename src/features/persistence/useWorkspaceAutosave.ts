@@ -5,12 +5,14 @@ import {
   throwAppError,
   type AppError,
 } from '../../errors/appError';
+import { selectWorkspaceAutosaveSource } from '../../store/workspaceSelectors';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 import {
   createIdleWorkspaceAutosaveState,
   type WorkspaceAutosaveState,
 } from './types';
 import { useDebouncedTask } from './useDebouncedTask';
-import { useWorkspaceAutosaveTracking } from './useWorkspaceAutosaveTracking';
+import { hasPersistedWorkspaceSliceChanged } from './useWorkspaceAutosaveTracking';
 import { persistWorkspaceAutosaveSource } from './workspaceAutosaveWriter';
 
 const DEFAULT_AUTOSAVE_DEBOUNCE_MS = 600;
@@ -44,16 +46,24 @@ export const useWorkspaceAutosave = ({
   saveWorkspace = saveWorkspacePersistence,
 }: UseWorkspaceAutosaveOptions): UseWorkspaceAutosaveResult => {
   const { cancel: cancelPendingSave, schedule } = useDebouncedTask();
-  const {
-    trackedSource,
-    hasTrackedChange,
-    getLatestTrackedSource,
-    syncTrackedState: syncTrackedSourceState,
-  } = useWorkspaceAutosaveTracking();
   const [autosaveState, setAutosaveState] = useState<WorkspaceAutosaveState>(
     () => createIdleWorkspaceAutosaveState(initialSavedAt),
   );
   const saveWorkspaceRef = useRef(saveWorkspace);
+  const trackedSourceRef = useRef(
+    selectWorkspaceAutosaveSource(useWorkspaceStore.getState()),
+  );
+  const latestTrackedSourceRef = useRef(trackedSourceRef.current);
+  const isSuppressedRef = useRef(isSuppressed);
+  const scheduleSaveRef = useRef<() => void>(() => undefined);
+
+  const getLatestTrackedSource = useCallback(() => {
+    return latestTrackedSourceRef.current;
+  }, []);
+
+  const syncTrackedSourceState = useCallback((): void => {
+    trackedSourceRef.current = latestTrackedSourceRef.current;
+  }, []);
 
   const syncTrackedState = useCallback((): void => {
     cancelPendingSave();
@@ -121,6 +131,14 @@ export const useWorkspaceAutosave = ({
   }, [debounceMs, isSuppressed, saveNow, schedule, setAutosaveErrorState]);
 
   useEffect(() => {
+    isSuppressedRef.current = isSuppressed;
+  }, [isSuppressed]);
+
+  useEffect(() => {
+    scheduleSaveRef.current = scheduleSave;
+  }, [scheduleSave]);
+
+  useEffect(() => {
     if (isSuppressed) {
       cancelPendingSave();
     }
@@ -131,16 +149,35 @@ export const useWorkspaceAutosave = ({
   }, [saveWorkspace]);
 
   useEffect(() => {
-    if (!hasTrackedChange) {
-      return;
-    }
+    const unsubscribe = useWorkspaceStore.subscribe((state) => {
+      const nextTrackedSource = selectWorkspaceAutosaveSource(state);
+      const previousTrackedSource = latestTrackedSourceRef.current;
+      latestTrackedSourceRef.current = nextTrackedSource;
 
-    if (isSuppressed) {
-      return;
-    }
+      if (
+        !hasPersistedWorkspaceSliceChanged(
+          previousTrackedSource,
+          nextTrackedSource,
+        )
+      ) {
+        return;
+      }
 
-    scheduleSave();
-  }, [hasTrackedChange, isSuppressed, scheduleSave, trackedSource]);
+      if (
+        hasPersistedWorkspaceSliceChanged(
+          trackedSourceRef.current,
+          nextTrackedSource,
+        ) &&
+        !isSuppressedRef.current
+      ) {
+        scheduleSaveRef.current();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return {
     autosaveState,

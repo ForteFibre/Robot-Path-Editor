@@ -1,5 +1,6 @@
 import { useMemo, type ReactElement } from 'react';
-import { useWorkspaceEditorDerived } from '../app-shell/WorkspaceEditorContext';
+import { useCanvasDragPreview } from '../canvas/CanvasDragPreviewContext';
+import { applyCanvasDragPreview } from '../canvas/canvasDragPreview';
 import {
   useCanvasTransform,
   useEditorTool,
@@ -12,6 +13,7 @@ import {
   resolveSelection,
   EMPTY_RESOLVED_SELECTION,
 } from './floatingInspectorModel';
+import { computeResolvedPaths } from '../../store/workspaceDerivedSelectors';
 import {
   getPanelStyle,
   type FloatingInspectorLayout,
@@ -46,11 +48,28 @@ export const FloatingInspector = ({
   const selection = useSelection();
   const tool = useEditorTool();
   const canvasTransform = useCanvasTransform();
-  const { resolvedPaths } = useWorkspaceEditorDerived();
+  const dragPreview = useCanvasDragPreview();
+
+  const previewWorkspace = useMemo(
+    () =>
+      applyCanvasDragPreview({
+        preview: dragPreview,
+        paths,
+        points,
+        lockedPointIds,
+        activePathId: selection.pathId ?? '',
+        backgroundImage: null,
+      }),
+    [dragPreview, lockedPointIds, paths, points, selection.pathId],
+  );
 
   const shouldResolveSelection = tool !== 'add-point';
   const shouldShowSelection =
     shouldResolveSelection && selection.pathId !== null;
+  const previewResolvedPaths = useMemo(
+    () => computeResolvedPaths(previewWorkspace.paths, previewWorkspace.points),
+    [previewWorkspace.paths, previewWorkspace.points],
+  );
 
   const {
     selectedPath,
@@ -62,8 +81,19 @@ export const FloatingInspector = ({
       return EMPTY_RESOLVED_SELECTION;
     }
 
-    return resolveSelection(resolvedPaths, paths, points, selection);
-  }, [paths, points, selection, resolvedPaths, shouldResolveSelection]);
+    return resolveSelection(
+      previewResolvedPaths,
+      previewWorkspace.paths,
+      previewWorkspace.points,
+      selection,
+    );
+  }, [
+    previewResolvedPaths,
+    previewWorkspace.paths,
+    previewWorkspace.points,
+    selection,
+    shouldResolveSelection,
+  ]);
 
   if (!shouldShowSelection || selectedPath?.id !== selection.pathId) {
     return <></>;

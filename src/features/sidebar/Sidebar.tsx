@@ -1,4 +1,4 @@
-import { type ReactElement, type Ref } from 'react';
+import { memo, useMemo, type ReactElement, type Ref } from 'react';
 import { useActivePathId, usePaths } from '../../store/workspaceSelectors';
 import { PointLibraryPanel } from '../pointLibrary/PointLibraryPanel';
 import { SidebarPresenter } from './SidebarPresenter';
@@ -8,7 +8,7 @@ type SidebarProps = {
   hostRef?: Ref<HTMLElement> | undefined;
 };
 
-export const Sidebar = ({ hostRef }: SidebarProps): ReactElement => {
+const SidebarComponent = ({ hostRef }: SidebarProps): ReactElement => {
   const {
     addPath,
     deletePath,
@@ -20,6 +20,8 @@ export const Sidebar = ({ hostRef }: SidebarProps): ReactElement => {
   } = useSidebarActions();
   const paths = usePaths();
   const activePathId = useActivePathId();
+
+  const libraryPanel = useMemo(() => <PointLibraryPanel />, []);
 
   return (
     <SidebarPresenter
@@ -33,7 +35,9 @@ export const Sidebar = ({ hostRef }: SidebarProps): ReactElement => {
       onRecolorPath={recolorPath}
       onSetActivePath={setActivePath}
       onTogglePathVisible={togglePathVisible}
-      libraryPanel={<PointLibraryPanel />}
+      libraryPanel={libraryPanel}
     />
   );
 };
+
+export const Sidebar = memo(SidebarComponent);

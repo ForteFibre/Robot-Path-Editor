@@ -10,6 +10,7 @@ import type { AppNotification } from '../../../../errors';
 import type { SnapSettings } from '../../../../domain/snapSettings';
 import type { RMinDragTarget } from '../../types/rMinDragTarget';
 import type { HitTarget } from '../canvasHitTesting';
+import type { CanvasDragPreview } from '../../canvasDragPreview';
 
 export type IdleMachineState = { kind: 'idle' };
 
@@ -28,6 +29,7 @@ export type DraggingBackgroundImageState = {
   startImgX: number;
   startImgY: number;
   hasMoved: boolean;
+  preview: Pick<BackgroundImage, 'x' | 'y'> | null;
 };
 
 export type PanningState = {
@@ -45,6 +47,7 @@ export type DraggingWaypointState = {
   startScreenX: number;
   startScreenY: number;
   hasMoved: boolean;
+  previewPoint: Point | null;
 };
 
 export type DraggingPathHeadingState = {
@@ -55,6 +58,7 @@ export type DraggingPathHeadingState = {
   startScreenY: number;
   hasMoved: boolean;
   origin: 'existing' | 'add-point';
+  previewHeading: number | null;
 };
 
 export type DraggingRobotHeadingState = {
@@ -65,6 +69,7 @@ export type DraggingRobotHeadingState = {
   startScreenX: number;
   startScreenY: number;
   hasMoved: boolean;
+  previewHeading: number | null;
 };
 
 export type DraggingHeadingKeyframeState = {
@@ -74,6 +79,10 @@ export type DraggingHeadingKeyframeState = {
   startScreenX: number;
   startScreenY: number;
   hasMoved: boolean;
+  previewPosition: {
+    sectionIndex: number;
+    sectionRatio: number;
+  } | null;
 };
 
 export type DraggingHeadingKeyframeHeadingState = {
@@ -85,6 +94,7 @@ export type DraggingHeadingKeyframeHeadingState = {
   startScreenY: number;
   hasMoved: boolean;
   origin: 'existing' | 'add-point';
+  previewHeading: number | null;
 };
 
 export type DraggingRMinState = {
@@ -95,6 +105,7 @@ export type DraggingRMinState = {
   startDistance: number;
   initialRMin: number;
   hasMoved: boolean;
+  previewRMin: number | null;
 };
 
 export type MachineState =
@@ -271,6 +282,10 @@ export type LocalTransitionEffect =
       kind: 'local.set-add-point-preview';
       preview: AddPointPreviewState | null;
     }
+  | {
+      kind: 'local.set-drag-preview';
+      preview: CanvasDragPreview | null;
+    }
   | { kind: 'local.capture-pointer'; pointerId: number }
   | { kind: 'local.release-pointer'; pointerId: number }
   | { kind: 'local.notify'; notification: AppNotification };
@@ -432,6 +447,8 @@ export type UseCanvasPointerMachineParams = {
   rMinDragTargets: RMinDragTarget[];
   setSnapGuide: (guide: SnapGuide) => void;
   setAddPointPreview: (preview: AddPointPreviewState | null) => void;
+  setDragPreview: (preview: CanvasDragPreview | null) => void;
   notify: (notification: AppNotification) => void;
   addPointPreview: AddPointPreviewState | null;
+  dragPreview: CanvasDragPreview | null;
 };

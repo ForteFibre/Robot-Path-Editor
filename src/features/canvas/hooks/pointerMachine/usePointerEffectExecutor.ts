@@ -3,6 +3,7 @@ import type { SnapGuide } from '../../../../domain/geometry';
 import type { AppNotification } from '../../../../errors';
 import { createCanvasEditingCommands } from '../../../../store/commands/canvasEditingCommands';
 import type { CanvasInteractionSnapshot } from '../../../../store/types';
+import type { CanvasDragPreview } from '../../canvasDragPreview';
 import { useCanvasEditActions } from '../useCanvasEditActions';
 import type {
   AddPointPreviewState,
@@ -30,6 +31,7 @@ export type PointerEffectExecutorDeps = {
   interactionSurfaceRef: RefObject<HTMLElement | null>;
   setSnapGuide: (guide: SnapGuide) => void;
   setAddPointPreview: (preview: AddPointPreviewState | null) => void;
+  setDragPreview: (preview: CanvasDragPreview | null) => void;
   notify: (notification: AppNotification) => void;
   canvasEditingCommands: CanvasEditingCommandExecutor;
   workspaceActions: WorkspaceEffectActions;
@@ -37,7 +39,11 @@ export type PointerEffectExecutorDeps = {
 
 type UsePointerEffectExecutorParams = Pick<
   PointerEffectExecutorDeps,
-  'interactionSurfaceRef' | 'setSnapGuide' | 'setAddPointPreview' | 'notify'
+  | 'interactionSurfaceRef'
+  | 'setSnapGuide'
+  | 'setAddPointPreview'
+  | 'setDragPreview'
+  | 'notify'
 > & {
   getWorkspace: () => CanvasInteractionSnapshot;
 };
@@ -82,6 +88,9 @@ const executeLocalEffect = (
       return;
     case 'local.set-add-point-preview':
       deps.setAddPointPreview(effect.preview);
+      return;
+    case 'local.set-drag-preview':
+      deps.setDragPreview(effect.preview);
       return;
     case 'local.capture-pointer':
       captureStagePointer(deps.interactionSurfaceRef, effect.pointerId);
@@ -226,6 +235,7 @@ export const usePointerEffectExecutor = ({
   interactionSurfaceRef,
   setSnapGuide,
   setAddPointPreview,
+  setDragPreview,
   notify,
   getWorkspace,
 }: UsePointerEffectExecutorParams): ((effect: TransitionEffect) => void) => {
@@ -272,6 +282,7 @@ export const usePointerEffectExecutor = ({
         interactionSurfaceRef,
         setSnapGuide,
         setAddPointPreview,
+        setDragPreview,
         notify,
         canvasEditingCommands,
         workspaceActions: {
@@ -291,6 +302,7 @@ export const usePointerEffectExecutor = ({
       notify,
       setAddPointPreview,
       setCanvasTransform,
+      setDragPreview,
       setSectionRMin,
       setSelection,
       setSnapGuide,

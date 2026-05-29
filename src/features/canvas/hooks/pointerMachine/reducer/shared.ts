@@ -40,6 +40,7 @@ export const clearLocalUiEffects = (): TransitionEffect[] => {
   return [
     { kind: 'local.set-snap-guide', guide: EMPTY_GUIDE },
     { kind: 'local.set-add-point-preview', preview: null },
+    { kind: 'local.set-drag-preview', preview: null },
   ];
 };
 

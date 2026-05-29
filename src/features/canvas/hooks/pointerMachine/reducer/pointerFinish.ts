@@ -1,7 +1,7 @@
-import { distance } from '../../../../../domain/geometry';
 import type {
   ContinuousDragState,
   MachineState,
+  PointerMachineEvent,
   PointerSnapshot,
   TransitionEffect,
   TransitionResult,
@@ -62,6 +62,14 @@ const finishStationaryContinuousDrag = (
       return result(idleState(), [
         ...clearLocalUiEffects(),
         { kind: 'command.execute-pan-selection-clear' },
+        ...(state.preview === null
+          ? []
+          : [
+              {
+                kind: 'pan.update-background-image',
+                updates: state.preview,
+              } as const,
+            ]),
         releasePointerEffect(snapshot),
       ]);
     case 'dragging-rmin':
@@ -80,35 +88,85 @@ const finishStationaryContinuousDrag = (
 const finishMovedContinuousDrag = (
   state: ContinuousDragState,
   snapshot: PointerSnapshot,
+  reason: Extract<PointerMachineEvent, { type: 'pointer-finish' }>['reason'],
 ): TransitionResult => {
   const baseEffects: TransitionEffect[] = [...clearLocalUiEffects()];
 
   switch (state.kind) {
+    case 'dragging-waypoint':
+      if (state.previewPoint !== null) {
+        baseEffects.push({
+          kind: 'path.update-waypoint-position',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          point: state.previewPoint,
+        });
+      }
+      break;
     case 'dragging-path-heading':
+      if (state.previewHeading !== null) {
+        baseEffects.push({
+          kind: 'path.update-waypoint-path-heading',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          pathHeading: state.previewHeading,
+        });
+      }
+      if (state.origin === 'add-point') {
+        baseEffects.push({ kind: 'command.complete-add-waypoint-mode' });
+      }
+      break;
+    case 'dragging-robot-heading':
+      if (state.previewHeading !== null) {
+        baseEffects.push({
+          kind: 'heading.update-waypoint-robot-heading',
+          pathId: state.pathId,
+          waypointId: state.waypointId,
+          robotHeading: state.previewHeading,
+        });
+      }
+      break;
+    case 'dragging-heading-keyframe':
+      if (state.previewPosition !== null) {
+        baseEffects.push({
+          kind: 'heading.update-heading-keyframe-position',
+          pathId: state.pathId,
+          headingKeyframeId: state.headingKeyframeId,
+          sectionIndex: state.previewPosition.sectionIndex,
+          sectionRatio: state.previewPosition.sectionRatio,
+        });
+      }
+      break;
     case 'dragging-heading-keyframe-heading':
+      if (state.previewHeading !== null) {
+        baseEffects.push({
+          kind: 'heading.update-heading-keyframe-heading',
+          pathId: state.pathId,
+          headingKeyframeId: state.headingKeyframeId,
+          robotHeading: state.previewHeading,
+        });
+      }
       if (state.origin === 'add-point') {
         baseEffects.push({ kind: 'command.complete-add-waypoint-mode' });
       }
       break;
     case 'dragging-rmin':
-      if (snapshot.world !== null) {
-        const currentDistance = distance(
-          state.target.waypointPoint,
-          snapshot.world,
-        );
-        const distanceOffset = currentDistance - state.startDistance;
+      if (state.previewRMin !== null) {
         baseEffects.push({
           kind: 'rmin.update-section-rmin',
           pathId: state.target.pathId,
           sectionIndex: state.target.sectionIndex,
-          rMin: Math.max(0, state.initialRMin + distanceOffset),
+          rMin: state.previewRMin,
         });
       }
       break;
-    case 'dragging-waypoint':
-    case 'dragging-robot-heading':
-    case 'dragging-heading-keyframe':
     case 'dragging-background-image':
+      if (state.preview !== null && reason === 'pointer-up') {
+        baseEffects.push({
+          kind: 'pan.update-background-image',
+          updates: state.preview,
+        });
+      }
       break;
   }
 
@@ -119,15 +177,17 @@ const finishMovedContinuousDrag = (
 const finishContinuousDrag = (
   state: ContinuousDragState,
   snapshot: PointerSnapshot,
+  reason: Extract<PointerMachineEvent, { type: 'pointer-finish' }>['reason'],
 ): TransitionResult => {
   return state.hasMoved
-    ? finishMovedContinuousDrag(state, snapshot)
+    ? finishMovedContinuousDrag(state, snapshot, reason)
     : finishStationaryContinuousDrag(state, snapshot);
 };
 
 export const reducePointerFinish = (
   state: MachineState,
   snapshot: PointerSnapshot,
+  reason: Extract<PointerMachineEvent, { type: 'pointer-finish' }>['reason'],
 ): TransitionResult => {
   if (state.kind === 'pending-pan') {
     return result(idleState(), [
@@ -145,7 +205,7 @@ export const reducePointerFinish = (
     state.kind === 'dragging-heading-keyframe-heading' ||
     state.kind === 'dragging-rmin'
   ) {
-    return finishContinuousDrag(state, snapshot);
+    return finishContinuousDrag(state, snapshot, reason);
   }
 
   return result(idleState(), [

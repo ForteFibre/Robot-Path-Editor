@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useDeferredValue, useMemo } from 'react';
 import { getCanvasRenderStep } from '../../../../domain/canvas';
 import { discretizePathDetailed } from '../../../../domain/interpolation';
 import type { ResolvedPathModel } from '../../../../domain/pointResolution';
@@ -12,7 +12,13 @@ import type {
 
 type UseCanvasSceneInteractionModelParams = Pick<
   UseCanvasSceneModelParams,
-  'mode' | 'tool' | 'paths' | 'points' | 'selection' | 'canvasTransform'
+  | 'mode'
+  | 'tool'
+  | 'paths'
+  | 'points'
+  | 'selection'
+  | 'canvasTransform'
+  | 'activePath'
 > & {
   resolvedPaths: ResolvedPathModel[];
 };
@@ -27,6 +33,7 @@ export const useCanvasSceneInteractionModel = ({
   tool,
   paths,
   points,
+  activePath,
   selection,
   canvasTransform,
   resolvedPaths,
@@ -46,16 +53,28 @@ export const useCanvasSceneInteractionModel = ({
   }, [resolvedPaths]);
 
   const renderStep = getCanvasRenderStep(canvasTransform.k);
+  const deferredRenderStep = useDeferredValue(renderStep);
 
   const discretizedByPathForInteraction = useMemo(() => {
     const byPath = new Map<string, ReturnType<typeof discretizePathDetailed>>();
 
+    if (activePath !== null) {
+      byPath.set(
+        activePath.id,
+        discretizePathDetailed(activePath, points, deferredRenderStep),
+      );
+      return byPath;
+    }
+
     for (const path of paths) {
-      byPath.set(path.id, discretizePathDetailed(path, points, renderStep));
+      byPath.set(
+        path.id,
+        discretizePathDetailed(path, points, deferredRenderStep),
+      );
     }
 
     return byPath;
-  }, [paths, points, renderStep]);
+  }, [activePath, deferredRenderStep, paths, points]);
 
   const resolveRMinDragTargets = useCallback(
     ({ draggingWaypointId, draggingPathId }: CanvasSceneDragState) => {

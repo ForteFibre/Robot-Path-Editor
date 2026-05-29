@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { PathModel, Point } from '../../domain/models';
 import {
   useActivePathId,
@@ -135,72 +135,103 @@ export const usePointLibrary = () => {
     setSelectedLibraryPointId,
   ]);
 
-  const createPoint = (draft: LibraryPointDraft): string | null => {
-    const createdId = addLibraryPoint({
-      name: draft.name,
-      x: draft.x ?? 0,
-      y: draft.y ?? 0,
-      robotHeading: draft.robotHeading,
-    });
+  const createPoint = useCallback(
+    (draft: LibraryPointDraft): string | null => {
+      const createdId = addLibraryPoint({
+        name: draft.name,
+        x: draft.x ?? 0,
+        y: draft.y ?? 0,
+        robotHeading: draft.robotHeading,
+      });
 
-    setSelectedLibraryPointId(createdId);
-    return createdId;
-  };
+      setSelectedLibraryPointId(createdId);
+      return createdId;
+    },
+    [addLibraryPoint, setSelectedLibraryPointId],
+  );
 
-  const selectPoint = (pointId: string): void => {
-    setSelectedLibraryPointId(pointId);
-  };
+  const selectPoint = useCallback(
+    (pointId: string): void => {
+      setSelectedLibraryPointId(pointId);
+    },
+    [setSelectedLibraryPointId],
+  );
 
-  const updatePointItem = (
-    pointId: string,
-    patch: Partial<
-      Pick<LibraryPointListItem, 'name' | 'x' | 'y' | 'robotHeading'>
-    >,
-  ): void => {
-    updateLibraryPoint(pointId, patch);
-  };
+  const updatePointItem = useCallback(
+    (
+      pointId: string,
+      patch: Partial<
+        Pick<LibraryPointListItem, 'name' | 'x' | 'y' | 'robotHeading'>
+      >,
+    ): void => {
+      updateLibraryPoint(pointId, patch);
+    },
+    [updateLibraryPoint],
+  );
 
-  const insertPointIntoPath = (pointId: string): void => {
-    insertLibraryWaypointAtEndOfPath(pointId, activePathId);
-  };
+  const insertPointIntoPath = useCallback(
+    (pointId: string): void => {
+      insertLibraryWaypointAtEndOfPath(pointId, activePathId);
+    },
+    [activePathId, insertLibraryWaypointAtEndOfPath],
+  );
 
-  const deletePoint = (
-    pointId: string,
-    options?: { force?: boolean },
-  ): DeleteLibraryPointResult => {
-    const item = items.find((candidate) => candidate.id === pointId);
-    if (item === undefined) {
-      return { kind: 'not-found' };
-    }
+  const deletePoint = useCallback(
+    (
+      pointId: string,
+      options?: { force?: boolean },
+    ): DeleteLibraryPointResult => {
+      const item = items.find((candidate) => candidate.id === pointId);
+      if (item === undefined) {
+        return { kind: 'not-found' };
+      }
 
-    if (item.usageCount > 0 && options?.force !== true) {
-      return {
-        kind: 'confirmation-required',
-        pointId: item.id,
-        pointName: getLibraryPointDisplayName(item.name),
-        usageCount: item.usageCount,
-      };
-    }
+      if (item.usageCount > 0 && options?.force !== true) {
+        return {
+          kind: 'confirmation-required',
+          pointId: item.id,
+          pointName: getLibraryPointDisplayName(item.name),
+          usageCount: item.usageCount,
+        };
+      }
 
-    deleteLibraryPoint(pointId);
+      deleteLibraryPoint(pointId);
 
-    return { kind: 'deleted' };
-  };
+      return { kind: 'deleted' };
+    },
+    [deleteLibraryPoint, items],
+  );
 
-  const togglePointLock = (pointId: string): void => {
-    toggleLibraryPointLock(pointId);
-  };
+  const togglePointLock = useCallback(
+    (pointId: string): void => {
+      toggleLibraryPointLock(pointId);
+    },
+    [toggleLibraryPointLock],
+  );
 
-  return {
-    items,
-    selectedLibraryPointId,
-    highlightedLibraryPointId,
-    createPoint,
-    selectPoint,
-    updatePointItem,
-    insertPointIntoPath,
-    deletePoint,
-    togglePointLock,
-    defaultDraft: DEFAULT_DRAFT,
-  };
+  return useMemo(
+    () => ({
+      items,
+      selectedLibraryPointId,
+      highlightedLibraryPointId,
+      createPoint,
+      selectPoint,
+      updatePointItem,
+      insertPointIntoPath,
+      deletePoint,
+      togglePointLock,
+      defaultDraft: DEFAULT_DRAFT,
+    }),
+    [
+      createPoint,
+      deletePoint,
+      highlightedLibraryPointId,
+      insertPointIntoPath,
+      items,
+      selectPoint,
+      selectedLibraryPointId,
+      togglePointLock,
+      updatePointItem,
+    ],
+  );
 };

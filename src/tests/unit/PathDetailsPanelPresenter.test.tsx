@@ -39,6 +39,7 @@ const defaultProps = {
   pathName: 'Test Path',
   totalTime: 5.5,
   sequentialItems: [makeWaypointItem('w1', 0), makeWaypointItem('w2', 1)],
+  waypointIds: ['w1', 'w2'],
   selectionWaypointId: null,
   selectionHeadingKeyframeId: null,
   onSelectItem: vi.fn(),
@@ -63,7 +64,11 @@ describe('PathDetailsPanelPresenter', () => {
 
   it('renders empty state message when no items', () => {
     render(
-      <PathDetailsPanelPresenter {...defaultProps} sequentialItems={[]} />,
+      <PathDetailsPanelPresenter
+        {...defaultProps}
+        sequentialItems={[]}
+        waypointIds={[]}
+      />,
     );
     expect(
       screen.getByText(/このパスにはポイントがありません/),
