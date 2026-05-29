@@ -37,7 +37,9 @@ const waitForActivatedServiceWorker = async (page: Page): Promise<void> => {
             return activeState;
           }
 
-          return navigator.serviceWorker.controller === null ? null : 'controlled';
+          return navigator.serviceWorker.controller === null
+            ? null
+            : 'controlled';
         });
       },
       { timeout: 30000 },
@@ -47,11 +49,14 @@ const waitForActivatedServiceWorker = async (page: Page): Promise<void> => {
 
 const waitForServiceWorkerController = async (page: Page): Promise<void> => {
   await expect
-    .poll(async () => {
-      return await page.evaluate(() => {
-        return navigator.serviceWorker.controller?.scriptURL ?? null;
-      });
-    }, { timeout: 15000 })
+    .poll(
+      async () => {
+        return await page.evaluate(() => {
+          return navigator.serviceWorker.controller?.scriptURL ?? null;
+        });
+      },
+      { timeout: 15000 },
+    )
     .toContain('/sw.js');
 };
 
