@@ -54,14 +54,14 @@ const buildFloatingInspectorLayout = (
     DEFAULT_FLOATING_INSPECTOR_LAYOUT.sidebarWidth,
   );
   const sidebarLeft = resolveRectLeft(sidebar) ?? containerLeft;
-  const rightPanelRectWidth =
-    rightPanel?.getBoundingClientRect().width ??
-    DEFAULT_FLOATING_INSPECTOR_LAYOUT.rightPanelWidth;
-  const rightPanelWidth = resolveDimension(
-    rightPanel?.clientWidth,
-    rightPanelRectWidth,
-    DEFAULT_FLOATING_INSPECTOR_LAYOUT.rightPanelWidth,
-  );
+  const rightPanelWidth =
+    rightPanel === null
+      ? 0
+      : resolveDimension(
+          rightPanel.clientWidth,
+          rightPanel.getBoundingClientRect().width,
+          DEFAULT_FLOATING_INSPECTOR_LAYOUT.rightPanelWidth,
+        );
   const viewportWidth =
     typeof globalThis.innerWidth === 'number'
       ? globalThis.innerWidth
