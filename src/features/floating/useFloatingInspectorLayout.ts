@@ -31,6 +31,7 @@ const resolveRectLeft = (element: HTMLElement | null): number | undefined => {
 const buildFloatingInspectorLayout = (
   container: HTMLDivElement | null,
   sidebar: HTMLElement | null,
+  rightPanel: HTMLElement | null,
 ): FloatingInspectorLayout => {
   const containerRectWidth =
     container?.getBoundingClientRect().width ??
@@ -53,6 +54,14 @@ const buildFloatingInspectorLayout = (
     DEFAULT_FLOATING_INSPECTOR_LAYOUT.sidebarWidth,
   );
   const sidebarLeft = resolveRectLeft(sidebar) ?? containerLeft;
+  const rightPanelWidth =
+    rightPanel === null
+      ? 0
+      : resolveDimension(
+          rightPanel.clientWidth,
+          rightPanel.getBoundingClientRect().width,
+          DEFAULT_FLOATING_INSPECTOR_LAYOUT.rightPanelWidth,
+        );
   const viewportWidth =
     typeof globalThis.innerWidth === 'number'
       ? globalThis.innerWidth
@@ -64,6 +73,7 @@ const buildFloatingInspectorLayout = (
     containerWidth,
     sidebarLeft,
     sidebarWidth,
+    rightPanelWidth,
     panelWidth: resolveFloatingInspectorPanelWidth(viewportWidth),
   };
 };
@@ -71,10 +81,12 @@ const buildFloatingInspectorLayout = (
 export const useFloatingInspectorLayout = (): {
   appBodyRef: RefObject<HTMLDivElement | null>;
   sidebarRef: RefObject<HTMLElement | null>;
+  rightPanelRef: RefObject<HTMLElement | null>;
   layout: FloatingInspectorLayout;
 } => {
   const appBodyRef = useRef<HTMLDivElement | null>(null);
   const sidebarRef = useRef<HTMLElement | null>(null);
+  const rightPanelRef = useRef<HTMLElement | null>(null);
   const [layout, setLayout] = useState<FloatingInspectorLayout>(
     DEFAULT_FLOATING_INSPECTOR_LAYOUT,
   );
@@ -82,7 +94,11 @@ export const useFloatingInspectorLayout = (): {
   useEffect(() => {
     const updateLayout = (): void => {
       setLayout(
-        buildFloatingInspectorLayout(appBodyRef.current, sidebarRef.current),
+        buildFloatingInspectorLayout(
+          appBodyRef.current,
+          sidebarRef.current,
+          rightPanelRef.current,
+        ),
       );
     };
 
@@ -109,6 +125,10 @@ export const useFloatingInspectorLayout = (): {
       observer?.observe(sidebarRef.current);
     }
 
+    if (rightPanelRef.current !== null) {
+      observer?.observe(rightPanelRef.current);
+    }
+
     return () => {
       observer?.disconnect();
       globalThis.removeEventListener('resize', handleWindowResize);
@@ -118,6 +138,7 @@ export const useFloatingInspectorLayout = (): {
   return {
     appBodyRef,
     sidebarRef,
+    rightPanelRef,
     layout,
   };
 };
