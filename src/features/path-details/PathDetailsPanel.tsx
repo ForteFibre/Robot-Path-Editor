@@ -1,4 +1,4 @@
-import { useCallback, useMemo, type ReactElement } from 'react';
+import { useCallback, useMemo, type ReactElement, type Ref } from 'react';
 import { useWorkspaceEditorDerived } from '../app-shell/WorkspaceEditorContext';
 import { useSelection } from '../../store/workspaceSelectors';
 import { buildSequentialItems } from './pathDetailsModel';
@@ -6,7 +6,13 @@ import { PathDetailsPanelPresenter } from './PathDetailsPanelPresenter';
 import type { PathItem } from './pathDetailsModel';
 import { usePathDetailsActions } from './usePathDetailsActions';
 
-export const PathDetailsPanel = (): ReactElement | null => {
+type PathDetailsPanelProps = {
+  hostRef?: Ref<HTMLElement> | undefined;
+};
+
+export const PathDetailsPanel = ({
+  hostRef,
+}: PathDetailsPanelProps): ReactElement | null => {
   const { activeResolvedPath: activePath, activePathTiming: pathTiming } =
     useWorkspaceEditorDerived();
   const selection = useSelection();
@@ -67,6 +73,7 @@ export const PathDetailsPanel = (): ReactElement | null => {
 
   return (
     <PathDetailsPanelPresenter
+      hostRef={hostRef}
       pathName={activePath.name}
       totalTime={pathTiming?.totalTime ?? 0}
       sequentialItems={sequentialItems}

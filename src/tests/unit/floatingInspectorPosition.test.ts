@@ -62,7 +62,7 @@ describe('getPanelStyle', () => {
       createLayout(),
     );
 
-    expect(style.left).toBe('920px');
+    expect(style.left).toBe('600px');
   });
 
   it('uses explicit container and sidebar offsets without reading the DOM', () => {
@@ -75,6 +75,7 @@ describe('getPanelStyle', () => {
         containerWidth: 900,
         sidebarLeft: 120,
         sidebarWidth: 280,
+        rightPanelWidth: 250,
         panelWidth: 240,
       }),
     );

@@ -5,6 +5,7 @@ import { worldToScreen } from '../../domain/geometry';
 export type FloatingInspectorLayout = {
   sidebarLeft: number;
   sidebarWidth: number;
+  rightPanelWidth: number;
   containerLeft: number;
   containerWidth: number;
   panelWidth: number;
@@ -17,6 +18,7 @@ export type FloatingInspectorLayout = {
 export const DEFAULT_FLOATING_INSPECTOR_LAYOUT: FloatingInspectorLayout = {
   sidebarLeft: 0,
   sidebarWidth: 320,
+  rightPanelWidth: 320,
   containerLeft: 0,
   containerWidth: 1200,
   panelWidth: 280,
@@ -51,7 +53,10 @@ export const getPanelStyle = (
     0,
   );
   const minLeft = sidebarInset + layout.minLeftMargin;
-  const maxLeft = Math.max(minLeft, layout.containerWidth - layout.panelWidth);
+  const maxLeft = Math.max(
+    minLeft,
+    layout.containerWidth - layout.rightPanelWidth - layout.panelWidth,
+  );
   const preferredLeft = sidebarInset + anchorScreen.x + layout.horizontalGap;
 
   return {

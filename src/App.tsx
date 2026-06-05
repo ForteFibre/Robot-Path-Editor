@@ -31,7 +31,8 @@ import { BenchmarkProfiler } from './bench/reactPerf';
 const EditorApp = (): ReactElement => {
   const { notification, setNotification, clearNotification } =
     useAppNotification();
-  const { appBodyRef, sidebarRef, layout } = useFloatingInspectorLayout();
+  const { appBodyRef, sidebarRef, rightPanelRef, layout } =
+    useFloatingInspectorLayout();
   const pwaController = usePwaController();
   const workspacePersistence = useWorkspacePersistence({
     setNotification,
@@ -88,7 +89,7 @@ const EditorApp = (): ReactElement => {
             </BenchmarkProfiler>
 
             <BenchmarkProfiler id="path-details">
-              <PathDetailsPanel />
+              <PathDetailsPanel hostRef={rightPanelRef} />
             </BenchmarkProfiler>
 
             <BenchmarkProfiler id="floating-inspector">

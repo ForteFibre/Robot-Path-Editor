@@ -21,6 +21,7 @@ import {
   useMemo,
   type CSSProperties,
   type ReactElement,
+  type Ref,
 } from 'react';
 import { GripVertical, Route, MapPin, Navigation, Info } from 'lucide-react';
 import {
@@ -198,6 +199,7 @@ const StaticPathItemRowComponent = ({
 const StaticPathItemRow = memo(StaticPathItemRowComponent);
 
 export type PathDetailsPanelPresenterProps = {
+  hostRef?: Ref<HTMLElement> | undefined;
   pathName: string;
   totalTime: number;
   sequentialItems: PathItem[];
@@ -209,6 +211,7 @@ export type PathDetailsPanelPresenterProps = {
 };
 
 export const PathDetailsPanelPresenter = ({
+  hostRef,
   pathName,
   totalTime,
   sequentialItems,
@@ -266,7 +269,7 @@ export const PathDetailsPanelPresenter = ({
   );
 
   return (
-    <SidePanel side="right" aria-label="path details sidebar">
+    <SidePanel side="right" ref={hostRef} aria-label="path details sidebar">
       <PanelHeader
         icon={<Route size={18} />}
         title="Path Elements"
