@@ -1,5 +1,6 @@
 .pathsSection {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  min-height: 120px;
 }
 
 .librarySection {
@@ -9,11 +10,65 @@
 
 .pathsList {
   display: flex;
+  flex: 1 1 0;
   flex-direction: column;
   gap: 0.45rem;
-  max-height: min(18rem, 35vh);
+  min-height: 0;
   overflow: auto;
   padding-right: 0.15rem;
+}
+
+.sectionResizeHandle {
+  position: relative;
+  flex: 0 0 10px;
+  margin: -0.25rem -0.85rem;
+  cursor: row-resize;
+  outline: none;
+}
+
+.sectionResizeHandle::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 0.85rem;
+  left: 0.85rem;
+  height: 2px;
+  background: transparent;
+  transition: background-color 0.12s ease;
+}
+
+.sectionResizeHandle:hover::before,
+.sectionResizeHandle:focus-visible::before,
+.sectionResizeHandleActive::before {
+  background: var(--color-accent-fg);
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  z-index: 2;
+  width: 8px;
+  cursor: col-resize;
+  outline: none;
+}
+
+.resizeHandle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 3px;
+  bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.12s ease;
+}
+
+.resizeHandle:hover::before,
+.resizeHandle:focus-visible::before,
+.resizeHandleActive::before {
+  background: var(--color-accent-fg);
 }
 
 /* Sidebar cards use more rounded corners than the SidePanel default */
