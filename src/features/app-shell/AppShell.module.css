@@ -11,12 +11,12 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 320px 1fr 320px;
+  grid-template-columns: var(--left-sidebar-width, 320px) minmax(0, 1fr) 320px;
   position: relative;
 }
 
 @media (max-width: 1400px) {
   .appBody {
-    grid-template-columns: 280px 1fr 280px;
+    grid-template-columns: var(--left-sidebar-width, 280px) minmax(0, 1fr) 280px;
   }
 }

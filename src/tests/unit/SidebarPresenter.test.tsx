@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { PathModel } from '../../domain/models';
 import { SidebarPresenter } from '../../features/sidebar/SidebarPresenter';
+import type { ResizableSidebarState } from '../../features/app-shell/useResizableSidebar';
+import type { ResizableSidebarSectionsState } from '../../features/sidebar/useResizableSidebarSections';
 
 const makePath = (id: string, name: string): PathModel => ({
   id,
@@ -11,6 +13,24 @@ const makePath = (id: string, name: string): PathModel => ({
   waypoints: [],
   headingKeyframes: [],
   sectionRMin: [],
+});
+
+const makeResizeState = (): ResizableSidebarState => ({
+  width: 320,
+  minWidth: 240,
+  maxWidth: 520,
+  isResizing: false,
+  onResizeStart: vi.fn(),
+  onResizeKeyDown: vi.fn(),
+});
+
+const makeSectionResizeState = (): ResizableSidebarSectionsState => ({
+  pathsHeight: 220,
+  minPathsHeight: 120,
+  maxPathsHeight: 520,
+  isResizing: false,
+  onResizeStart: vi.fn(),
+  onResizeKeyDown: vi.fn(),
 });
 
 const defaultProps = {
@@ -24,6 +44,8 @@ const defaultProps = {
   onSetActivePath: vi.fn(),
   onTogglePathVisible: vi.fn(),
   libraryPanel: <div data-testid="library-panel" />,
+  resize: makeResizeState(),
+  sectionResize: makeSectionResizeState(),
 };
 
 describe('SidebarPresenter', () => {
@@ -124,5 +146,59 @@ describe('SidebarPresenter', () => {
   it('renders the library panel slot', () => {
     render(<SidebarPresenter {...defaultProps} />);
     expect(screen.getByTestId('library-panel')).toBeInTheDocument();
+  });
+
+  it('renders a resize handle with current width metadata', () => {
+    render(<SidebarPresenter {...defaultProps} />);
+
+    const handle = screen.getByRole('slider', {
+      name: 'resize editor sidebar',
+    });
+    expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+    expect(handle).toHaveAttribute('aria-valuemin', '240');
+    expect(handle).toHaveAttribute('aria-valuemax', '520');
+    expect(handle).toHaveAttribute('aria-valuenow', '320');
+  });
+
+  it('forwards pointer and keyboard events from the resize handle', () => {
+    const resize = makeResizeState();
+    render(<SidebarPresenter {...defaultProps} resize={resize} />);
+
+    const handle = screen.getByRole('slider', {
+      name: 'resize editor sidebar',
+    });
+    fireEvent.pointerDown(handle, { button: 0, clientX: 320 });
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+
+    expect(resize.onResizeStart).toHaveBeenCalledOnce();
+    expect(resize.onResizeKeyDown).toHaveBeenCalledOnce();
+  });
+
+  it('renders a section resize handle with current paths height metadata', () => {
+    render(<SidebarPresenter {...defaultProps} />);
+
+    const handle = screen.getByRole('slider', {
+      name: 'resize paths and library panels',
+    });
+    expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+    expect(handle).toHaveAttribute('aria-valuemin', '120');
+    expect(handle).toHaveAttribute('aria-valuemax', '520');
+    expect(handle).toHaveAttribute('aria-valuenow', '220');
+  });
+
+  it('forwards pointer and keyboard events from the section resize handle', () => {
+    const sectionResize = makeSectionResizeState();
+    render(
+      <SidebarPresenter {...defaultProps} sectionResize={sectionResize} />,
+    );
+
+    const handle = screen.getByRole('slider', {
+      name: 'resize paths and library panels',
+    });
+    fireEvent.pointerDown(handle, { button: 0, clientY: 220 });
+    fireEvent.keyDown(handle, { key: 'ArrowDown' });
+
+    expect(sectionResize.onResizeStart).toHaveBeenCalledOnce();
+    expect(sectionResize.onResizeKeyDown).toHaveBeenCalledOnce();
   });
 });

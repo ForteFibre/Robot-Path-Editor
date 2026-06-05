@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo } from 'react';
+import { type CSSProperties, type ReactElement, useMemo } from 'react';
 import './App.css';
 import appShellStyles from './features/app-shell/AppShell.module.css';
 import { PathCanvas } from './features/canvas/PathCanvas';
@@ -27,12 +27,18 @@ import { useWorkspaceFileCommands } from './features/workspace-file/useWorkspace
 import { usePwaController } from './pwa/usePwaController';
 import { ThemePreferenceProvider } from './features/theme/ThemePreferenceContext';
 import { BenchmarkProfiler } from './bench/reactPerf';
+import { useResizableSidebar } from './features/app-shell/useResizableSidebar';
+
+type AppBodyStyle = CSSProperties & {
+  '--left-sidebar-width': string;
+};
 
 const EditorApp = (): ReactElement => {
   const { notification, setNotification, clearNotification } =
     useAppNotification();
   const { appBodyRef, sidebarRef, rightPanelRef, layout } =
     useFloatingInspectorLayout();
+  const resizableSidebar = useResizableSidebar();
   const pwaController = usePwaController();
   const workspacePersistence = useWorkspacePersistence({
     setNotification,
@@ -59,6 +65,12 @@ const EditorApp = (): ReactElement => {
     }),
     [csvExportCommand, pathSetExportCommand, workspaceCommands],
   );
+  const appBodyStyle = useMemo<AppBodyStyle>(
+    () => ({
+      '--left-sidebar-width': `${resizableSidebar.width}px`,
+    }),
+    [resizableSidebar.width],
+  );
 
   return (
     <div className={appShellStyles.appShell}>
@@ -77,9 +89,13 @@ const EditorApp = (): ReactElement => {
         onDismiss={clearNotification}
       />
 
-      <div className={appShellStyles.appBody} ref={appBodyRef}>
+      <div
+        className={appShellStyles.appBody}
+        ref={appBodyRef}
+        style={appBodyStyle}
+      >
         <BenchmarkProfiler id="sidebar">
-          <Sidebar hostRef={sidebarRef} />
+          <Sidebar hostRef={sidebarRef} resize={resizableSidebar} />
         </BenchmarkProfiler>
 
         <WorkspaceEditorProvider>
