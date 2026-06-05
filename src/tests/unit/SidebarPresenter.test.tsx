@@ -80,13 +80,45 @@ describe('SidebarPresenter', () => {
     expect(onTogglePathVisible).toHaveBeenCalledWith('p1');
   });
 
-  it('renaming a path calls onRenamePath', () => {
+  it('keeps a path in place while renaming and commits on blur', () => {
     const onRenamePath = vi.fn();
     render(<SidebarPresenter {...defaultProps} onRenamePath={onRenamePath} />);
-    fireEvent.change(screen.getByLabelText('rename Path 1'), {
+
+    const input = screen.getByLabelText('rename Path 1');
+    fireEvent.change(input, {
       target: { value: 'Renamed Path' },
     });
+    expect(onRenamePath).not.toHaveBeenCalled();
+
+    fireEvent.blur(input);
     expect(onRenamePath).toHaveBeenCalledWith('p1', 'Renamed Path');
+  });
+
+  it('commits path rename on Enter', () => {
+    const onRenamePath = vi.fn();
+    render(<SidebarPresenter {...defaultProps} onRenamePath={onRenamePath} />);
+
+    const input = screen.getByLabelText('rename Path 1');
+    fireEvent.change(input, {
+      target: { value: 'Renamed Path' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onRenamePath).toHaveBeenCalledWith('p1', 'Renamed Path');
+  });
+
+  it('cancels path rename on Escape', () => {
+    const onRenamePath = vi.fn();
+    render(<SidebarPresenter {...defaultProps} onRenamePath={onRenamePath} />);
+
+    const input = screen.getByLabelText('rename Path 1');
+    fireEvent.change(input, {
+      target: { value: 'Renamed Path' },
+    });
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(onRenamePath).not.toHaveBeenCalled();
+    expect(screen.getByDisplayValue('Path 1')).toBeInTheDocument();
   });
 
   it('renders the library panel slot', () => {
